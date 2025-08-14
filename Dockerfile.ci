@@ -8,7 +8,7 @@ RUN yarn build
 FROM quay.io/ocs-dev/cypress:latest as serverpackage
 RUN yarn global add http-server
 RUN export PATH="$(yarn global bin):$PATH"
-
+#test
 FROM serverpackage
 COPY --from=builder /app/dist /app
 COPY --from=builder /app/dist /app/compatibility
