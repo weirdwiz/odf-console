@@ -69,3 +69,4 @@ yarn test-cypress-headless BRIDGE_E2E_BROWSER_NAME=chrome  # E2E tests
 - PRs should explain motivation, outline verification steps (`yarn test`, `yarn lint`, relevant build command), and add screenshots for UI-facing work
 - Tag OWNERS from the touched package
 - Document required OpenShift configuration (e.g., `CONSOLE_VERSION`, `PLUGIN`) when the change depends on a specific environment
+
