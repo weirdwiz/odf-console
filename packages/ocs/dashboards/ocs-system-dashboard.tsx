@@ -43,6 +43,7 @@ import CephFSSubvolumeCard from './persistent-internal/cephfs-subvolume-card/cep
 import DetailsCard from './persistent-internal/details-card';
 import InventoryCard from './persistent-internal/inventory-card';
 import PoolUtilizationCard from './persistent-internal/pool-utilization-card/pool-utilization-card';
+import PVCHealthCard from './persistent-internal/pvc-health-card/pvc-health-card';
 import RawCapacityCard from './persistent-internal/raw-capacity-card/raw-capacity-card';
 import { default as StatusCard } from './persistent-internal/status-card/status-card';
 import storageEfficiencyCard from './persistent-internal/storage-efficiency-card/storage-efficiency-card';
@@ -88,6 +89,7 @@ const PersistentInternalDashboard: React.FC = () => {
     BreakdownCard,
     PoolUtilizationCard,
     CephFSSubvolumeCard,
+    PVCHealthCard,
     UtilizationCard,
   ];
   const leftCards: React.ComponentType[] = [

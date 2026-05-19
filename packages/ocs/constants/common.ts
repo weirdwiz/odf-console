@@ -1,5 +1,7 @@
 export const PVC_PROVISIONER_ANNOTATION =
   'volume.beta.kubernetes.io/storage-provisioner';
+export const VOLUME_HEALTH_ANNOTATION =
+  'volumecondition.csiaddons.openshift.io/health';
 export const COMPRESSION_ON = 'aggressive';
 export enum PoolState {
   READY = 'Ready',
