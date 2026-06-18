@@ -129,6 +129,19 @@ jest.mock('../common/hooks', () => ({
   useIsLocalClusterConfigured: jest.fn(() => null),
 }));
 
+// Mock the kernel-devel validation hook
+jest.mock('./useKernelDevelValidation', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    isKernelDevelConfigured: true,
+    isMCPUpdated: true,
+    isMCPUpdating: false,
+    isMCPDegraded: false,
+    isLoading: false,
+    error: '',
+  })),
+}));
+
 jest.mock('./payload', () => ({
   createScaleCaCertSecretPayload: jest.fn(() => Promise.resolve({})),
   createScaleRemoteClusterPayload: jest.fn(() => Promise.resolve({})),

@@ -45,6 +45,7 @@ import {
 } from './payload';
 import { ScaleSystemComponentState, initialComponentState } from './types';
 import useScaleSystemFormValidation from './useFormValidation';
+import useKernelDevelValidation from './useKernelDevelValidation';
 import './CreateScaleSystem.scss';
 
 type CreateScaleSystemFormProps = {
@@ -66,6 +67,17 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
   const [loading, setLoading] = React.useState(false);
   const localCluster = useIsLocalClusterConfigured();
   const isLocalClusterConfigured = !_.isEmpty(localCluster);
+
+  const {
+    isKernelDevelConfigured,
+    isMCPUpdated,
+    isMCPUpdating,
+    isMCPDegraded,
+    isLoading: isKernelDevelLoading,
+  } = useKernelDevelValidation();
+
+  const isKernelDevelReady =
+    isKernelDevelConfigured && isMCPUpdated && !isMCPUpdating;
 
   const existingFileSystemNames = useExistingFileSystemNames();
 
@@ -115,7 +127,8 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
       tenantId
     );
 
-  const isFormValid = mandatoryFieldsValid && encryptionFieldsValid;
+  const isFormValid =
+    mandatoryFieldsValid && encryptionFieldsValid && isKernelDevelReady;
 
   const handleGeneralCAFileInputChange = React.useCallback(
     (_ev, file: File) => {
@@ -302,6 +315,42 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
           />
         </FormGroup>
       </FormSection>
+      {!isKernelDevelLoading && !isKernelDevelConfigured && (
+        <Alert
+          variant={AlertVariant.danger}
+          isInline
+          title={t('kernel-devel package is not configured')}
+          data-test="kernel-devel-not-configured-alert"
+        >
+          {t(
+            'No MachineConfig with the kernel-devel extension was found. Create a MachineConfig that includes kernel-devel in spec.extensions for your worker nodes before connecting.'
+          )}
+        </Alert>
+      )}
+      {!isKernelDevelLoading && isKernelDevelConfigured && isMCPUpdating && (
+        <Alert
+          variant={AlertVariant.warning}
+          isInline
+          title={t('MachineConfigPool is updating')}
+          data-test="mcp-updating-alert"
+        >
+          {t(
+            'The worker MachineConfigPool is still rolling out configuration changes. Wait for the update to complete before connecting.'
+          )}
+        </Alert>
+      )}
+      {!isKernelDevelLoading && isMCPDegraded && (
+        <Alert
+          variant={AlertVariant.danger}
+          isInline
+          title={t('MachineConfigPool is degraded')}
+          data-test="mcp-degraded-alert"
+        >
+          {t(
+            'The worker MachineConfigPool is in a degraded state. Resolve the issue before connecting.'
+          )}
+        </Alert>
+      )}
       <FormSection title={t('Connection details')}>
         <FormHelperText>
           <HelperText>
@@ -725,8 +774,8 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
           <Button
             type={ButtonType.submit}
             variant={ButtonVariant.primary}
-            isDisabled={loading || !isFormValid}
-            isLoading={loading}
+            isDisabled={loading || !isFormValid || isKernelDevelLoading}
+            isLoading={loading || isKernelDevelLoading}
             data-test="connect-scale-system"
           >
             {t('Connect')}

@@ -294,6 +294,36 @@ export const VolumeGroupSnapshotClassModel: K8sModel = {
   crd: true,
 };
 
+export const MachineConfigModel: K8sModel = {
+  label: 'MachineConfig',
+  labelKey: 'MachineConfig',
+  apiVersion: 'v1',
+  apiGroup: 'machineconfiguration.openshift.io',
+  plural: 'machineconfigs',
+  abbr: 'MC',
+  namespaced: false,
+  kind: 'MachineConfig',
+  id: 'machineconfig',
+  labelPlural: 'MachineConfigs',
+  labelPluralKey: 'MachineConfigs',
+  crd: true,
+};
+
+export const MachineConfigPoolModel: K8sModel = {
+  label: 'MachineConfigPool',
+  labelKey: 'MachineConfigPool',
+  apiVersion: 'v1',
+  apiGroup: 'machineconfiguration.openshift.io',
+  plural: 'machineconfigpools',
+  abbr: 'MCP',
+  namespaced: false,
+  kind: 'MachineConfigPool',
+  id: 'machineconfigpool',
+  labelPlural: 'MachineConfigPools',
+  labelPluralKey: 'MachineConfigPools',
+  crd: true,
+};
+
 export const ImageRegistryConfigModel: K8sModel = {
   label: 'Image Registry Config',
   labelKey: 'ImageRegistryConfig',
