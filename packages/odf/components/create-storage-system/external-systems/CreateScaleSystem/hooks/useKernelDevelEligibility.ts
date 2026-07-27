@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   MachineConfigKind,
   MachineConfigNodeKind,
@@ -59,13 +58,10 @@ const getLoadErrorMessage = (loadError: { message?: string }): string =>
 export const useKernelDevelEligibility = (
   selectedNodes: WizardNodeState[]
 ): KernelDevelEligibility => {
-  const cachedNodeNames = React.useRef(new Set<string>());
-  const cachedMachineConfigNames = React.useRef(new Set<string>());
-  selectedNodes.forEach((node) => cachedNodeNames.current.add(node.name));
-
-  const machineConfigNodeResources = Array.from(cachedNodeNames.current).reduce<
+  const machineConfigNodeResources = selectedNodes.reduce<
     Record<string, WatchK8sResource>
-  >((acc, nodeName) => {
+  >((acc, node) => {
+    const nodeName = node.name;
     acc[machineConfigNodeKey(nodeName)] = machineConfigNodeResource(nodeName);
     return acc;
   }, {});
@@ -74,17 +70,13 @@ export const useKernelDevelEligibility = (
       machineConfigNodeResources
     );
 
-  Object.values(machineConfigNodeResults).forEach((result) => {
-    const currentConfigName = result.data?.status?.configVersion?.current;
-    if (currentConfigName) {
-      cachedMachineConfigNames.current.add(currentConfigName);
+  const machineConfigResources = Object.values(machineConfigNodeResults).reduce<
+    Record<string, WatchK8sResource>
+  >((acc, result) => {
+    const configName = result.data?.status?.configVersion?.current;
+    if (configName) {
+      acc[machineConfigKey(configName)] = machineConfigResource(configName);
     }
-  });
-
-  const machineConfigResources = Array.from(
-    cachedMachineConfigNames.current
-  ).reduce<Record<string, WatchK8sResource>>((acc, configName) => {
-    acc[machineConfigKey(configName)] = machineConfigResource(configName);
     return acc;
   }, {});
   const machineConfigResults = useK8sWatchResources<MachineConfigWatchResults>(

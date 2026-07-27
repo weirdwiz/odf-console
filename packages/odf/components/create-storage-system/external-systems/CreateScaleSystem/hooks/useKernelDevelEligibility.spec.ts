@@ -3,7 +3,7 @@ import {
   MachineConfigNodeKind,
 } from '@odf/core/types/scale';
 import { useK8sWatchResources } from '@openshift-console/dynamic-plugin-sdk';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { WizardNodeState } from '../../../reducer';
 import { useKernelDevelEligibility } from './useKernelDevelEligibility';
 
@@ -184,7 +184,7 @@ describe('useKernelDevelEligibility', () => {
     expect(result.current.nodesWithoutKernelDevel).toEqual([]);
   });
 
-  it('starts watches lazily and keeps them alive after the first selection', () => {
+  it('watches only resources needed by the current selection', () => {
     mockWatchResources({
       machineConfigNodes: {
         data: [
@@ -236,14 +236,8 @@ describe('useKernelDevelEligibility', () => {
     );
 
     rerender({ selectedNodes: [] });
-    expect(useK8sWatchResources).toHaveBeenNthCalledWith(
-      5,
-      expectedMachineConfigNodeResources
-    );
-    expect(useK8sWatchResources).toHaveBeenNthCalledWith(
-      6,
-      expectedMachineConfigResources
-    );
+    expect(useK8sWatchResources).toHaveBeenNthCalledWith(5, {});
+    expect(useK8sWatchResources).toHaveBeenNthCalledWith(6, {});
     expect(result.current.areSelectedNodesEligible).toBe(false);
     expect(result.current.nodesWithoutKernelDevel).toEqual([]);
   });

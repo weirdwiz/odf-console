@@ -87,9 +87,6 @@ describe('useScaleSystemFormValidation', () => {
         'username',
         'password',
         'fileSystemName',
-        'tenantId',
-        'client',
-        'serverInfo',
       ];
 
       expectedFieldTypes.forEach((fieldType) => {
@@ -625,6 +622,24 @@ describe('useScaleSystemFormValidation', () => {
       );
       await Promise.all(invalidValidationPromises);
     });
+
+    it.each([
+      ['client', 16],
+      ['tenantId', 16],
+      ['remoteRKM', 21],
+    ])(
+      'should limit %s to the EncryptionConfig CRD maximum',
+      async (field, max) => {
+        const result = getHookResult();
+
+        await expect(
+          result.formSchema.validateAt(field, { [field]: 'a'.repeat(max) })
+        ).resolves.toBe('a'.repeat(max));
+        await expect(
+          result.formSchema.validateAt(field, { [field]: 'a'.repeat(max + 1) })
+        ).rejects.toThrow(`No more than ${max} characters`);
+      }
+    );
   });
 
   describe('Field Requirements', () => {
@@ -639,9 +654,6 @@ describe('useScaleSystemFormValidation', () => {
       expect(fieldRequirements.username).toBeDefined();
       expect(fieldRequirements.password).toBeDefined();
       expect(fieldRequirements.fileSystemName).toBeDefined();
-      expect(fieldRequirements.tenantId).toBeDefined();
-      expect(fieldRequirements.client).toBeDefined();
-      expect(fieldRequirements.serverInfo).toBeDefined();
 
       // Check that requirements are arrays of strings
       Object.values(fieldRequirements).forEach((requirements) => {
