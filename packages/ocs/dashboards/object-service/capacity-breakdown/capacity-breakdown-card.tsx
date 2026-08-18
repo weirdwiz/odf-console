@@ -16,11 +16,13 @@ import {
   usePrometheusBasePath,
 } from '@odf/shared/hooks/custom-prometheus-poll';
 import { subscriptionResource } from '@odf/shared/resources/common';
-import { K8sResourceKind, SubscriptionKind } from '@odf/shared/types';
 import { useCustomTranslation } from '@odf/shared/useCustomTranslationHook';
 import { DataPoint, getInstantVectorStats } from '@odf/shared/utils';
 import { humanizeBinaryBytes, isFunctionThenApply } from '@odf/shared/utils';
-import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  K8sResourceKind,
+  useK8sWatchResource,
+} from '@openshift-console/dynamic-plugin-sdk';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk/lib/api/common-types';
 import * as _ from 'lodash-es';
 import {
@@ -40,6 +42,18 @@ import { ServiceType, CapacityBreakdown } from '../../../constants';
 import { breakdownQueryMapMCG } from '../../../queries';
 import { decodeRGWPrefix, getStackChartStats } from '../../../utils';
 import './capacity-breakdown-card.scss';
+
+export const capacityBreakdownCardDeps = {
+  useCustomTranslation,
+  useODFNamespaceSelector,
+  useODFSystemFlagsSelector,
+  useGetClusterDetails,
+  useK8sWatchResource: (
+    ...args: Parameters<typeof useK8sWatchResource>
+  ): ReturnType<typeof useK8sWatchResource> => useK8sWatchResource(...args),
+  useCustomPrometheusPoll,
+  usePrometheusBasePath,
+};
 
 type DropdownItems = {
   group: string;
@@ -92,9 +106,9 @@ const CapacityBreakdownCardBody: React.FC<CapacityBreakdownCardBodyProps> = ({
   ocsVersion,
   labelPadding,
 }) => {
-  const { t } = useCustomTranslation();
+  const { t } = capacityBreakdownCardDeps.useCustomTranslation();
 
-  const { odfNamespace } = useODFNamespaceSelector();
+  const { odfNamespace } = capacityBreakdownCardDeps.useODFNamespaceSelector();
 
   // For charts whose datapoints are composed of multiple queries
   const flattenedResponse = response.reduce(
@@ -141,21 +155,24 @@ const ServiceTypeALL: React.FC<ServiceTypeProps> = ({
   ocsVersion,
   labelPadding,
 }) => {
-  const [rgw, rgwLoadError, rgwLoading] = useCustomPrometheusPoll({
-    query: prometheusQueries?.[0],
-    endpoint: PrometheusEndpoint.QUERY,
-    basePath: usePrometheusBasePath(),
-  });
-  const [noobaa, noobaaLoadError, noobaaLoading] = useCustomPrometheusPoll({
-    query: prometheusQueries?.[1],
-    endpoint: PrometheusEndpoint.QUERY,
-    basePath: usePrometheusBasePath(),
-  });
-  const [object, objectLoadError, objectLoading] = useCustomPrometheusPoll({
-    query: prometheusQueries?.[2],
-    endpoint: PrometheusEndpoint.QUERY,
-    basePath: usePrometheusBasePath(),
-  });
+  const [rgw, rgwLoadError, rgwLoading] =
+    capacityBreakdownCardDeps.useCustomPrometheusPoll({
+      query: prometheusQueries?.[0],
+      endpoint: PrometheusEndpoint.QUERY,
+      basePath: capacityBreakdownCardDeps.usePrometheusBasePath(),
+    });
+  const [noobaa, noobaaLoadError, noobaaLoading] =
+    capacityBreakdownCardDeps.useCustomPrometheusPoll({
+      query: prometheusQueries?.[1],
+      endpoint: PrometheusEndpoint.QUERY,
+      basePath: capacityBreakdownCardDeps.usePrometheusBasePath(),
+    });
+  const [object, objectLoadError, objectLoading] =
+    capacityBreakdownCardDeps.useCustomPrometheusPoll({
+      query: prometheusQueries?.[2],
+      endpoint: PrometheusEndpoint.QUERY,
+      basePath: capacityBreakdownCardDeps.usePrometheusBasePath(),
+    });
 
   const loading = rgwLoading || noobaaLoading || objectLoading;
   const error = !!rgwLoadError || !!noobaaLoadError || !!objectLoadError;
@@ -193,18 +210,18 @@ const ServiceTypeMCG: React.FC<ServiceTypeProps> = ({
   ocsVersion,
   labelPadding,
 }) => {
-  const [byUsed, byUsedError, byUsedLoading] = useCustomPrometheusPoll({
-    query: prometheusQueries?.[0],
-    endpoint: PrometheusEndpoint.QUERY,
-    basePath: usePrometheusBasePath(),
-  });
-  const [totalUsed, totalUsedError, totalUsedLoading] = useCustomPrometheusPoll(
-    {
+  const [byUsed, byUsedError, byUsedLoading] =
+    capacityBreakdownCardDeps.useCustomPrometheusPoll({
+      query: prometheusQueries?.[0],
+      endpoint: PrometheusEndpoint.QUERY,
+      basePath: capacityBreakdownCardDeps.usePrometheusBasePath(),
+    });
+  const [totalUsed, totalUsedError, totalUsedLoading] =
+    capacityBreakdownCardDeps.useCustomPrometheusPoll({
       query: prometheusQueries?.[1],
       endpoint: PrometheusEndpoint.QUERY,
-      basePath: usePrometheusBasePath(),
-    }
-  );
+      basePath: capacityBreakdownCardDeps.usePrometheusBasePath(),
+    });
 
   const loading = byUsedLoading || totalUsedLoading;
   const error = !!byUsedError || !!totalUsedError;
@@ -241,18 +258,18 @@ const ServiceTypeRGW: React.FC<ServiceTypeProps> = ({
   ocsVersion,
   labelPadding,
 }) => {
-  const [totalUsed, totalUsedError, totalUsedLoading] = useCustomPrometheusPoll(
-    {
+  const [totalUsed, totalUsedError, totalUsedLoading] =
+    capacityBreakdownCardDeps.useCustomPrometheusPoll({
       query: prometheusQueries?.[0],
       endpoint: PrometheusEndpoint.QUERY,
-      basePath: usePrometheusBasePath(),
-    }
-  );
-  const [used, usedError, usedLoading] = useCustomPrometheusPoll({
-    query: prometheusQueries?.[1],
-    endpoint: PrometheusEndpoint.QUERY,
-    basePath: usePrometheusBasePath(),
-  });
+      basePath: capacityBreakdownCardDeps.usePrometheusBasePath(),
+    });
+  const [used, usedError, usedLoading] =
+    capacityBreakdownCardDeps.useCustomPrometheusPoll({
+      query: prometheusQueries?.[1],
+      endpoint: PrometheusEndpoint.QUERY,
+      basePath: capacityBreakdownCardDeps.usePrometheusBasePath(),
+    });
 
   const loading = usedLoading || totalUsedLoading;
   const error = !!usedError || !!totalUsedError;
@@ -282,7 +299,7 @@ const ServiceTypeRGW: React.FC<ServiceTypeProps> = ({
 };
 
 const BreakdownCard: React.FC = () => {
-  const { t } = useCustomTranslation();
+  const { t } = capacityBreakdownCardDeps.useCustomTranslation();
   const [serviceType, setServiceType] = React.useState(ServiceType.MCG);
   const [metricType, setMetricType] = React.useState<CapacityBreakdown.Metrics>(
     CapacityBreakdown.defaultMetrics[ServiceType.MCG]
@@ -290,8 +307,9 @@ const BreakdownCard: React.FC = () => {
   const [isOpenServiceSelect, setServiceSelect] = React.useState(false);
   const [isOpenBreakdownSelect, setBreakdownSelect] = React.useState(false);
 
-  const { clusterNamespace: clusterNs } = useGetClusterDetails();
-  const { systemFlags } = useODFSystemFlagsSelector();
+  const { clusterNamespace: clusterNs } =
+    capacityBreakdownCardDeps.useGetClusterDetails();
+  const { systemFlags } = capacityBreakdownCardDeps.useODFSystemFlagsSelector();
   const isRGWSupported = systemFlags[clusterNs]?.isRGWAvailable;
   const isMCGSupported = systemFlags[clusterNs]?.isNoobaaAvailable;
   const managedByOCS = systemFlags[clusterNs]?.ocsClusterName;
@@ -309,8 +327,11 @@ const BreakdownCard: React.FC = () => {
     }
   }, [isRGWSupported, isMCGSupported]);
 
+  // SAFETY: secretResource returns a single-resource watch spec; useK8sWatchResource returns [K8sResourceKind, boolean, any] for non-list watches.
   const [secretData, secretLoaded, secretLoadError] =
-    useK8sWatchResource<K8sResourceKind>(secretResource(clusterNs));
+    capacityBreakdownCardDeps.useK8sWatchResource(
+      secretResource(clusterNs)
+    ) as [K8sResourceKind, boolean, any];
   const rgwPrefix = React.useMemo(
     () =>
       isRGWSupported && secretLoaded && !secretLoadError
@@ -342,8 +363,13 @@ const BreakdownCard: React.FC = () => {
     [queries]
   );
 
+  // SAFETY: subscriptionResource is a single-resource watch spec; useK8sWatchResource returns [K8sResourceKind, boolean, any] for non-list watches.
   const [subscription, loaded, loadError] =
-    useK8sWatchResource<SubscriptionKind>(subscriptionResource);
+    capacityBreakdownCardDeps.useK8sWatchResource(subscriptionResource) as [
+      K8sResourceKind,
+      boolean,
+      any,
+    ];
 
   const breakdownItems = React.useMemo(
     () => [

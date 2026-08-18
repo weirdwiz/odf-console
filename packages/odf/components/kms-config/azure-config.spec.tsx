@@ -1,7 +1,6 @@
 import React from 'react';
 import { screen, render, fireEvent } from '@testing-library/react';
-import * as TestDependency1 from 'lodash-es';
-import { AzureConfigure } from './azure-config';
+import { AzureConfigure, azureConfigDeps } from './azure-config';
 
 const state = {
   kms: {
@@ -32,7 +31,7 @@ const state = {
 
 const dispatch = jest.fn();
 jest
-  .spyOn(TestDependency1, 'cloneDeep')
+  .spyOn(azureConfigDeps, 'cloneDeep')
   .mockImplementation(jest.fn((value) => value));
 
 describe('AzureConfigure component', () => {

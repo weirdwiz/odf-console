@@ -21,6 +21,11 @@ import {
   ScaleEncryptionFormData,
 } from '../scale-encryption/ScaleEncryptionForm';
 
+export const encryptionConfigModalDeps = {
+  enableScaleEncryption,
+  useCustomTranslation,
+};
+
 type EncryptionConfigModalProps = {
   closeModal: () => void;
   isOpen: boolean;
@@ -30,7 +35,7 @@ const EncryptionConfigModal: React.FC<EncryptionConfigModalProps> = ({
   closeModal,
   isOpen,
 }) => {
-  const { t } = useCustomTranslation();
+  const { t } = encryptionConfigModalDeps.useCustomTranslation();
   const [certificate, setCertificate] = React.useState('');
   const [isEncryptionEnabled, setEncryptionEnabled] = React.useState(false);
   const [error, setError] = React.useState('');
@@ -60,7 +65,7 @@ const EncryptionConfigModal: React.FC<EncryptionConfigModalProps> = ({
     setError('');
     setProgress(true);
     try {
-      await enableScaleEncryption({
+      await encryptionConfigModalDeps.enableScaleEncryption({
         certificate,
         client: formData.client,
         password: formData.encryptionPassword,

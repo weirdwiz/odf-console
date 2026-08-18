@@ -1,17 +1,17 @@
 import React from 'react';
 import { PersistentVolumeClaimModel } from '@odf/shared/models';
 import { render } from '@testing-library/react';
-import { BreakdownCardBody, BreakdownBodyProps } from './breakdown-body';
-import * as TestDependency3 from './breakdown-capacity';
-import * as TestDependency4 from './breakdown-chart';
-import * as TestDependency2 from './breakdown-loading';
-import * as TestDependency1 from './utils';
+import {
+  BreakdownCardBody,
+  BreakdownBodyProps,
+  breakdownBodyDependencies,
+} from './breakdown-body';
 
 const mockHumanize = jest.fn((value: string) => ({ string: `${value} MB` }));
 jest
-  .spyOn(TestDependency1, 'getLegends')
+  .spyOn(breakdownBodyDependencies, 'getLegends')
   .mockImplementation(jest.fn(() => ['Legend1', 'Legend2', 'Available']));
-jest.spyOn(TestDependency1, 'addAvailable').mockImplementation(
+jest.spyOn(breakdownBodyDependencies, 'addAvailable').mockImplementation(
   jest.fn((_unused) => {
     return [
       { label: 'Label1', data: [10, 20, 30] },
@@ -20,7 +20,7 @@ jest.spyOn(TestDependency1, 'addAvailable').mockImplementation(
   })
 );
 jest
-  .spyOn(TestDependency2, 'BreakdownChartLoading')
+  .spyOn(breakdownBodyDependencies, 'BreakdownChartLoading')
   .mockImplementation(() => (
     <div data-test-id="mocked-breakdown-chart-loading" />
   ));
@@ -29,10 +29,10 @@ const mockTotalCapacityBody = jest.fn((_unused) => {
   return <div data-test-id="mocked-total-capacity-body" />;
 });
 jest
-  .spyOn(TestDependency3, 'TotalCapacityBody')
+  .spyOn(breakdownBodyDependencies, 'TotalCapacityBody')
   .mockImplementation((props) => mockTotalCapacityBody(props));
 jest
-  .spyOn(TestDependency4, 'BreakdownChart')
+  .spyOn(breakdownBodyDependencies, 'BreakdownChart')
   .mockImplementation(() => <div data-test-id="mocked-breakdown-chart" />);
 
 describe('tests for BreakdownCardBody', () => {

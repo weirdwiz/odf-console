@@ -1,12 +1,14 @@
-import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
-import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
 import { renderHook } from '@testing-library/react';
 import { FileSystemKind } from '../types/scale';
-import useIsSANSystemDeletable from './useIsSANSystemDeletable';
+import useIsSANSystemDeletable, {
+  useIsSANSystemDeletableDeps,
+} from './useIsSANSystemDeletable';
 
 jest
-  .spyOn(TestDependency1, 'useK8sWatchResource')
+  .spyOn(useIsSANSystemDeletableDeps, 'useK8sWatchResource')
   .mockImplementation(jest.fn());
+
+const useK8sWatchResource = useIsSANSystemDeletableDeps.useK8sWatchResource;
 
 const sanFileSystem = (name: string): FileSystemKind => ({
   apiVersion: 'scale.spectrum.ibm.com/v1beta1',

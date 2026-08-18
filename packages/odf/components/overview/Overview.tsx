@@ -14,11 +14,21 @@ import { hasAnyInternalCeph } from '../../utils';
 import { HealthOverviewCard } from './health-overview-card/HealthOverviewCard';
 import './Overview.scss';
 
+export const overviewDeps = {
+  useODFSystemFlagsSelector,
+  // SAFETY: The deps wrapper delegates to useLocation; the cast preserves the Location return type for test spying.
+  useLocation: useLocation as typeof useLocation,
+  useCustomTranslation,
+  GeneralOverviewActivityCard,
+  HealthOverviewCard,
+  ObjectStorageCard,
+};
+
 const Overview: React.FC = () => {
-  const { t } = useCustomTranslation();
+  const { t } = overviewDeps.useCustomTranslation();
   const title = t('Overview');
 
-  const location = useLocation();
+  const location = overviewDeps.useLocation();
   const searchParams = new URLSearchParams(location.search);
   const showWelcomeModal = searchParams.get('show-welcome-modal');
   const launchModal = useModalWrapper();
@@ -26,7 +36,8 @@ const Overview: React.FC = () => {
   // Show health card only for internal Ceph clusters.
   // Can't use hasAnyInternalOCS because MCG standalone is also internal mode,
   // but it has no Ceph, so ocs_health_score metric won't exist.
-  const { systemFlags, areFlagsSafe } = useODFSystemFlagsSelector();
+  const { systemFlags, areFlagsSafe } =
+    overviewDeps.useODFSystemFlagsSelector();
   const showHealthCard = areFlagsSafe && hasAnyInternalCeph(systemFlags);
 
   React.useEffect(() => {
@@ -47,17 +58,17 @@ const Overview: React.FC = () => {
         </GridItem>
         {showHealthCard && (
           <GridItem xl2={3}>
-            <HealthOverviewCard />
+            <overviewDeps.HealthOverviewCard />
           </GridItem>
         )}
         <GridItem xl2={4} xl2RowSpan={3} order={{ '2xl': '0', default: '3' }}>
-          <GeneralOverviewActivityCard />
+          <overviewDeps.GeneralOverviewActivityCard />
         </GridItem>
         <GridItem xl2={3}>
           <ExternalSystemsCard />
         </GridItem>
         <GridItem xl2={5}>
-          <ObjectStorageCard />
+          <overviewDeps.ObjectStorageCard />
         </GridItem>
       </Grid>
     </>

@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { configure, render } from '@testing-library/react';
-import * as TestDependency1 from '@patternfly/react-icons';
 import {
   BlueArrowCircleUpIcon,
   BlueInfoCircleIcon,
   BlueSyncIcon,
   GrayUnknownIcon,
   GreenCheckCircleIcon,
+  iconsDependencies,
   RedExclamationCircleIcon,
   RedResourcesFullIcon,
   YellowExclamationTriangleIcon,
@@ -51,31 +51,31 @@ const mockArrowCircleUpIcon = jest.fn((props) => (
   <span data-testid="mock-arrow-circle-up-icon" {...props} />
 ));
 jest
-  .spyOn(TestDependency1, 'CheckCircleIcon')
+  .spyOn(iconsDependencies, 'CheckCircleIcon')
   .mockImplementation((props) => mockCheckCircleIcon(props));
 jest
-  .spyOn(TestDependency1, 'ExclamationCircleIcon')
+  .spyOn(iconsDependencies, 'ExclamationCircleIcon')
   .mockImplementation((props) => mockExclamationCircleIcon(props));
 jest
-  .spyOn(TestDependency1, 'ExclamationTriangleIcon')
+  .spyOn(iconsDependencies, 'ExclamationTriangleIcon')
   .mockImplementation((props) => mockExclamationTriangleIcon(props));
 jest
-  .spyOn(TestDependency1, 'InfoCircleIcon')
+  .spyOn(iconsDependencies, 'InfoCircleIcon')
   .mockImplementation((props) => mockInfoCircleIcon(props));
 jest
-  .spyOn(TestDependency1, 'UnknownIcon')
+  .spyOn(iconsDependencies, 'UnknownIcon')
   .mockImplementation((props) => mockUnknownIcon(props));
 jest
-  .spyOn(TestDependency1, 'SyncAltIcon')
+  .spyOn(iconsDependencies, 'SyncAltIcon')
   .mockImplementation((props) => mockSyncAltIcon(props));
 jest
-  .spyOn(TestDependency1, 'ResourcesFullIcon')
+  .spyOn(iconsDependencies, 'ResourcesFullIcon')
   .mockImplementation((props) => mockResourcesFullIcon(props));
 jest
-  .spyOn(TestDependency1, 'ResourcesAlmostFullIcon')
+  .spyOn(iconsDependencies, 'ResourcesAlmostFullIcon')
   .mockImplementation((props) => mockResourcesAlmostFullIcon(props));
 jest
-  .spyOn(TestDependency1, 'ArrowCircleUpIcon')
+  .spyOn(iconsDependencies, 'ArrowCircleUpIcon')
   .mockImplementation((props) => mockArrowCircleUpIcon(props));
 
 describe('GreenCheckCircleIcon', () => {

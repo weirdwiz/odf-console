@@ -1,14 +1,16 @@
 import * as React from 'react';
-import * as TestDependency1 from '@odf/shared';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { SetCephRBDStorageClassDefault } from './set-rbd-sc-default';
+import {
+  SetCephRBDStorageClassDefault,
+  setRbdScDefaultDeps,
+} from './set-rbd-sc-default';
 
 // Mock useK8sGet
 const mockUseK8sGet = jest.fn();
 jest
-  .spyOn(TestDependency1, 'useK8sGet')
+  .spyOn(setRbdScDefaultDeps, 'useK8sGet')
   .mockImplementation(() => mockUseK8sGet());
 
 describe('Setting Ceph RBD StorageClass as default, during installation', () => {

@@ -25,6 +25,10 @@ import { Content, ContentVariants, SelectOption } from '@patternfly/react-core';
 import { InlineResourceRequirementsText } from './inline-resource-requirements-text';
 import './configure-performance.scss';
 
+export const configurePerformanceDeps = {
+  useNodesData,
+};
+
 const selectOptions = (
   t: TFunction,
   forceLean: boolean,
@@ -274,7 +278,7 @@ const ConfigurePerformanceWithForceLean: React.FC<ConfigurePerformanceProps> = (
   const { onResourceProfileChange, resourceProfile, osdAmount, enableNFS } =
     props;
   const [availableNodes, availableNodesLoaded, availableNodesLoadError] =
-    useNodesData();
+    configurePerformanceDeps.useNodesData();
 
   // Force Lean mode when all selectable capacity is not enough for higher profiles.
   let forceLean = false;

@@ -1,12 +1,11 @@
 import * as React from 'react';
 import { NetworkType } from '@odf/core/types';
-import * as TestDependency1 from '@odf/shared';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { NICSelectComponent } from './nic';
+import { NICSelectComponent, nicDeps } from './nic';
 
 jest
-  .spyOn(TestDependency1, 'useCustomTranslation')
+  .spyOn(nicDeps, 'useCustomTranslation')
   .mockImplementation(() => ({ t: (key: string) => key }));
 
 describe('NICSelectComponent', () => {

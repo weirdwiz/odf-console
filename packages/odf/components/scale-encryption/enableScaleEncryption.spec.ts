@@ -1,16 +1,18 @@
-import {
-  K8sResourceCommon,
-  k8sCreate,
-  k8sDelete,
-} from '@openshift-console/dynamic-plugin-sdk';
-import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
+import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
+import { payloadDeps } from '../create-storage-system/external-systems/common/payload';
 import {
   enableScaleEncryption,
+  enableScaleEncryptionDeps,
   ScaleEncryptionInput,
 } from './enableScaleEncryption';
 
-jest.spyOn(TestDependency1, 'k8sCreate').mockImplementation(jest.fn());
-jest.spyOn(TestDependency1, 'k8sDelete').mockImplementation(jest.fn());
+jest
+  .spyOn(enableScaleEncryptionDeps, 'k8sCreate')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(enableScaleEncryptionDeps, 'k8sDelete')
+  .mockImplementation(jest.fn());
+jest.spyOn(payloadDeps, 'k8sCreate').mockImplementation(jest.fn());
 
 const input: ScaleEncryptionInput = {
   certificate: 'certificate',
@@ -29,16 +31,27 @@ const createdResource = ({ data }: { data: K8sResourceCommon }) =>
 describe('enableScaleEncryption', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(k8sCreate).mockImplementation(createdResource);
-    jest.mocked(k8sDelete).mockResolvedValue(undefined);
+    jest.mocked(payloadDeps.k8sCreate).mockImplementation(createdResource);
+    jest
+      .mocked(enableScaleEncryptionDeps.k8sCreate)
+      .mockImplementation(createdResource);
+    jest
+      .mocked(enableScaleEncryptionDeps.k8sDelete)
+      .mockResolvedValue(undefined);
   });
 
   it('creates the encryption resources in dependency order', async () => {
     await enableScaleEncryption(input);
 
-    expect(
-      jest.mocked(k8sCreate).mock.calls.map(([request]) => request.data)
-    ).toEqual([
+    const payloadCalls = jest
+      .mocked(payloadDeps.k8sCreate)
+      .mock.calls.map(([request]) => request.data);
+    const encCalls = jest
+      .mocked(enableScaleEncryptionDeps.k8sCreate)
+      .mock.calls.map(([request]) => request.data);
+    const allCalls = [...payloadCalls, ...encCalls];
+
+    expect(allCalls).toEqual([
       expect.objectContaining({
         kind: 'ConfigMap',
         data: { 'enc-ca.crt': 'certificate' },
@@ -63,10 +76,9 @@ describe('enableScaleEncryption', () => {
   });
 
   it('removes created dependencies when setup fails', async () => {
+    jest.mocked(payloadDeps.k8sCreate).mockImplementation(createdResource);
     jest
-      .mocked(k8sCreate)
-      .mockImplementationOnce(createdResource)
-      .mockImplementationOnce(createdResource)
+      .mocked(enableScaleEncryptionDeps.k8sCreate)
       .mockRejectedValueOnce(new Error('EncryptionConfig failed'));
 
     await expect(enableScaleEncryption(input)).rejects.toThrow(
@@ -75,7 +87,7 @@ describe('enableScaleEncryption', () => {
 
     expect(
       jest
-        .mocked(k8sDelete)
+        .mocked(enableScaleEncryptionDeps.k8sDelete)
         .mock.calls.map(([request]) => request.resource.metadata.name)
     ).toEqual(['encryption-secret', 'encryption-config']);
   });

@@ -19,6 +19,10 @@ import { FileUploadInput } from './file-upload-input';
 import { KMSConfigureProps } from './providers';
 import { kmsConfigValidation, parseURL, isValidName } from './utils';
 
+export const azureConfigDeps = {
+  cloneDeep: _.cloneDeep,
+};
+
 export const AzureConfigure: React.FC<KMSConfigureProps> = ({
   state,
   dispatch,
@@ -31,7 +35,7 @@ export const AzureConfigure: React.FC<KMSConfigureProps> = ({
     true
   ) as AzureConfig;
   const azureStateClone: AzureConfig = React.useMemo(
-    () => _.cloneDeep(azureState),
+    () => azureConfigDeps.cloneDeep(azureState),
     [azureState]
   );
 

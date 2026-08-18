@@ -72,47 +72,96 @@ import {
 } from '@patternfly/react-tokens';
 import './StorageClusterCard.scss';
 
+export const storageClusterCardDeps = {
+  useRawCapacity,
+  useSafeK8sWatchResource: (
+    ...args: Parameters<typeof useSafeK8sWatchResource>
+  ): ReturnType<typeof useSafeK8sWatchResource> =>
+    useSafeK8sWatchResource(...args),
+  useODFNamespaceSelector,
+  odfSubscriptionResource,
+  storageClusterResource,
+  getStorageClusterInNs,
+  useGetOCSHealth,
+  resiliencyProgressQuery,
+  StatusCardQueries,
+  getDataResiliencyState,
+  DASH,
+  getName,
+  healthStateMapping,
+  healthStateMessage,
+  ODF_OPERATOR,
+  useFetchCsv,
+  ErrorCardBody: (props: React.ComponentProps<typeof ErrorCardBody>) => (
+    <ErrorCardBody {...props} />
+  ),
+  useCustomPrometheusPoll,
+  usePrometheusBasePath,
+  useCustomTranslation,
+  getOprChannelFromSub,
+  getOprVersionFromCSV,
+  getStorageClusterMetric,
+  humanizeBinaryBytes,
+  useK8sWatchResource: (
+    ...args: Parameters<typeof useK8sWatchResource>
+  ): ReturnType<typeof useK8sWatchResource> => useK8sWatchResource(...args),
+  DANGER_THRESHOLD,
+  WARNING_THRESHOLD,
+  useNavigate,
+};
+
 const generalColorScale = [general1.value, general2.value];
 const warningColorScale = [warning1.value, general2.value];
 const dangerColorScale = [danger1.value, general2.value];
 
 export const StorageClusterCard: React.FC<CardProps> = ({ className }) => {
-  const { t } = useCustomTranslation();
-  const navigate = useNavigate();
+  const { t } = storageClusterCardDeps.useCustomTranslation();
+  const navigate = storageClusterCardDeps.useNavigate();
+  // SAFETY: storageClusterResource specifies isList:true; useK8sWatchResource returns [StorageClusterKind[], boolean, any] for list watches.
   const [storageClusters, storageClustersLoaded, storageClustersError] =
-    useK8sWatchResource<StorageClusterKind[]>(storageClusterResource);
-  const { odfNamespace, isNsSafe } = useODFNamespaceSelector();
-  const [csv, csvLoaded, csvError] = useFetchCsv({
-    specName: ODF_OPERATOR,
+    storageClusterCardDeps.useK8sWatchResource(
+      storageClusterCardDeps.storageClusterResource
+    ) as ReturnType<typeof useK8sWatchResource<StorageClusterKind[]>>;
+  const { odfNamespace, isNsSafe } =
+    storageClusterCardDeps.useODFNamespaceSelector();
+  const [csv, csvLoaded, csvError] = storageClusterCardDeps.useFetchCsv({
+    specName: storageClusterCardDeps.ODF_OPERATOR,
     namespace: odfNamespace,
     startPollingInstantly: isNsSafe,
   });
+  // SAFETY: odfSubscriptionResource specifies a single Subscription resource; useSafeK8sWatchResource returns [SubscriptionKind, boolean, any].
   const [subscription, subscriptionLoaded, subscriptionError] =
-    useSafeK8sWatchResource<SubscriptionKind>(odfSubscriptionResource);
+    storageClusterCardDeps.useSafeK8sWatchResource(
+      storageClusterCardDeps.odfSubscriptionResource
+    ) as ReturnType<typeof useSafeK8sWatchResource<SubscriptionKind>>;
 
-  const storageCluster = getStorageClusterInNs(storageClusters, odfNamespace);
-  const clusterName = getName(storageCluster);
+  const storageCluster = storageClusterCardDeps.getStorageClusterInNs(
+    storageClusters,
+    odfNamespace
+  );
+  const clusterName = storageClusterCardDeps.getName(storageCluster);
 
   const { healthState, message: healthMessage } =
-    useGetOCSHealth(storageCluster);
+    storageClusterCardDeps.useGetOCSHealth(storageCluster);
 
   const [totalCapacity, usedCapacity, capacityLoading, capacityLoadError] =
-    useRawCapacity(clusterName);
+    storageClusterCardDeps.useRawCapacity(clusterName);
   const [cephResiliencyProgress, cephResiliencyProgressError] =
-    useCustomPrometheusPoll({
-      query: resiliencyProgressQuery(clusterName),
+    storageClusterCardDeps.useCustomPrometheusPoll({
+      query: storageClusterCardDeps.resiliencyProgressQuery(clusterName),
       endpoint: PrometheusEndpoint.QUERY,
-      basePath: usePrometheusBasePath(),
+      basePath: storageClusterCardDeps.usePrometheusBasePath(),
     });
 
   const [objectResiliencyProgress, objectResiliencyProgressError] =
-    useCustomPrometheusPoll({
-      query: StatusCardQueries.MCG_REBUILD_PROGRESS_QUERY,
+    storageClusterCardDeps.useCustomPrometheusPoll({
+      query:
+        storageClusterCardDeps.StatusCardQueries.MCG_REBUILD_PROGRESS_QUERY,
       endpoint: PrometheusEndpoint.QUERY,
-      basePath: usePrometheusBasePath(),
+      basePath: storageClusterCardDeps.usePrometheusBasePath(),
     });
 
-  const objectResiliencyState = getDataResiliencyState(
+  const objectResiliencyState = storageClusterCardDeps.getDataResiliencyState(
     [
       {
         response: objectResiliencyProgress,
@@ -121,54 +170,66 @@ export const StorageClusterCard: React.FC<CardProps> = ({ className }) => {
     ],
     t
   );
-  const cephDataResiliencyState = getDataResiliencyState(
+  const cephDataResiliencyState = storageClusterCardDeps.getDataResiliencyState(
     [{ response: cephResiliencyProgress, error: cephResiliencyProgressError }],
     t
   );
-  const healthIcon = healthStateMapping?.[healthState]?.icon;
+  const healthIcon =
+    storageClusterCardDeps.healthStateMapping?.[healthState]?.icon;
   const cephResiliencyMessage =
     cephDataResiliencyState.state === HealthState.OK
       ? t('Healthy')
-      : healthStateMessage(cephDataResiliencyState.state, t);
+      : storageClusterCardDeps.healthStateMessage(
+          cephDataResiliencyState.state,
+          t
+        );
   const cephResiliencyIcon =
-    healthStateMapping?.[cephDataResiliencyState.state]?.icon;
+    storageClusterCardDeps.healthStateMapping?.[cephDataResiliencyState.state]
+      ?.icon;
   const objectResiliencyMessage =
     objectResiliencyState.state === HealthState.OK
       ? t('Healthy')
-      : healthStateMessage(objectResiliencyState.state, t);
+      : storageClusterCardDeps.healthStateMessage(
+          objectResiliencyState.state,
+          t
+        );
   const objectResiliencyIcon =
-    healthStateMapping?.[objectResiliencyState.state]?.icon;
+    storageClusterCardDeps.healthStateMapping?.[objectResiliencyState.state]
+      ?.icon;
 
   const odfVersion =
-    csvLoaded && _.isEmpty(csvError) ? getOprVersionFromCSV(csv) : DASH;
+    csvLoaded && _.isEmpty(csvError)
+      ? storageClusterCardDeps.getOprVersionFromCSV(csv)
+      : storageClusterCardDeps.DASH;
 
   const clusterVersionChannel =
     subscriptionLoaded && !subscriptionError
-      ? getOprChannelFromSub(subscription)
-      : DASH;
+      ? storageClusterCardDeps.getOprChannelFromSub(subscription)
+      : storageClusterCardDeps.DASH;
 
-  const usedCapacityData = getStorageClusterMetric(
+  const usedCapacityData = storageClusterCardDeps.getStorageClusterMetric(
     usedCapacity,
     clusterName,
     odfNamespace
   );
-  const totalCapacityData = getStorageClusterMetric(
+  const totalCapacityData = storageClusterCardDeps.getStorageClusterMetric(
     totalCapacity,
     clusterName,
     odfNamespace
   );
-  const totalCapacityValue = humanizeBinaryBytes(totalCapacityData?.value?.[1]);
+  const totalCapacityValue = storageClusterCardDeps.humanizeBinaryBytes(
+    totalCapacityData?.value?.[1]
+  );
   const showCapacityChart =
     !capacityLoading && !capacityLoadError && totalCapacityValue.value > 0;
-  const usedCapacityValue = humanizeBinaryBytes(
+  const usedCapacityValue = storageClusterCardDeps.humanizeBinaryBytes(
     usedCapacityData?.value?.[1],
     null,
     totalCapacityValue?.unit
   );
-  const usedCapacityNotRelativeToTotal = humanizeBinaryBytes(
-    usedCapacityData?.value?.[1]
-  );
-  const availableCapacityValue = humanizeBinaryBytes(
+  const usedCapacityNotRelativeToTotal =
+    storageClusterCardDeps.humanizeBinaryBytes(usedCapacityData?.value?.[1]);
+  const availableCapacityValue = storageClusterCardDeps.humanizeBinaryBytes(
     !!usedCapacityData?.value?.[1] && !!totalCapacityData?.value?.[1]
       ? Number(totalCapacityData.value?.[1]) -
           Number(usedCapacityData.value?.[1])
@@ -190,8 +251,12 @@ export const StorageClusterCard: React.FC<CardProps> = ({ className }) => {
   );
 
   const colorScale = React.useMemo(() => {
-    if (capacityRatio > DANGER_THRESHOLD) return dangerColorScale;
-    if (capacityRatio > WARNING_THRESHOLD && capacityRatio <= DANGER_THRESHOLD)
+    if (capacityRatio > storageClusterCardDeps.DANGER_THRESHOLD)
+      return dangerColorScale;
+    if (
+      capacityRatio > storageClusterCardDeps.WARNING_THRESHOLD &&
+      capacityRatio <= storageClusterCardDeps.DANGER_THRESHOLD
+    )
       return warningColorScale;
     return generalColorScale;
   }, [capacityRatio]);
@@ -329,7 +394,9 @@ export const StorageClusterCard: React.FC<CardProps> = ({ className }) => {
           </Grid>
         )}
         {storageClustersLoaded && !storageClustersError && !storageCluster && (
-          <ErrorCardBody title={t('No storage cluster configured.')} />
+          <storageClusterCardDeps.ErrorCardBody
+            title={t('No storage cluster configured.')}
+          />
         )}
         {!storageClustersLoaded && !storageClustersError && (
           <Skeleton
@@ -338,7 +405,9 @@ export const StorageClusterCard: React.FC<CardProps> = ({ className }) => {
           />
         )}
         {storageClustersError && (
-          <ErrorCardBody title={t('Storage cluster data not available.')} />
+          <storageClusterCardDeps.ErrorCardBody
+            title={t('Storage cluster data not available.')}
+          />
         )}
       </CardBody>
     </Card>

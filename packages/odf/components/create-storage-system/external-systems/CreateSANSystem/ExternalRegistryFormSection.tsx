@@ -13,6 +13,13 @@ import { Control } from 'react-hook-form';
 import { Grid, GridItem } from '@patternfly/react-core';
 import { SANSystemFormData } from './useFormValidation';
 
+export const externalRegistryFormDeps = {
+  FormGroupController,
+  TextInputWithFieldRequirements,
+  ResourceDropdown,
+  useCustomTranslation,
+};
+
 type ExternalRegistryFieldRequirements = {
   imageRegistryUrl: string[];
   imageRepositoryName: string[];
@@ -28,14 +35,14 @@ type ExternalRegistryFormSectionProps = {
 export const ExternalRegistryFormSection: React.FC<
   ExternalRegistryFormSectionProps
 > = ({ control, fieldRequirements, showImageRegistryFields }) => {
-  const { t } = useCustomTranslation();
+  const { t } = externalRegistryFormDeps.useCustomTranslation();
 
   return (
     <Grid hasGutter>
       {showImageRegistryFields && (
         <>
           <GridItem span={6}>
-            <TextInputWithFieldRequirements
+            <externalRegistryFormDeps.TextInputWithFieldRequirements
               control={control}
               fieldRequirements={fieldRequirements.imageRegistryUrl}
               popoverProps={{
@@ -57,7 +64,7 @@ export const ExternalRegistryFormSection: React.FC<
             />
           </GridItem>
           <GridItem span={6}>
-            <TextInputWithFieldRequirements
+            <externalRegistryFormDeps.TextInputWithFieldRequirements
               control={control}
               fieldRequirements={fieldRequirements.imageRepositoryName}
               popoverProps={{
@@ -82,7 +89,7 @@ export const ExternalRegistryFormSection: React.FC<
       )}
       {showImageRegistryFields && (
         <GridItem span={12}>
-          <FormGroupController
+          <externalRegistryFormDeps.FormGroupController
             name="secretKey"
             control={control}
             formGroupProps={{
@@ -92,7 +99,7 @@ export const ExternalRegistryFormSection: React.FC<
               helperText: t('Select a secret for registry authentication.'),
             }}
             render={({ onChange, onBlur }) => (
-              <ResourceDropdown<SecretKind>
+              <externalRegistryFormDeps.ResourceDropdown<SecretKind>
                 onSelect={(res) => {
                   onChange(getName(res));
                 }}
@@ -110,7 +117,7 @@ export const ExternalRegistryFormSection: React.FC<
         </GridItem>
       )}
       <GridItem span={6}>
-        <FormGroupController
+        <externalRegistryFormDeps.FormGroupController
           name="caCertificateSecret"
           control={control}
           formGroupProps={{
@@ -122,7 +129,7 @@ export const ExternalRegistryFormSection: React.FC<
             ),
           }}
           render={({ onChange, onBlur }) => (
-            <ResourceDropdown<SecretKind>
+            <externalRegistryFormDeps.ResourceDropdown<SecretKind>
               onSelect={(res) => {
                 onChange(getName(res));
               }}
@@ -139,7 +146,7 @@ export const ExternalRegistryFormSection: React.FC<
         />
       </GridItem>
       <GridItem span={6}>
-        <FormGroupController
+        <externalRegistryFormDeps.FormGroupController
           name="privateKeySecret"
           control={control}
           formGroupProps={{
@@ -151,7 +158,7 @@ export const ExternalRegistryFormSection: React.FC<
             ),
           }}
           render={({ onChange, onBlur }) => (
-            <ResourceDropdown<SecretKind>
+            <externalRegistryFormDeps.ResourceDropdown<SecretKind>
               onSelect={(res) => {
                 onChange(getName(res));
               }}

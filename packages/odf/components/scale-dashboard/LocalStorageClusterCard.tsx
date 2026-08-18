@@ -36,13 +36,24 @@ import { ENCRYPTION_CONFIG_NAME } from '../scale-encryption/enableScaleEncryptio
 import AddLocalScaleNodesModal from './AddLocalScaleNodesModal';
 import EncryptionConfigModal from './EncryptionConfigModal';
 
+export const localStorageClusterCardDeps = {
+  useK8sWatchResources: (
+    ...args: Parameters<typeof useK8sWatchResources>
+  ): ReturnType<typeof useK8sWatchResources> => useK8sWatchResources(...args),
+  ResourceInventoryItem: (
+    props: React.ComponentProps<typeof ResourceInventoryItem>
+  ) => <ResourceInventoryItem {...props} />,
+  useCustomTranslation,
+  useModalWrapper,
+};
+
 const nodesHref = `${resourcePathFromModel(NodeModel)}?label=${encodeURIComponent(
   `${SCALE_DAEMON_NODE_LABEL}=`
 )}`;
 
 const LocalStorageClusterCard: React.FC = () => {
-  const { t } = useCustomTranslation();
-  const launchModal = useModalWrapper();
+  const { t } = localStorageClusterCardDeps.useCustomTranslation();
+  const launchModal = localStorageClusterCardDeps.useModalWrapper();
 
   const watchResources = React.useMemo(
     () => ({
@@ -71,11 +82,8 @@ const LocalStorageClusterCard: React.FC = () => {
     []
   );
 
-  const resources = useK8sWatchResources<{
-    cluster: ClusterKind;
-    nodes: NodeKind[];
-    encryptionConfig: EncryptionConfigKind;
-  }>(watchResources);
+  const resources =
+    localStorageClusterCardDeps.useK8sWatchResources(watchResources);
 
   // SAFETY: k8s watch returns K8sResourceCommon; the model guarantees ClusterKind shape.
   const cluster = resources.cluster?.data as ClusterKind;
@@ -131,7 +139,7 @@ const LocalStorageClusterCard: React.FC = () => {
         </DescriptionList>
         <Flex alignItems={{ default: 'alignItemsCenter' }}>
           <FlexItem>
-            <ResourceInventoryItem
+            <localStorageClusterCardDeps.ResourceInventoryItem
               dataTest="inventory-nodes"
               isLoading={!nodesLoaded}
               error={!!nodesLoadError}

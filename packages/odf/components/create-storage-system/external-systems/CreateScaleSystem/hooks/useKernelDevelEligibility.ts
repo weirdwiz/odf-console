@@ -5,6 +5,11 @@ import { useK8sWatchResources } from '@openshift-console/dynamic-plugin-sdk';
 import { WizardNodeState } from '../../../reducer';
 import { KernelDevelEligibility } from '../types';
 
+export const useKernelDevelEligibilityDeps = {
+  // SAFETY: The deps wrapper delegates to useK8sWatchResources; the cast preserves the generic signature for test spying.
+  useK8sWatchResources: useK8sWatchResources as typeof useK8sWatchResources,
+};
+
 const KERNEL_DEVEL = 'kernel-devel';
 
 const resources = {
@@ -43,7 +48,10 @@ const getLoadErrorMessage = (loadError: { message?: string }): string =>
 export const useKernelDevelEligibility = (
   selectedNodes: WizardNodeState[]
 ): KernelDevelEligibility => {
-  const results = useK8sWatchResources<KernelDevelWatchResources>(resources);
+  const results =
+    useKernelDevelEligibilityDeps.useK8sWatchResources<KernelDevelWatchResources>(
+      resources
+    );
   const machineConfigNodes = results.machineConfigNodes.data || [];
   const machineConfigs = results.machineConfigs.data || [];
   const isLoading =

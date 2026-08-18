@@ -5,24 +5,21 @@ import {
   SCALE_DAEMON_NODE_LABEL,
 } from '@odf/core/constants';
 import { ClusterKind, EncryptionConfigKind } from '@odf/core/types/scale';
-import * as TestDependency4 from '@odf/shared/sdk-wrapper/useModalWrapper';
 import { NodeKind } from '@odf/shared/types';
-import * as TestDependency3 from '@odf/shared/useCustomTranslationHook';
-import { useK8sWatchResources } from '@openshift-console/dynamic-plugin-sdk';
-import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
-import * as TestDependency2 from '@openshift-console/dynamic-plugin-sdk-internal';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { ENCRYPTION_CONFIG_NAME } from '../scale-encryption/enableScaleEncryption';
-import LocalStorageClusterCard from './LocalStorageClusterCard';
+import LocalStorageClusterCard, {
+  localStorageClusterCardDeps,
+} from './LocalStorageClusterCard';
 
 const launchModal = jest.fn();
 jest
-  .spyOn(TestDependency1, 'useK8sWatchResources')
+  .spyOn(localStorageClusterCardDeps, 'useK8sWatchResources')
   .mockImplementation(jest.fn());
 jest
-  .spyOn(TestDependency2, 'ResourceInventoryItem')
+  .spyOn(localStorageClusterCardDeps, 'ResourceInventoryItem')
   .mockImplementation((props) => (
     <div data-test={props.dataTest}>
       {props.isLoading ? (
@@ -34,19 +31,21 @@ jest
       )}
     </div>
   ));
-jest.spyOn(TestDependency3, 'useCustomTranslation').mockImplementation(() => ({
-  t: (key: string, params?: Record<string, string | number>) => {
-    if (params) {
-      return Object.entries(params).reduce(
-        (str, [k, v]) => str.replace(`{{ ${k} }}`, String(v)),
-        key
-      );
-    }
-    return key;
-  },
-}));
 jest
-  .spyOn(TestDependency4, 'useModalWrapper')
+  .spyOn(localStorageClusterCardDeps, 'useCustomTranslation')
+  .mockImplementation(() => ({
+    t: (key: string, params?: Record<string, string | number>) => {
+      if (params) {
+        return Object.entries(params).reduce(
+          (str, [k, v]) => str.replace(`{{ ${k} }}`, String(v)),
+          key
+        );
+      }
+      return key;
+    },
+  }));
+jest
+  .spyOn(localStorageClusterCardDeps, 'useModalWrapper')
   .mockImplementation(() => launchModal);
 
 const makeNode = (name: string, labels: Record<string, string>): NodeKind => ({
@@ -110,23 +109,25 @@ const setupMocks = ({
   encryptionConfigLoaded = true,
   encryptionConfigLoadError,
 }: SetupMocksOptions = {}) => {
-  jest.mocked(useK8sWatchResources).mockReturnValue({
-    cluster: {
-      data: cluster,
-      loaded: clusterLoaded,
-      loadError: clusterLoadError ?? null,
-    },
-    nodes: {
-      data: nodes,
-      loaded: nodesLoaded,
-      loadError: nodesLoadError ?? null,
-    },
-    encryptionConfig: {
-      data: encryptionConfig,
-      loaded: encryptionConfigLoaded,
-      loadError: encryptionConfigLoadError ?? null,
-    },
-  });
+  jest
+    .mocked(localStorageClusterCardDeps.useK8sWatchResources)
+    .mockReturnValue({
+      cluster: {
+        data: cluster,
+        loaded: clusterLoaded,
+        loadError: clusterLoadError ?? null,
+      },
+      nodes: {
+        data: nodes,
+        loaded: nodesLoaded,
+        loadError: nodesLoadError ?? null,
+      },
+      encryptionConfig: {
+        data: encryptionConfig,
+        loaded: encryptionConfigLoaded,
+        loadError: encryptionConfigLoadError ?? null,
+      },
+    });
 };
 
 const renderCard = () =>
@@ -154,7 +155,9 @@ describe('LocalStorageClusterCard', () => {
       setupMocks();
       renderCard();
 
-      expect(useK8sWatchResources).toHaveBeenCalledWith(
+      expect(
+        localStorageClusterCardDeps.useK8sWatchResources
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           cluster: expect.objectContaining({
             name: IBM_SCALE_LOCAL_CLUSTER_NAME,
@@ -238,7 +241,9 @@ describe('LocalStorageClusterCard', () => {
       setupMocks();
       renderCard();
 
-      expect(useK8sWatchResources).toHaveBeenCalledWith(
+      expect(
+        localStorageClusterCardDeps.useK8sWatchResources
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           nodes: expect.objectContaining({
             kind: 'Node',
@@ -260,7 +265,8 @@ describe('LocalStorageClusterCard', () => {
       renderCard();
       expect(screen.getByText('3 Nodes')).toBeInTheDocument();
       expect(
-        jest.mocked(useK8sWatchResources).mock.calls[0][0]
+        jest.mocked(localStorageClusterCardDeps.useK8sWatchResources).mock
+          .calls[0][0]
       ).not.toHaveProperty('corePods');
     });
 
@@ -311,7 +317,9 @@ describe('LocalStorageClusterCard', () => {
       setupMocks();
       renderCard();
 
-      expect(useK8sWatchResources).toHaveBeenCalledWith(
+      expect(
+        localStorageClusterCardDeps.useK8sWatchResources
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           encryptionConfig: expect.objectContaining({
             name: ENCRYPTION_CONFIG_NAME,

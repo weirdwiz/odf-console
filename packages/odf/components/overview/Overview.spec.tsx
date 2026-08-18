@@ -1,60 +1,12 @@
 import * as React from 'react';
-import * as TestDependency1 from '@odf/core/redux/selectors';
-import * as TestDependency4 from '@odf/shared/hooks/custom-prometheus-poll';
-import {
-  PrometheusResponse,
-  useFlag,
-} from '@openshift-console/dynamic-plugin-sdk';
-import * as TestDependency3 from '@openshift-console/dynamic-plugin-sdk';
-import * as TestDependency6 from '@openshift-console/dynamic-plugin-sdk/lib/utils/flags';
-import * as TestDependency5 from '@openshift-console/dynamic-plugin-sdk-internal';
+import { PrometheusResponse } from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router';
-import * as TestDependency2 from 'react-router';
-import Overview from './Overview';
+import { externalSystemsCardDeps } from './external-systems-card/ExternalSystemsCard';
+import Overview, { overviewDeps } from './Overview';
+import { storageClusterCardDeps } from './storage-cluster-card/StorageClusterCard';
 
 const odfNamespace = 'test-ns';
-jest
-  .spyOn(TestDependency1, 'useODFNamespaceSelector')
-  .mockImplementation(() => ({
-    odfNamespace,
-    isODFNsLoaded: true,
-    odfNsLoadError: null,
-    isNsSafe: true,
-    isFallbackSafe: true,
-  }));
-jest
-  .spyOn(TestDependency1, 'useODFSystemFlagsSelector')
-  .mockImplementation(() => ({
-    systemFlags: {
-      [odfNamespace]: {
-        isInternalMode: true,
-        isExternalMode: false,
-        isNoobaaStandalone: false,
-      },
-    },
-    areFlagsSafe: true,
-  }));
-jest
-  .spyOn(TestDependency2, 'useLocation')
-  .mockImplementation(jest.fn(() => ({ pathname: '/overview', search: '' })));
-jest.spyOn(TestDependency3, 'useK8sWatchResource').mockImplementation(
-  jest.fn(() => {
-    return [null, true, undefined];
-  })
-);
-jest.spyOn(TestDependency3, 'useK8sWatchResources').mockImplementation(
-  jest.fn(() => ({
-    storageClusters: { data: [], loaded: true, loadError: null },
-    flashSystemClusters: { data: [], loaded: true, loadError: null },
-    remoteClusters: { data: [], loaded: true, loadError: null },
-    sanClusters: { data: [], loaded: true, loadError: null },
-    daemons: { data: [], loaded: true, loadError: null },
-  }))
-);
-jest
-  .spyOn(TestDependency3, 'useActivePerspective')
-  .mockImplementation(jest.fn(() => ''));
 
 const promResponse: PrometheusResponse = {
   status: 'success',
@@ -68,20 +20,97 @@ const promResponse: PrometheusResponse = {
     resultType: 'vector',
   },
 };
+
 jest
-  .spyOn(TestDependency4, 'useCustomPrometheusPoll')
-  .mockImplementation(jest.fn(() => [promResponse, null, false]));
+  .spyOn(overviewDeps, 'useODFSystemFlagsSelector')
+  .mockImplementation(() => ({
+    systemFlags: {
+      [odfNamespace]: {
+        isInternalMode: true,
+        isExternalMode: false,
+        isNoobaaStandalone: false,
+      },
+    },
+    areFlagsSafe: true,
+  }));
 jest
-  .spyOn(TestDependency4, 'usePrometheusBasePath')
-  .mockImplementation(jest.fn(() => ''));
+  .spyOn(overviewDeps, 'GeneralOverviewActivityCard')
+  .mockImplementation(() => <div>Activity</div>);
 jest
-  .spyOn(TestDependency5, 'useUtilizationDuration')
-  .mockImplementation(jest.fn(() => ({ duration: 0 })));
-jest.spyOn(TestDependency6, 'useFlag').mockImplementation(jest.fn());
+  .spyOn(overviewDeps, 'HealthOverviewCard')
+  .mockImplementation(() => <div>Health</div>);
+jest
+  .spyOn(overviewDeps, 'ObjectStorageCard')
+  .mockImplementation(() => <div>Object storage</div>);
+// SAFETY: Mock return value satisfies Location shape; the cast matches the useLocation return type.
+jest
+  .spyOn(overviewDeps, 'useLocation')
+  .mockImplementation(
+    () =>
+      ({ pathname: '/overview', search: '' }) as ReturnType<
+        typeof overviewDeps.useLocation
+      >
+  );
+// SAFETY: Mock return value provides the t() identity function matching the useCustomTranslation contract.
+jest
+  .spyOn(overviewDeps, 'useCustomTranslation')
+  .mockImplementation(
+    () =>
+      ({ t: (k: string) => k }) as ReturnType<
+        typeof overviewDeps.useCustomTranslation
+      >
+  );
+
+jest.spyOn(storageClusterCardDeps, 'useODFNamespaceSelector').mockReturnValue({
+  odfNamespace,
+  isODFNsLoaded: true,
+  odfNsLoadError: null,
+  isNsSafe: true,
+  isFallbackSafe: true,
+});
+jest
+  .spyOn(storageClusterCardDeps, 'useK8sWatchResource')
+  .mockReturnValue([null, true, undefined]);
+jest
+  .spyOn(storageClusterCardDeps, 'useSafeK8sWatchResource')
+  .mockReturnValue([null, true, undefined]);
+// SAFETY: Mock return value provides the t() identity function matching the useCustomTranslation contract.
+jest
+  .spyOn(storageClusterCardDeps, 'useCustomTranslation')
+  .mockReturnValue({ t: (k: string) => k } as ReturnType<
+    typeof storageClusterCardDeps.useCustomTranslation
+  >);
+jest.spyOn(storageClusterCardDeps, 'useNavigate').mockReturnValue(jest.fn());
+jest
+  .spyOn(storageClusterCardDeps, 'useCustomPrometheusPoll')
+  .mockReturnValue([promResponse, null, false]);
+jest.spyOn(storageClusterCardDeps, 'usePrometheusBasePath').mockReturnValue('');
+jest
+  .spyOn(storageClusterCardDeps, 'useFetchCsv')
+  .mockReturnValue([undefined, false, undefined]);
+jest
+  .spyOn(storageClusterCardDeps, 'useGetOCSHealth')
+  .mockReturnValue([undefined, false, undefined]);
+jest
+  .spyOn(storageClusterCardDeps, 'useRawCapacity')
+  .mockReturnValue([undefined, undefined, false]);
+
+// SAFETY: Mock return value provides the t() identity function matching the useCustomTranslation contract.
+jest
+  .spyOn(externalSystemsCardDeps, 'useCustomTranslation')
+  .mockReturnValue({ t: (k: string) => k } as ReturnType<
+    typeof externalSystemsCardDeps.useCustomTranslation
+  >);
+jest
+  .spyOn(externalSystemsCardDeps, 'useWatchStorageClusters')
+  .mockReturnValue([[], true, null]);
+jest.spyOn(externalSystemsCardDeps, 'useFlag').mockReturnValue(false);
+jest
+  .spyOn(externalSystemsCardDeps, 'useK8sWatchResource')
+  .mockReturnValue([[], true, undefined]);
 
 describe('General Overview', () => {
   it('only renders common cards', () => {
-    jest.mocked(useFlag).mockReturnValue(false);
     render(
       <BrowserRouter>
         <Overview />
@@ -94,7 +123,6 @@ describe('General Overview', () => {
   });
 
   it('also renders External Systems card', () => {
-    jest.mocked(useFlag).mockReturnValue(true);
     render(
       <BrowserRouter>
         <Overview />

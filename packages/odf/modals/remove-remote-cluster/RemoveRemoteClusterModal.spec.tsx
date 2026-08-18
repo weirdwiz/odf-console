@@ -1,32 +1,35 @@
 import * as React from 'react';
-import useIsRemoteClusterDeletable from '@odf/core/hooks/useIsRemoteClusterDeletable';
-import * as TestDependency1 from '@odf/core/hooks/useIsRemoteClusterDeletable';
-import { ClusterKind, RemoteClusterKind } from '@odf/core/types/scale';
-import {
-  k8sDelete,
-  k8sGet,
-  k8sList,
-} from '@openshift-console/dynamic-plugin-sdk';
-import * as TestDependency3 from '@openshift-console/dynamic-plugin-sdk';
+import { RemoteClusterKind } from '@odf/core/types/scale';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import * as TestDependency2 from 'react-router';
-import RemoveRemoteClusterModal from './RemoveRemoteClusterModal';
+import RemoveRemoteClusterModal, {
+  removeRemoteClusterModalDeps,
+} from './RemoveRemoteClusterModal';
 
 const mockNavigate = jest.fn();
-jest.spyOn(TestDependency1, 'default').mockImplementation(jest.fn());
 jest
-  .spyOn(TestDependency2, 'useNavigate')
+  .spyOn(removeRemoteClusterModalDeps, 'useIsRemoteClusterDeletable')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(removeRemoteClusterModalDeps, 'useNavigate')
   .mockImplementation(() => mockNavigate);
-jest.spyOn(TestDependency3, 'k8sDelete').mockImplementation(jest.fn());
-jest.spyOn(TestDependency3, 'k8sGet').mockImplementation(jest.fn());
-jest.spyOn(TestDependency3, 'k8sList').mockImplementation(jest.fn());
+jest
+  .spyOn(removeRemoteClusterModalDeps, 'k8sDelete')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(removeRemoteClusterModalDeps, 'k8sGet')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(removeRemoteClusterModalDeps, 'k8sList')
+  .mockImplementation(jest.fn());
 
-const mockIsRemoteClusterDeletable = jest.mocked(useIsRemoteClusterDeletable);
-const mockK8sDelete = jest.mocked(k8sDelete);
-const mockK8sGet = jest.mocked(k8sGet);
-const mockK8sList = jest.mocked(k8sList);
+const mockIsRemoteClusterDeletable = jest.mocked(
+  removeRemoteClusterModalDeps.useIsRemoteClusterDeletable
+);
+const mockK8sDelete = jest.mocked(removeRemoteClusterModalDeps.k8sDelete);
+const mockK8sGet = jest.mocked(removeRemoteClusterModalDeps.k8sGet);
+const mockK8sList = jest.mocked(removeRemoteClusterModalDeps.k8sList);
 
 const remoteCluster: RemoteClusterKind = {
   apiVersion: 'scale.spectrum.ibm.com/v1beta1',

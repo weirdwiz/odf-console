@@ -1,12 +1,14 @@
-import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
-import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
 import { renderHook } from '@testing-library/react';
 import { FileSystemKind } from '../types/scale';
-import useIsRemoteClusterDeletable from './useIsRemoteClusterDeletable';
+import useIsRemoteClusterDeletable, {
+  useIsRemoteClusterDeletableDeps,
+} from './useIsRemoteClusterDeletable';
 
 jest
-  .spyOn(TestDependency1, 'useK8sWatchResource')
+  .spyOn(useIsRemoteClusterDeletableDeps, 'useK8sWatchResource')
   .mockImplementation(jest.fn());
+
+const useK8sWatchResource = useIsRemoteClusterDeletableDeps.useK8sWatchResource;
 
 const remoteFileSystem = (
   name: string,

@@ -16,6 +16,16 @@ import { WizardNodeState, WizardState } from '../reducer';
 import { SelectNodesTableFooter } from './select-nodes-table-footer';
 import './select-nodes-table.scss';
 
+export const selectNodesTableDeps = {
+  useNodesData,
+  useListPageFilter: (
+    ...args: Parameters<typeof useListPageFilter>
+  ): ReturnType<typeof useListPageFilter> => useListPageFilter(...args),
+  ListPageFilterWrapper: (
+    props: React.ComponentProps<typeof ListPageFilterWrapper>
+  ) => <ListPageFilterWrapper {...props} />,
+};
+
 type InternalNodeTableProps = {
   onRowSelected: (selectedNodes: NodeData[]) => void;
   nodesData: NodeData[];
@@ -90,8 +100,15 @@ export const SelectNodesTable: React.FC<SelectNodesTableProps> = ({
   disableLabeledNodes = false,
   systemNamespace,
 }) => {
-  const [nodesData, nodesLoaded, nodesLoadError] = useNodesData();
-  const [data, filteredData, onFilterChange] = useListPageFilter(nodesData);
+  const [nodesData, nodesLoaded, nodesLoadError] =
+    selectNodesTableDeps.useNodesData();
+  // SAFETY: useListPageFilter returns [unfiltered, filtered, onFilterChange] for NodeData[]; the cast narrows the generic tuple.
+  const [data, filteredData, onFilterChange] =
+    selectNodesTableDeps.useListPageFilter(nodesData) as [
+      NodeData[],
+      NodeData[],
+      (...args: unknown[]) => void,
+    ];
 
   return (
     <div className="odf-capacity-and-nodes__select-nodes">

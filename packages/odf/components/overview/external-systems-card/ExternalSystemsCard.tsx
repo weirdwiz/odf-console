@@ -46,6 +46,15 @@ import {
 } from './external-systems-status';
 import './ExternalSystemsCard.scss';
 
+export const externalSystemsCardDeps = {
+  useWatchStorageClusters,
+  // SAFETY: The deps wrapper delegates to useFlag; the cast preserves the concrete return type for test spying.
+  useFlag: useFlag as typeof useFlag,
+  // SAFETY: The deps wrapper delegates to useK8sWatchResource; the cast preserves the generic signature for test spying.
+  useK8sWatchResource: useK8sWatchResource as typeof useK8sWatchResource,
+  useCustomTranslation,
+};
+
 type ExternalSystemRow = {
   id: string;
   label: string;
@@ -89,15 +98,15 @@ const ExternalSystemsListBody: React.FC<ExternalSystemsListBodyProps> = ({
 };
 
 export const ExternalSystemsCard: React.FC<CardProps> = ({ className }) => {
-  const { t } = useCustomTranslation();
+  const { t } = externalSystemsCardDeps.useCustomTranslation();
   const { storageClusters, flashSystemClusters, remoteClusters, sanClusters } =
-    useWatchStorageClusters();
+    externalSystemsCardDeps.useWatchStorageClusters();
   const navigate = useNavigate();
 
-  const isFDF = useFlag(FDF_FLAG);
+  const isFDF = externalSystemsCardDeps.useFlag(FDF_FLAG);
 
   const [fileSystems, fileSystemsLoaded, fileSystemsLoadError] =
-    useK8sWatchResource<FileSystemKind[]>(
+    externalSystemsCardDeps.useK8sWatchResource<FileSystemKind[]>(
       getValidWatchK8sResourceObj(
         {
           kind: referenceForModel(FileSystemModel),

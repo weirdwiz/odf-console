@@ -27,11 +27,23 @@ export type ColoredIconProps = {
   title?: string;
 };
 
+export const iconsDependencies = {
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  ExclamationTriangleIcon,
+  InfoCircleIcon,
+  UnknownIcon,
+  SyncAltIcon,
+  ResourcesFullIcon,
+  ResourcesAlmostFullIcon,
+  ArrowCircleUpIcon,
+};
+
 export const GreenCheckCircleIcon: React.FC<ColoredIconProps> = ({
   className,
   title,
 }) => (
-  <CheckCircleIcon
+  <iconsDependencies.CheckCircleIcon
     data-test="success-icon"
     color={okColor.value}
     className={className}
@@ -43,7 +55,7 @@ export const RedExclamationCircleIcon: React.FC<ColoredIconProps> = ({
   className,
   title,
 }) => (
-  <ExclamationCircleIcon
+  <iconsDependencies.ExclamationCircleIcon
     color={dangerColor.value}
     className={className}
     title={title}
@@ -54,7 +66,7 @@ export const RedExclamationTriangleIcon: React.FC<ColoredIconProps> = ({
   className,
   title,
 }) => (
-  <ExclamationTriangleIcon
+  <iconsDependencies.ExclamationTriangleIcon
     color={dangerColor.value}
     className={className}
     title={title}
@@ -65,7 +77,7 @@ export const YellowExclamationTriangleIcon: React.FC<ColoredIconProps> = ({
   className,
   title,
 }) => (
-  <ExclamationTriangleIcon
+  <iconsDependencies.ExclamationTriangleIcon
     color={warningColor.value}
     className={className}
     title={title}
@@ -76,7 +88,7 @@ export const BlueInfoCircleIcon: React.FC<ColoredIconProps> = ({
   className,
   title,
 }) => (
-  <InfoCircleIcon
+  <iconsDependencies.InfoCircleIcon
     color={blueInfoColor.value}
     className={className}
     title={title}
@@ -87,7 +99,7 @@ export const GrayInfoCircleIcon: React.FC<ColoredIconProps> = ({
   className,
   title,
 }) => (
-  <InfoCircleIcon
+  <iconsDependencies.InfoCircleIcon
     color={grayInfoColor.value}
     className={className}
     title={title}
@@ -98,7 +110,7 @@ export const GrayUnknownIcon: React.FC<ColoredIconProps> = ({
   className,
   title,
 }) => (
-  <UnknownIcon
+  <iconsDependencies.UnknownIcon
     color={disabledColor.value}
     className={className}
     title={title}
@@ -109,7 +121,7 @@ export const BlueSyncIcon: React.FC<ColoredIconProps> = ({
   className,
   title,
 }) => (
-  <SyncAltIcon
+  <iconsDependencies.SyncAltIcon
     color={blueInfoColor.value}
     className={className}
     title={title}
@@ -120,7 +132,7 @@ export const RedResourcesFullIcon: React.FC<ColoredIconProps> = ({
   className,
   title,
 }) => (
-  <ResourcesFullIcon
+  <iconsDependencies.ResourcesFullIcon
     color={dangerColor.value}
     className={className}
     title={title}
@@ -131,7 +143,7 @@ export const YellowResourcesAlmostFullIcon: React.FC<ColoredIconProps> = ({
   className,
   title,
 }) => (
-  <ResourcesAlmostFullIcon
+  <iconsDependencies.ResourcesAlmostFullIcon
     color={warningColor.value}
     className={className}
     title={title}
@@ -142,7 +154,7 @@ export const BlueArrowCircleUpIcon: React.FC<ColoredIconProps> = ({
   className,
   title,
 }) => (
-  <ArrowCircleUpIcon
+  <iconsDependencies.ArrowCircleUpIcon
     color={blueDefaultColor.value}
     className={className}
     title={title}

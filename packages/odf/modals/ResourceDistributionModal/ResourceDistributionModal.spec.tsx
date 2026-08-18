@@ -1,18 +1,75 @@
 import * as React from 'react';
 import { StorageConsumerKind } from '@odf/shared';
-import * as TestDependency1 from '@odf/shared';
-import * as TestDependency2 from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ResourceDistributionModal from './ResourceDistributionModal';
+import { resourceDistributionTableDeps } from '../../components/ResourceDistribution/ResourceDistributionTable';
+import ResourceDistributionModal, {
+  resourceDistributionModalDeps,
+} from './ResourceDistributionModal';
 
 jest
-  .spyOn(TestDependency1, 'useCustomTranslation')
+  .spyOn(resourceDistributionModalDeps, 'useCustomTranslation')
   .mockImplementation(jest.fn().mockReturnValue({ t: (key: string) => key }));
-jest.spyOn(TestDependency2, 'useK8sWatchResources').mockImplementation(
-  jest.fn().mockReturnValue({
-    storageClasses: {
-      data: [
+jest
+  .spyOn(resourceDistributionModalDeps, 'useK8sWatchResources')
+  .mockImplementation(
+    jest.fn().mockReturnValue({
+      storageClasses: {
+        data: [
+          {
+            apiVersion: 'v1',
+            kind: 'StorageClass',
+            metadata: {
+              name: 'test-storage-class',
+              namespace: 'test-namespace',
+            },
+            provisioner: 'test-provisioner.rbd.csi.ceph.com',
+          },
+        ],
+        loaded: true,
+        error: null,
+      },
+      volumeSnapshotClasses: {
+        data: [
+          {
+            apiVersion: 'v1',
+            kind: 'VolumeSnapshotClass',
+            metadata: {
+              name: 'test-snapshot-class',
+              namespace: 'test-namespace',
+            },
+            driver: 'test-provisioner.rbd.csi.ceph.com',
+          },
+        ],
+        loaded: true,
+        error: null,
+      },
+      volumeGroupSnapshotClasses: {
+        data: [
+          {
+            apiVersion: 'v1beta1',
+            kind: 'VolumeGroupSnapshotClass',
+            metadata: {
+              name: 'test-snapshot-class',
+              namespace: 'test-namespace',
+            },
+            driver: 'test-provisioner.rbd.csi.ceph.com',
+          },
+        ],
+        loaded: true,
+        error: null,
+      },
+    })
+  );
+jest
+  .spyOn(resourceDistributionModalDeps, 'k8sPatch')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(resourceDistributionTableDeps, 'useListPageFilter')
+  .mockImplementation(
+    jest.fn().mockReturnValue([
+      [],
+      [
         {
           apiVersion: 'v1',
           kind: 'StorageClass',
@@ -23,59 +80,9 @@ jest.spyOn(TestDependency2, 'useK8sWatchResources').mockImplementation(
           provisioner: 'test-provisioner.rbd.csi.ceph.com',
         },
       ],
-      loaded: true,
-      error: null,
-    },
-    volumeSnapshotClasses: {
-      data: [
-        {
-          apiVersion: 'v1',
-          kind: 'VolumeSnapshotClass',
-          metadata: {
-            name: 'test-snapshot-class',
-            namespace: 'test-namespace',
-          },
-          driver: 'test-provisioner.rbd.csi.ceph.com',
-        },
-      ],
-      loaded: true,
-      error: null,
-    },
-    volumeGroupSnapshotClasses: {
-      data: [
-        {
-          apiVersion: 'v1beta1',
-          kind: 'VolumeGroupSnapshotClass',
-          metadata: {
-            name: 'test-snapshot-class',
-            namespace: 'test-namespace',
-          },
-          driver: 'test-provisioner.rbd.csi.ceph.com',
-        },
-      ],
-      loaded: true,
-      error: null,
-    },
-  })
-);
-jest.spyOn(TestDependency2, 'k8sPatch').mockImplementation(jest.fn());
-jest.spyOn(TestDependency2, 'useListPageFilter').mockImplementation(
-  jest.fn().mockReturnValue([
-    [],
-    [
-      {
-        apiVersion: 'v1',
-        kind: 'StorageClass',
-        metadata: {
-          name: 'test-storage-class',
-          namespace: 'test-namespace',
-        },
-        provisioner: 'test-provisioner.rbd.csi.ceph.com',
-      },
-    ],
-    jest.fn(),
-  ])
-);
+      jest.fn(),
+    ])
+  );
 
 const storageConsumerResource: StorageConsumerKind = {
   apiVersion: 'v1',

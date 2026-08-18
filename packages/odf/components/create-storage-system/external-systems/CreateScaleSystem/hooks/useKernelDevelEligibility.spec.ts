@@ -1,12 +1,13 @@
 import { MachineConfigKind, MachineConfigNodeKind } from '@odf/shared/types';
-import { useK8sWatchResources } from '@openshift-console/dynamic-plugin-sdk';
-import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
 import { renderHook } from '@testing-library/react';
 import { WizardNodeState } from '../../../reducer';
-import { useKernelDevelEligibility } from './useKernelDevelEligibility';
+import {
+  useKernelDevelEligibility,
+  useKernelDevelEligibilityDeps,
+} from './useKernelDevelEligibility';
 
 jest
-  .spyOn(TestDependency1, 'useK8sWatchResources')
+  .spyOn(useKernelDevelEligibilityDeps, 'useK8sWatchResources')
   .mockImplementation(jest.fn());
 
 const makeNode = (name: string): WizardNodeState => ({
@@ -38,18 +39,20 @@ const mockWatchResources = ({
   machineConfigNodes = {},
   machineConfigs = {},
 }: WatchResourcesMock = {}) => {
-  jest.mocked(useK8sWatchResources).mockReturnValue({
-    machineConfigNodes: {
-      data: machineConfigNodes.data || [],
-      loaded: machineConfigNodes.loaded ?? true,
-      loadError: machineConfigNodes.loadError ?? null,
-    },
-    machineConfigs: {
-      data: machineConfigs.data || [],
-      loaded: machineConfigs.loaded ?? true,
-      loadError: machineConfigs.loadError ?? null,
-    },
-  });
+  jest
+    .mocked(useKernelDevelEligibilityDeps.useK8sWatchResources)
+    .mockReturnValue({
+      machineConfigNodes: {
+        data: machineConfigNodes.data || [],
+        loaded: machineConfigNodes.loaded ?? true,
+        loadError: machineConfigNodes.loadError ?? null,
+      },
+      machineConfigs: {
+        data: machineConfigs.data || [],
+        loaded: machineConfigs.loaded ?? true,
+        loadError: machineConfigs.loadError ?? null,
+      },
+    });
 };
 
 describe('useKernelDevelEligibility', () => {
@@ -82,7 +85,9 @@ describe('useKernelDevelEligibility', () => {
       useKernelDevelEligibility(selectedNodes)
     );
 
-    expect(useK8sWatchResources).toHaveBeenCalledWith({
+    expect(
+      useKernelDevelEligibilityDeps.useK8sWatchResources
+    ).toHaveBeenCalledWith({
       machineConfigNodes: expect.objectContaining({ isList: true }),
       machineConfigs: expect.objectContaining({ isList: true }),
     });

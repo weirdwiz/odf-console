@@ -12,6 +12,10 @@ import {
 } from '@patternfly/react-core';
 import './nic.scss';
 
+export const nicDeps = {
+  useCustomTranslation,
+};
+
 type NICSelectComponentProps = {
   cephClusterCIDR: string;
   setCephCIDR: (cidr: string) => void;
@@ -34,7 +38,7 @@ export const NICSelectComponent: React.FC<NICSelectComponentProps> = ({
   setUseClusterNetwork,
   nodes = [],
 }) => {
-  const { t } = useCustomTranslation();
+  const { t } = nicDeps.useCustomTranslation();
 
   const isIsolateCephNetwork = networkType === NetworkType.NIC;
 

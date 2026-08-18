@@ -16,6 +16,11 @@ import {
   ModalVariant,
 } from '@patternfly/react-core';
 
+export const addLocalScaleNodesModalDeps = {
+  useKernelDevelEligibility,
+  useCustomTranslation,
+};
+
 type AddLocalScaleNodesModalProps = {
   closeModal: () => void;
   isOpen: boolean;
@@ -25,13 +30,14 @@ const AddLocalScaleNodesModal: React.FC<AddLocalScaleNodesModalProps> = ({
   closeModal,
   isOpen,
 }) => {
-  const { t } = useCustomTranslation();
+  const { t } = addLocalScaleNodesModalDeps.useCustomTranslation();
   const [selectedNodes, setSelectedNodes] = React.useState<WizardNodeState[]>(
     []
   );
   const [error, setError] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const kernelDevelEligibility = useKernelDevelEligibility(selectedNodes);
+  const kernelDevelEligibility =
+    addLocalScaleNodesModalDeps.useKernelDevelEligibility(selectedNodes);
   const isNodeFixed = React.useCallback(
     (node: NodeData) =>
       Object.prototype.hasOwnProperty.call(

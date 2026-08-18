@@ -1,14 +1,15 @@
 import React from 'react';
-import * as TestDependency1 from '@odf/shared';
-import * as TestDependency2 from '@odf/shared/useCustomTranslationHook';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import type { FieldValues } from 'react-hook-form';
-import { ExternalRegistryFormSection } from './ExternalRegistryFormSection';
+import {
+  ExternalRegistryFormSection,
+  externalRegistryFormDeps,
+} from './ExternalRegistryFormSection';
 
 jest
-  .spyOn(TestDependency1, 'FormGroupController')
+  .spyOn(externalRegistryFormDeps, 'FormGroupController')
   .mockImplementation(
     ({
       name,
@@ -43,7 +44,7 @@ jest
     )
   );
 jest
-  .spyOn(TestDependency1, 'TextInputWithFieldRequirements')
+  .spyOn(externalRegistryFormDeps, 'TextInputWithFieldRequirements')
   .mockImplementation(
     ({
       formGroupProps,
@@ -70,10 +71,10 @@ jest
     )
   );
 jest
-  .spyOn(TestDependency1, 'ResourceDropdown')
+  .spyOn(externalRegistryFormDeps, 'ResourceDropdown')
   .mockImplementation(() => <div data-testid="resource-dropdown" />);
 jest
-  .spyOn(TestDependency2, 'useCustomTranslation')
+  .spyOn(externalRegistryFormDeps, 'useCustomTranslation')
   .mockImplementation(() => ({ t: (key: string) => key }));
 
 const fieldRequirements = {

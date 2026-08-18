@@ -1,27 +1,25 @@
 import * as React from 'react';
-import { useKernelDevelEligibility } from '@odf/core/components/create-storage-system/external-systems/CreateScaleSystem/hooks/useKernelDevelEligibility';
-import * as TestDependency2 from '@odf/core/components/create-storage-system/external-systems/CreateScaleSystem/hooks/useKernelDevelEligibility';
+import { nodesSectionDeps } from '@odf/core/components/create-storage-system/external-systems/common/NodesSection';
+import { payloadDeps } from '@odf/core/components/create-storage-system/external-systems/common/payload';
 import { SCALE_DAEMON_NODE_LABEL } from '@odf/core/constants';
-import { useNodesData } from '@odf/core/hooks';
-import * as TestDependency1 from '@odf/core/hooks';
 import { NodeData } from '@odf/core/types';
-import * as TestDependency4 from '@odf/shared/useCustomTranslationHook';
-import * as TestDependency3 from '@odf/shared/utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
-import AddLocalScaleNodesModal from './AddLocalScaleNodesModal';
+import AddLocalScaleNodesModal, {
+  addLocalScaleNodesModalDeps,
+} from './AddLocalScaleNodesModal';
 
 const mockPatchNode = jest.fn();
-jest.spyOn(TestDependency1, 'useNodesData').mockImplementation(jest.fn());
+jest.spyOn(nodesSectionDeps, 'useNodesData').mockImplementation(jest.fn());
 jest
-  .spyOn(TestDependency2, 'useKernelDevelEligibility')
+  .spyOn(addLocalScaleNodesModalDeps, 'useKernelDevelEligibility')
   .mockImplementation(jest.fn());
 jest
-  .spyOn(TestDependency3, 'k8sPatchByName')
+  .spyOn(payloadDeps, 'k8sPatchByName')
   .mockImplementation((...args) => mockPatchNode(...args));
 jest
-  .spyOn(TestDependency4, 'useCustomTranslation')
+  .spyOn(addLocalScaleNodesModalDeps, 'useCustomTranslation')
   .mockImplementation(() => ({ t: (key: string) => key }));
 
 const makeNode = (
@@ -43,12 +41,14 @@ const makeNode = (
 describe('AddLocalScaleNodesModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useKernelDevelEligibility).mockReturnValue({
-      areSelectedNodesEligible: false,
-      isLoading: false,
-      error: '',
-      nodesWithoutKernelDevel: [],
-    });
+    jest
+      .mocked(addLocalScaleNodesModalDeps.useKernelDevelEligibility)
+      .mockReturnValue({
+        areSelectedNodesEligible: false,
+        isLoading: false,
+        error: '',
+        nodesWithoutKernelDevel: [],
+      });
   });
 
   const openModal = (closeModal = jest.fn()) => {
@@ -68,7 +68,7 @@ describe('AddLocalScaleNodesModal', () => {
       { key: 'dedicated', value: 'other', effect: 'NoSchedule' },
     ];
 
-    jest.mocked(useNodesData).mockReturnValue([
+    jest.mocked(nodesSectionDeps.useNodesData).mockReturnValue([
       [
         makeNode('worker-candidate'),
         cordonedWorker,
@@ -100,10 +100,10 @@ describe('AddLocalScaleNodesModal', () => {
 
   it('assigns an eligible expansion candidate', async () => {
     jest
-      .mocked(useNodesData)
+      .mocked(nodesSectionDeps.useNodesData)
       .mockReturnValue([[makeNode('worker-candidate')], true, null]);
     jest
-      .mocked(useKernelDevelEligibility)
+      .mocked(addLocalScaleNodesModalDeps.useKernelDevelEligibility)
       .mockImplementation((selectedNodes) => ({
         areSelectedNodesEligible: selectedNodes.length > 0,
         isLoading: false,
@@ -137,14 +137,14 @@ describe('AddLocalScaleNodesModal', () => {
 
   it('keeps the modal open and shows the patch error', async () => {
     jest
-      .mocked(useNodesData)
+      .mocked(nodesSectionDeps.useNodesData)
       .mockReturnValue([
         [makeNode('worker-one'), makeNode('worker-two')],
         true,
         null,
       ]);
     jest
-      .mocked(useKernelDevelEligibility)
+      .mocked(addLocalScaleNodesModalDeps.useKernelDevelEligibility)
       .mockImplementation((selectedNodes) => ({
         areSelectedNodesEligible: selectedNodes.length > 0,
         isLoading: false,

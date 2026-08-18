@@ -17,6 +17,13 @@ import {
 import * as _ from 'lodash-es';
 import { NodeData } from '../types';
 
+export const useNodesDataDependencies = {
+  // SAFETY: The deps wrapper delegates to useK8sWatchResource; the cast preserves the generic signature for test spying.
+  useK8sWatchResource: useK8sWatchResource as typeof useK8sWatchResource,
+  useCustomPrometheusPoll,
+  usePrometheusBasePath,
+};
+
 /**
  * Note: Reference of "nodesData" changes frequently due to recomputation caused by Prometheus response.
  * That is, "utilization" updates every few seconds.
@@ -27,12 +34,13 @@ export const useNodesData = (
   controlPlaneOrStretchCluster?: boolean
 ): [NodeData[], boolean, any] => {
   const [nodes, nodesLoaded, nodesLoadError] =
-    useK8sWatchResource<NodeKind[]>(nodeResource);
-  const [utilization, , promLoading] = useCustomPrometheusPoll({
-    query: allNodesUtilizationQueries[NodeQueries.ALL_NODES_MEMORY_TOTAL],
-    endpoint: PrometheusEndpoint.QUERY,
-    basePath: usePrometheusBasePath(),
-  });
+    useNodesDataDependencies.useK8sWatchResource<NodeKind[]>(nodeResource);
+  const [utilization, , promLoading] =
+    useNodesDataDependencies.useCustomPrometheusPoll({
+      query: allNodesUtilizationQueries[NodeQueries.ALL_NODES_MEMORY_TOTAL],
+      endpoint: PrometheusEndpoint.QUERY,
+      basePath: useNodesDataDependencies.usePrometheusBasePath(),
+    });
 
   const loaded = nodesLoaded && !promLoading;
   const error = nodesLoadError;

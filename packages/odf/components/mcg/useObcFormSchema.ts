@@ -12,6 +12,12 @@ import validationRegEx from '@odf/shared/utils/validation';
 import * as Yup from 'yup';
 import { State } from './state';
 
+export const useObcFormSchemaDeps = {
+  getName,
+  // SAFETY: The deps wrapper delegates to useK8sList; the cast preserves the generic signature for test spying.
+  useK8sList: useK8sList as typeof useK8sList,
+};
+
 export type UseObcBaseSchema = {
   obcFormSchema: Yup.ObjectSchema<{
     obcName?: string;
@@ -26,7 +32,7 @@ const useObcFormSchema = (
   state: State
 ): UseObcBaseSchema => {
   const { t } = useCustomTranslation();
-  const [data, loaded, loadError] = useK8sList(
+  const [data, loaded, loadError] = useObcFormSchemaDeps.useK8sList(
     NooBaaObjectBucketClaimModel,
     namespace
   );
@@ -34,7 +40,9 @@ const useObcFormSchema = (
   return React.useMemo(() => {
     const isClient = isClientPlugin();
     const existingNames =
-      loaded && !loadError ? data?.map((dataItem) => getName(dataItem)) : [];
+      loaded && !loadError
+        ? data?.map((dataItem) => useObcFormSchemaDeps.getName(dataItem))
+        : [];
 
     const isNoobaa = state.scProvisioner?.includes(NOOBAA_PROVISIONER);
 

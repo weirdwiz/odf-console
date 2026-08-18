@@ -1,27 +1,26 @@
 import * as React from 'react';
-import * as TestDependency2 from '@odf/core/components/utils';
-import { useNodesData } from '@odf/core/hooks';
-import * as TestDependency1 from '@odf/core/hooks';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import * as TestDependency4 from '../../../nodes-table/NodesTable';
 import { WizardNodeState } from '../../reducer';
-import { SANNodesSection, ScaleNodesSection } from './NodesSection';
-import * as TestDependency3 from './select-local-cluster-nodes-table/select-local-cluster-nodes-table';
+import {
+  SANNodesSection,
+  ScaleNodesSection,
+  nodesSectionDeps,
+} from './NodesSection';
 
-jest.spyOn(TestDependency1, 'useNodesData').mockImplementation(jest.fn());
+jest.spyOn(nodesSectionDeps, 'useNodesData').mockImplementation(jest.fn());
 jest
-  .spyOn(TestDependency2, 'createWizardNodeState')
+  .spyOn(nodesSectionDeps, 'createWizardNodeState')
   .mockImplementation(
     jest.fn((nodes) =>
       nodes.map((node) => ({ ...node, name: node.metadata.name }))
     )
   );
 jest
-  .spyOn(TestDependency3, 'SelectLocalClusterNodesTable')
+  .spyOn(nodesSectionDeps, 'SelectLocalClusterNodesTable')
   .mockImplementation(() => <div data-test-id="local-cluster-nodes-table" />);
 jest
-  .spyOn(TestDependency4, 'NodesTable')
+  .spyOn(nodesSectionDeps, 'NodesTable')
   .mockImplementation(({ nodes, selectedNodes, loaded, isRowSelectable }) => (
     <div
       data-test-id="nodes-table"
@@ -44,7 +43,9 @@ const ineligible = {
 
 describe('NodesSection', () => {
   it('renders the local cluster table when all-nodes selection is hidden', () => {
-    jest.mocked(useNodesData).mockReturnValue([[], true, null]);
+    jest
+      .mocked(nodesSectionDeps.useNodesData)
+      .mockReturnValue([[], true, null]);
 
     render(<SANNodesSection selectedNodes={[]} setSelectedNodes={jest.fn()} />);
 
@@ -75,7 +76,9 @@ describe('NodesSection', () => {
     ];
     const setSelectedNodes = jest.fn();
 
-    jest.mocked(useNodesData).mockReturnValue([nodes, true, null]);
+    jest
+      .mocked(nodesSectionDeps.useNodesData)
+      .mockReturnValue([nodes, true, null]);
 
     render(
       <ScaleNodesSection
@@ -110,7 +113,9 @@ describe('NodesSection', () => {
         spec: {},
       },
     ];
-    jest.mocked(useNodesData).mockReturnValue([nodes, true, null]);
+    jest
+      .mocked(nodesSectionDeps.useNodesData)
+      .mockReturnValue([nodes, true, null]);
 
     render(
       <ScaleNodesSection
@@ -159,7 +164,9 @@ describe('NodesSection', () => {
     ];
     const onSelectionChange = jest.fn();
 
-    jest.mocked(useNodesData).mockReturnValue([nodes, true, null]);
+    jest
+      .mocked(nodesSectionDeps.useNodesData)
+      .mockReturnValue([nodes, true, null]);
 
     const TestScaleNodesSection = () => {
       const [selectedNodes, setSelectedNodes] = React.useState<
@@ -227,7 +234,9 @@ describe('NodesSection', () => {
         'Kernel-devel packages are missing on some selected nodes. Please apply the Machine Config Operator (MCO) update to install them before continuing.',
     },
   ])('renders kernel-devel status: $message', ({ eligibility, message }) => {
-    jest.mocked(useNodesData).mockReturnValue([[], true, null]);
+    jest
+      .mocked(nodesSectionDeps.useNodesData)
+      .mockReturnValue([[], true, null]);
 
     render(
       <ScaleNodesSection
@@ -241,7 +250,9 @@ describe('NodesSection', () => {
   });
 
   it('renders verified kernel-devel status', () => {
-    jest.mocked(useNodesData).mockReturnValue([[], true, null]);
+    jest
+      .mocked(nodesSectionDeps.useNodesData)
+      .mockReturnValue([[], true, null]);
 
     render(
       <ScaleNodesSection
@@ -260,7 +271,9 @@ describe('NodesSection', () => {
   });
 
   it('passes the node loading state to the table', () => {
-    jest.mocked(useNodesData).mockReturnValue([[], false, null]);
+    jest
+      .mocked(nodesSectionDeps.useNodesData)
+      .mockReturnValue([[], false, null]);
 
     render(
       <ScaleNodesSection

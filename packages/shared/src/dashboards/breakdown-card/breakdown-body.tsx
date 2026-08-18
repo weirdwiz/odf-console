@@ -8,6 +8,14 @@ import { BreakdownChart, LabelPadding } from './breakdown-chart';
 import { BreakdownChartLoading } from './breakdown-loading';
 import { addAvailable, StackDataPoint, getLegends } from './utils';
 
+export const breakdownBodyDependencies = {
+  getLegends,
+  addAvailable,
+  BreakdownChartLoading,
+  TotalCapacityBody,
+  BreakdownChart,
+};
+
 export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
   top5MetricsStats,
   metricTotal,
@@ -25,7 +33,7 @@ export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
   const { t } = useCustomTranslation();
 
   if (isLoading && !hasLoadError) {
-    return <BreakdownChartLoading />;
+    return <breakdownBodyDependencies.BreakdownChartLoading />;
   }
   if (!capacityUsed || !top5MetricsStats.length || hasLoadError) {
     return (
@@ -42,7 +50,7 @@ export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
     );
   }
 
-  const chartData = addAvailable(
+  const chartData = breakdownBodyDependencies.addAvailable(
     top5MetricsStats,
     capacityAvailable,
     metricTotal,
@@ -50,7 +58,7 @@ export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
     t
   );
 
-  const legends = getLegends(chartData);
+  const legends = breakdownBodyDependencies.getLegends(chartData);
 
   // Removes Legend for available
   if (capacityAvailable) {
@@ -60,7 +68,7 @@ export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
   return (
     <Grid>
       <GridItem span={4}>
-        <TotalCapacityBody
+        <breakdownBodyDependencies.TotalCapacityBody
           {...(isPersistentInternal ? { prefix: t('Total requests: ') } : {})}
           capacity={humanize(metricTotal).string}
           {...(!isPersistentInternal ? { suffix: t('used') } : {})}
@@ -70,7 +78,7 @@ export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
       <GridItem span={4} />
       <GridItem span={4}>
         {capacityAvailable && (
-          <TotalCapacityBody
+          <breakdownBodyDependencies.TotalCapacityBody
             capacity={humanize(capacityAvailable).string}
             {...(!isPersistentInternal ? { suffix: t('available') } : {})}
             className="capacity-breakdown-card__available-body text-secondary"
@@ -78,7 +86,7 @@ export const BreakdownCardBody: React.FC<BreakdownBodyProps> = ({
         )}
       </GridItem>
       <GridItem span={12}>
-        <BreakdownChart
+        <breakdownBodyDependencies.BreakdownChart
           data={chartData}
           legends={legends}
           metricModel={metricModel}

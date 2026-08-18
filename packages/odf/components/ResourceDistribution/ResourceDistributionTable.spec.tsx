@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
-import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
@@ -9,6 +8,7 @@ import {
   ResourceDistributionTable,
   RowGeneratorProps,
   SelectedResources,
+  resourceDistributionTableDeps,
 } from './ResourceDistributionTable';
 
 const resources = [
@@ -40,23 +40,25 @@ const selectedResources: SelectedResources = {
     'test-snapshot-class': false,
   },
 };
-jest.spyOn(TestDependency1, 'useListPageFilter').mockImplementation(
-  jest.fn().mockReturnValue([
-    [],
-    [
-      {
-        apiVersion: 'v1',
-        kind: 'StorageClass',
-        metadata: {
-          name: 'test-storage-class',
-          namespace: 'test-namespace',
+jest
+  .spyOn(resourceDistributionTableDeps, 'useListPageFilter')
+  .mockImplementation(
+    jest.fn().mockReturnValue([
+      [],
+      [
+        {
+          apiVersion: 'v1',
+          kind: 'StorageClass',
+          metadata: {
+            name: 'test-storage-class',
+            namespace: 'test-namespace',
+          },
+          provisioner: 'test-provisioner',
         },
-        provisioner: 'test-provisioner',
-      },
-    ],
-    jest.fn(),
-  ])
-);
+      ],
+      jest.fn(),
+    ])
+  );
 
 describe('Resource distribution table component renders correctly for a storage class', () => {
   it('Renders basic features correctly', () => {

@@ -282,4 +282,5 @@ const useScaleSystemFormValidation = (
   };
 };
 
+export { useScaleSystemFormValidation };
 export default useScaleSystemFormValidation;

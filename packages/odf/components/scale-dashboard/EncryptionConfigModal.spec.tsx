@@ -1,16 +1,15 @@
 import * as React from 'react';
-import * as TestDependency2 from '@odf/shared/useCustomTranslationHook';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { enableScaleEncryption } from '../scale-encryption/enableScaleEncryption';
-import * as TestDependency1 from '../scale-encryption/enableScaleEncryption';
-import EncryptionConfigModal from './EncryptionConfigModal';
+import EncryptionConfigModal, {
+  encryptionConfigModalDeps,
+} from './EncryptionConfigModal';
 
 jest
-  .spyOn(TestDependency1, 'enableScaleEncryption')
+  .spyOn(encryptionConfigModalDeps, 'enableScaleEncryption')
   .mockImplementation(jest.fn());
 jest
-  .spyOn(TestDependency2, 'useCustomTranslation')
+  .spyOn(encryptionConfigModalDeps, 'useCustomTranslation')
   .mockImplementation(() => ({ t: (key: string) => key }));
 
 const renderModal = () => {
@@ -61,7 +60,9 @@ const fillAndSubmit = async () => {
 describe('EncryptionConfigModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(enableScaleEncryption).mockResolvedValue(undefined);
+    jest
+      .mocked(encryptionConfigModalDeps.enableScaleEncryption)
+      .mockResolvedValue(undefined);
   });
 
   it('submits the encryption configuration', async () => {
@@ -71,7 +72,9 @@ describe('EncryptionConfigModal', () => {
     await fillAndSubmit();
 
     await waitFor(() => expect(closeModal).toHaveBeenCalled());
-    expect(enableScaleEncryption).toHaveBeenCalledWith({
+    expect(
+      encryptionConfigModalDeps.enableScaleEncryption
+    ).toHaveBeenCalledWith({
       certificate: 'Y2VydGlmaWNhdGU=',
       client: 'scale-client',
       password: 'password',
@@ -85,7 +88,7 @@ describe('EncryptionConfigModal', () => {
 
   it('keeps the modal open when encryption fails', async () => {
     jest
-      .mocked(enableScaleEncryption)
+      .mocked(encryptionConfigModalDeps.enableScaleEncryption)
       .mockRejectedValue(new Error('EncryptionConfig creation failed'));
     const { closeModal } = renderModal();
 

@@ -19,6 +19,12 @@ import {
 import { ExternalSystemsSelectModal } from './ExternalSystemsModal';
 import './StorageClusterCreateModal.scss';
 
+export const storageClusterCreateModalDeps = {
+  useCustomTranslation,
+  useNavigate,
+  useLocation,
+};
+
 type ConfigureDFSelectionsProps = {
   closeModal: () => void;
 };
@@ -26,10 +32,10 @@ type ConfigureDFSelectionsProps = {
 export const ConfigureDFSelections: React.FC<ConfigureDFSelectionsProps> = ({
   closeModal,
 }) => {
-  const { t } = useCustomTranslation();
-  const navigate = useNavigate();
+  const { t } = storageClusterCreateModalDeps.useCustomTranslation();
+  const navigate = storageClusterCreateModalDeps.useNavigate();
   const launchModal = useModalWrapper();
-  const location = useLocation();
+  const location = storageClusterCreateModalDeps.useLocation();
 
   const shouldShowExternalSystems = location.pathname.includes(
     StartingPoint.OVERVIEW

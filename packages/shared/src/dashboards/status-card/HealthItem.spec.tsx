@@ -1,16 +1,12 @@
 import * as React from 'react';
-import * as TestDependency2 from '@odf/shared/status/SecondaryStatus';
 import { HealthState } from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen } from '@testing-library/react';
-import * as TestDependency1 from 'classnames';
-import * as TestDependency3 from '@patternfly/react-core';
-import HealthItem from './HealthItem';
-import * as TestDependency4 from './states';
+import HealthItem, { healthItemDependencies } from './HealthItem';
 
 const classNames = jest.fn();
 jest
-  .spyOn(TestDependency1, 'default')
-  .mockImplementation((...props: string[]) => {
+  .spyOn(healthItemDependencies, 'classNames')
+  .mockImplementation((...props) => {
     classNames(props);
     return props[1] ? props[0] + ' ' + props[1] : props[0];
   });
@@ -19,7 +15,7 @@ const mockSecondaryStatusComponent = jest.fn((_unused) => {
   return <div data-test-id="mocked-secondary-status" />;
 });
 jest
-  .spyOn(TestDependency2, 'default')
+  .spyOn(healthItemDependencies, 'SecondaryStatus')
   .mockImplementation((props) => mockSecondaryStatusComponent(props));
 
 const mockPopOverComponent = jest.fn((_unused) => {
@@ -30,21 +26,22 @@ const mockButtonComponent = jest.fn((_unused) => {
   return <div data-test-id="mocked-button" />;
 });
 jest
-  .spyOn(TestDependency3, 'Popover')
+  .spyOn(healthItemDependencies, 'Popover')
   .mockImplementation((props) => mockPopOverComponent(props));
 jest
-  .spyOn(TestDependency3, 'Button')
+  .spyOn(healthItemDependencies, 'Button')
   .mockImplementation((props) => mockButtonComponent(props));
-jest.replaceProperty(TestDependency4, 'healthStateMapping', {
+// SAFETY: Test-only partial mock; only OK and UNKNOWN states are exercised, so the incomplete mapping is safe for these tests.
+healthItemDependencies.healthStateMapping = {
   [HealthState.OK]: {
     icon: 'unit-test-ok-icon',
   },
   [HealthState.UNKNOWN]: {
     icon: 'unit-test-unknown-icon',
   },
-});
+} as any;
 jest
-  .spyOn(TestDependency4, 'healthStateMessage')
+  .spyOn(healthItemDependencies, 'healthStateMessage')
   .mockImplementation(() => 'mocked-health-state-message');
 
 const title = 'unit-tests';

@@ -31,6 +31,13 @@ import { WizardNodeState } from '../../reducer';
 import { KernelDevelEligibility } from '../CreateScaleSystem/types';
 import { SelectLocalClusterNodesTable } from './select-local-cluster-nodes-table/select-local-cluster-nodes-table';
 
+export const nodesSectionDeps = {
+  useNodesData,
+  createWizardNodeState,
+  SelectLocalClusterNodesTable,
+  NodesTable,
+};
+
 type IncludeControlPlaneCheckboxProps = {
   isChecked: boolean;
   isDisabled?: boolean;
@@ -140,7 +147,7 @@ export const ScaleNodesSection: React.FC<ScaleNodesSectionProps> = React.memo(
     const { t } = useCustomTranslation();
     const [includeControlPlaneNodes, setIncludeControlPlaneNodes] =
       React.useState(false);
-    const [allNodes, allNodesLoaded] = useNodesData();
+    const [allNodes, allNodesLoaded] = nodesSectionDeps.useNodesData();
     const hasInitializedSelection = React.useRef(false);
 
     const [workerNodes, controlPlaneNodes] = React.useMemo(
@@ -161,7 +168,7 @@ export const ScaleNodesSection: React.FC<ScaleNodesSectionProps> = React.memo(
     const onNodeSelect = React.useCallback(
       (nodes: NodeData[]) => {
         setSelectedNodes(
-          createWizardNodeState(
+          nodesSectionDeps.createWizardNodeState(
             isNodeFixed ? nodes.filter((node) => !isNodeFixed(node)) : nodes
           )
         );
@@ -217,7 +224,7 @@ export const ScaleNodesSection: React.FC<ScaleNodesSectionProps> = React.memo(
           onChange={handleIncludeControlPlaneNodes}
           className="pf-v6-u-mb-sm"
         />
-        <NodesTable
+        <nodesSectionDeps.NodesTable
           nodes={tableNodes}
           selectedNodes={selectedNodeData}
           setSelectedNodes={onNodeSelect}
@@ -264,14 +271,16 @@ export const SANNodesSection: React.FC<SANNodesSectionProps> = React.memo(
     const onNodeSelect = React.useCallback(
       (nodes: NodeData[]) => {
         setSelectedNodes(
-          createWizardNodeState(nodes, { enableStretchCluster }).map((node) => {
-            const previousRole = selectedNodes.find(
-              (n) => n.name === node.name
-            )?.localClusterRole;
-            return previousRole && node.localClusterRole !== NodeType.ARBITER
-              ? { ...node, localClusterRole: previousRole }
-              : node;
-          })
+          nodesSectionDeps
+            .createWizardNodeState(nodes, { enableStretchCluster })
+            .map((node) => {
+              const previousRole = selectedNodes.find(
+                (n) => n.name === node.name
+              )?.localClusterRole;
+              return previousRole && node.localClusterRole !== NodeType.ARBITER
+                ? { ...node, localClusterRole: previousRole }
+                : node;
+            })
         );
       },
       [enableStretchCluster, setSelectedNodes, selectedNodes]
@@ -290,7 +299,7 @@ export const SANNodesSection: React.FC<SANNodesSectionProps> = React.memo(
 
     return (
       <>
-        <SelectLocalClusterNodesTable
+        <nodesSectionDeps.SelectLocalClusterNodesTable
           nodes={selectedNodes}
           onRowSelected={onNodeSelect}
           onLocalClusterRoleChange={onLocalClusterRoleChange}

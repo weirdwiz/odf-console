@@ -8,6 +8,12 @@ import {
 import * as _ from 'lodash-es';
 import { Thead, Tr, Th, Tbody, Table } from '@patternfly/react-table';
 
+export const resourceDistributionTableDeps = {
+  useListPageFilter: (
+    ...args: Parameters<typeof useListPageFilter>
+  ): ReturnType<typeof useListPageFilter> => useListPageFilter(...args),
+};
+
 export type SelectedResources = {
   storageClass: {
     [name: string]: boolean;
@@ -84,8 +90,13 @@ export const ResourceDistributionTable: React.FC<
     [resourceType, selectedResources]
   );
 
+  // SAFETY: useListPageFilter returns [unfiltered, filtered, onFilterChange] for K8sResourceCommon[]; the cast narrows the generic tuple.
   const [unfilteredData, filteredData, onFilterChange] =
-    useListPageFilter(resources);
+    resourceDistributionTableDeps.useListPageFilter(resources) as [
+      K8sResourceCommon[],
+      K8sResourceCommon[],
+      (...args: unknown[]) => void,
+    ];
 
   const selectAllResources = (select: boolean) => {
     setAllResourcesSelected(select);

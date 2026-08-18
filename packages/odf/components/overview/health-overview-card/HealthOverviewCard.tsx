@@ -44,6 +44,11 @@ import {
 } from '../../HealthOverview/hooks';
 import './health-overview-card.scss';
 
+export const healthOverviewCardDeps = {
+  useCustomPrometheusPoll,
+  usePrometheusBasePath,
+};
+
 type HealthDataPoint = {
   x: number;
   y: number;
@@ -54,11 +59,11 @@ export const HealthOverviewCard: React.FC = () => {
   const { t } = useCustomTranslation();
   const navigate = useNavigate();
   const [chartRef, chartWidth] = useRefWidth();
-  const basePath = usePrometheusBasePath();
+  const basePath = healthOverviewCardDeps.usePrometheusBasePath();
 
   // Fetch health score metric over time (range query for chart)
   const [healthScoreData, healthScoreError, healthScoreLoading] =
-    useCustomPrometheusPoll({
+    healthOverviewCardDeps.useCustomPrometheusPoll({
       query: HEALTH_SCORE_QUERY,
       endpoint: PrometheusEndpoint.QUERY_RANGE,
       basePath,
@@ -67,7 +72,7 @@ export const HealthOverviewCard: React.FC = () => {
 
   // Fetch current health score (instant query for accurate current value)
   const [currentScoreData, currentScoreError, currentScoreLoading] =
-    useCustomPrometheusPoll({
+    healthOverviewCardDeps.useCustomPrometheusPoll({
       query: HEALTH_SCORE_QUERY,
       endpoint: PrometheusEndpoint.QUERY,
       basePath,

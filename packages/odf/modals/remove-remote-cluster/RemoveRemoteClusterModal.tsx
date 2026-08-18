@@ -29,6 +29,17 @@ import {
   TextInput,
 } from '@patternfly/react-core';
 
+export const removeRemoteClusterModalDeps = {
+  useIsRemoteClusterDeletable,
+  useNavigate,
+  // SAFETY: The deps wrapper delegates to k8sDelete; the cast preserves the generic signature for test spying.
+  k8sDelete: k8sDelete as typeof k8sDelete,
+  // SAFETY: The deps wrapper delegates to k8sGet; the cast preserves the generic signature for test spying.
+  k8sGet: k8sGet as typeof k8sGet,
+  // SAFETY: The deps wrapper delegates to k8sList; the cast preserves the generic signature for test spying.
+  k8sList: k8sList as typeof k8sList,
+};
+
 type RemoveRemoteClusterModalProps = CommonModalProps<{
   resource: RemoteClusterKind;
 }>;
@@ -45,9 +56,10 @@ const RemoveRemoteClusterModal: React.FC<RemoveRemoteClusterModalProps> = ({
   extraProps: { resource },
 }) => {
   const { t } = useCustomTranslation();
-  const navigate = useNavigate();
+  const navigate = removeRemoteClusterModalDeps.useNavigate();
   const clusterName = getName(resource);
-  const isRemoteClusterDeletable = useIsRemoteClusterDeletable(clusterName);
+  const isRemoteClusterDeletable =
+    removeRemoteClusterModalDeps.useIsRemoteClusterDeletable(clusterName);
 
   const [inProgress, setInProgress] = React.useState(false);
   const [error, setError] = React.useState<string>('');
@@ -62,7 +74,7 @@ const RemoveRemoteClusterModal: React.FC<RemoveRemoteClusterModalProps> = ({
 
     try {
       try {
-        await k8sDelete({
+        await removeRemoteClusterModalDeps.k8sDelete({
           model: RemoteClusterModel,
           resource,
           requestInit: null,
@@ -76,7 +88,7 @@ const RemoveRemoteClusterModal: React.FC<RemoveRemoteClusterModalProps> = ({
 
       failureMessage = t('Failed to list remote clusters');
       // SAFETY: k8sList returns K8sResourceCommon[]; the model guarantees RemoteClusterKind shape.
-      const remoteClusters = (await k8sList({
+      const remoteClusters = (await removeRemoteClusterModalDeps.k8sList({
         model: RemoteClusterModel,
         queryParams: { ns: IBM_SCALE_NAMESPACE },
       })) as RemoteClusterKind[];
@@ -90,7 +102,7 @@ const RemoveRemoteClusterModal: React.FC<RemoveRemoteClusterModalProps> = ({
 
         try {
           // SAFETY: k8sGet returns K8sResourceCommon; the model guarantees ClusterKind shape.
-          localCluster = (await k8sGet({
+          localCluster = (await removeRemoteClusterModalDeps.k8sGet({
             model: ClusterModel,
             name: IBM_SCALE_LOCAL_CLUSTER_NAME,
             ns: IBM_SCALE_NAMESPACE,
@@ -103,7 +115,7 @@ const RemoveRemoteClusterModal: React.FC<RemoveRemoteClusterModalProps> = ({
 
         if (localCluster) {
           failureMessage = t('Failed to delete the local Scale cluster');
-          await k8sDelete({
+          await removeRemoteClusterModalDeps.k8sDelete({
             model: ClusterModel,
             resource: localCluster,
             requestInit: null,

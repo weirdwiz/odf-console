@@ -1,31 +1,28 @@
 import * as React from 'react';
 import { FileSystemKind } from '@odf/core/types/scale';
-import { useWatchStorageClusters } from '@odf/shared/hooks/useWatchStorageClusters';
-import * as TestDependency1 from '@odf/shared/hooks/useWatchStorageClusters';
 import { StorageClusterKind } from '@odf/shared/types';
-import * as TestDependency3 from '@odf/shared/useCustomTranslationHook';
-import {
-  useFlag,
-  useK8sWatchResource,
-} from '@openshift-console/dynamic-plugin-sdk';
-import * as TestDependency2 from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen, within } from '@testing-library/react';
 import { BrowserRouter } from 'react-router';
-import { ExternalSystemsCard } from './ExternalSystemsCard';
+import {
+  ExternalSystemsCard,
+  externalSystemsCardDeps,
+} from './ExternalSystemsCard';
 
 jest
-  .spyOn(TestDependency1, 'useWatchStorageClusters')
+  .spyOn(externalSystemsCardDeps, 'useWatchStorageClusters')
   .mockImplementation(jest.fn());
-jest.spyOn(TestDependency2, 'useFlag').mockImplementation(jest.fn());
+jest.spyOn(externalSystemsCardDeps, 'useFlag').mockImplementation(jest.fn());
 jest
-  .spyOn(TestDependency2, 'useK8sWatchResource')
+  .spyOn(externalSystemsCardDeps, 'useK8sWatchResource')
   .mockImplementation(jest.fn());
-jest.spyOn(TestDependency3, 'useCustomTranslation').mockImplementation(() => ({
-  t: (key: string) => key,
-}));
+jest
+  .spyOn(externalSystemsCardDeps, 'useCustomTranslation')
+  .mockImplementation(() => ({
+    t: (key: string) => key,
+  }));
 
 const mockWatchClusters = <Overrides extends object>(overrides?: Overrides) => {
-  jest.mocked(useWatchStorageClusters).mockReturnValue({
+  jest.mocked(externalSystemsCardDeps.useWatchStorageClusters).mockReturnValue({
     storageClusters: { data: [], loaded: true, loadError: null },
     flashSystemClusters: { data: [], loaded: true, loadError: null },
     remoteClusters: { data: [], loaded: true, loadError: null },
@@ -36,7 +33,7 @@ const mockWatchClusters = <Overrides extends object>(overrides?: Overrides) => {
 
 const mockFileSystems = (fileSystems: FileSystemKind[] = []) => {
   jest
-    .mocked(useK8sWatchResource)
+    .mocked(externalSystemsCardDeps.useK8sWatchResource)
     .mockReturnValue([fileSystems, true, undefined]);
 };
 
@@ -170,7 +167,7 @@ const renderCard = () =>
 describe('ExternalSystemsCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useFlag).mockReturnValue(true);
+    jest.mocked(externalSystemsCardDeps.useFlag).mockReturnValue(true);
     mockWatchClusters();
     mockFileSystems();
   });
@@ -189,7 +186,9 @@ describe('ExternalSystemsCard', () => {
       remoteClusters: { data: [], loaded: false, loadError: null },
       sanClusters: { data: [], loaded: false, loadError: null },
     });
-    jest.mocked(useK8sWatchResource).mockReturnValue([[], false, undefined]);
+    jest
+      .mocked(externalSystemsCardDeps.useK8sWatchResource)
+      .mockReturnValue([[], false, undefined]);
 
     renderCard();
     expect(

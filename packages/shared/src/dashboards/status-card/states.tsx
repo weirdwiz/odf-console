@@ -11,6 +11,16 @@ import { HealthState } from '@openshift-console/dynamic-plugin-sdk';
 import { TFunction } from 'i18next';
 import { InProgressIcon } from '@patternfly/react-icons';
 
+export const statesDependencies = {
+  InProgressIcon,
+  GreenCheckCircleIcon,
+  GrayUnknownIcon,
+  BlueSyncIcon,
+  BlueArrowCircleUpIcon,
+  YellowExclamationTriangleIcon,
+  RedExclamationCircleIcon,
+};
+
 export const healthStateMap = (state: string) => {
   switch (state) {
     case '0':
@@ -56,37 +66,55 @@ export const healthStateMapping = {
   [HealthState.OK]: {
     priority: 0,
     health: HealthState.OK,
-    icon: <GreenCheckCircleIcon title="Healthy" />,
+    get icon() {
+      return <statesDependencies.GreenCheckCircleIcon title="Healthy" />;
+    },
   },
   [HealthState.UNKNOWN]: {
     priority: 1,
     health: HealthState.UNKNOWN,
-    icon: <GrayUnknownIcon title="Unknown" />,
+    get icon() {
+      return <statesDependencies.GrayUnknownIcon title="Unknown" />;
+    },
   },
   [HealthState.PROGRESS]: {
     priority: 2,
     health: HealthState.PROGRESS,
-    icon: <InProgressIcon title="In progress" />,
+    get icon() {
+      return <statesDependencies.InProgressIcon title="In progress" />;
+    },
   },
   [HealthState.UPDATING]: {
     priority: 3,
     health: HealthState.UPDATING,
-    icon: <BlueSyncIcon title="Updating" />,
+    get icon() {
+      return <statesDependencies.BlueSyncIcon title="Updating" />;
+    },
   },
   [HealthState.UPGRADABLE]: {
     priority: 4,
     health: HealthState.UPGRADABLE,
-    icon: <BlueArrowCircleUpIcon title="Upgrade available" />,
+    get icon() {
+      return (
+        <statesDependencies.BlueArrowCircleUpIcon title="Upgrade available" />
+      );
+    },
   },
   [HealthState.WARNING]: {
     priority: 5,
     health: HealthState.WARNING,
-    icon: <YellowExclamationTriangleIcon title="Warning" />,
+    get icon() {
+      return (
+        <statesDependencies.YellowExclamationTriangleIcon title="Warning" />
+      );
+    },
   },
   [HealthState.ERROR]: {
     priority: 6,
     health: HealthState.ERROR,
-    icon: <RedExclamationCircleIcon title="Error" />,
+    get icon() {
+      return <statesDependencies.RedExclamationCircleIcon title="Error" />;
+    },
   },
   [HealthState.LOADING]: {
     priority: 7,
@@ -96,7 +124,9 @@ export const healthStateMapping = {
   [HealthState.NOT_AVAILABLE]: {
     priority: 8,
     health: HealthState.NOT_AVAILABLE,
-    icon: <GrayUnknownIcon title="Not available" />,
+    get icon() {
+      return <statesDependencies.GrayUnknownIcon title="Not available" />;
+    },
   },
 } satisfies {
   [key in HealthState]: HealthStateMappingValues;

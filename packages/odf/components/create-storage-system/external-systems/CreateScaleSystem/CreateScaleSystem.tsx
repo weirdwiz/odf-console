@@ -49,6 +49,32 @@ import { ScaleSystemComponentState, initialComponentState } from './types';
 import useScaleSystemFormValidation from './useFormValidation';
 import './CreateScaleSystem.scss';
 
+export const createScaleSystemDeps = {
+  useCustomTranslation,
+  useNavigate,
+  useIsLocalClusterConfigured,
+  useKernelDevelEligibility,
+  useExistingFileSystemNames,
+  useScaleSystemFormValidation,
+  ScaleNodesSection: (
+    props: React.ComponentProps<typeof ScaleNodesSection>
+  ) => <ScaleNodesSection {...props} />,
+  PageHeading,
+  TextInputWithFieldRequirements,
+  ValidatedPasswordInput,
+  ScaleEncryptionForm,
+  ButtonBar,
+  enableScaleEncryption,
+  labelNodes,
+  createScaleLocalClusterPayload,
+  configureMetricsNamespaceLabels,
+  createScaleCaCertSecretPayload,
+  createUserDetailsSecretPayload,
+  createConfigMapPayload,
+  createScaleRemoteClusterPayload,
+  createFileSystem,
+};
+
 type CreateScaleSystemFormProps = {
   componentState: ScaleSystemComponentState;
   setComponentState: React.Dispatch<
@@ -60,18 +86,21 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
   componentState,
   setComponentState,
 }) => {
-  const { t } = useCustomTranslation();
+  const { t } = createScaleSystemDeps.useCustomTranslation();
+  const deps = createScaleSystemDeps;
   const [generalCAFileName, setGeneralCAFileName] = React.useState('');
-  const navigate = useNavigate();
+  const navigate = createScaleSystemDeps.useNavigate();
   const [error, setError] = React.useState<string>('');
   const [loading, setLoading] = React.useState(false);
-  const localCluster = useIsLocalClusterConfigured();
+  const localCluster = createScaleSystemDeps.useIsLocalClusterConfigured();
   const isLocalClusterConfigured = !_.isEmpty(localCluster);
-  const kernelDevelEligibility = useKernelDevelEligibility(
-    componentState.selectedNodes
-  );
+  const kernelDevelEligibility =
+    createScaleSystemDeps.useKernelDevelEligibility(
+      componentState.selectedNodes
+    );
 
-  const existingFileSystemNames = useExistingFileSystemNames();
+  const existingFileSystemNames =
+    createScaleSystemDeps.useExistingFileSystemNames();
 
   const {
     fieldRequirements,
@@ -81,7 +110,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
     isEncryptionValid,
     watch,
     getValues,
-  } = useScaleSystemFormValidation(
+  } = createScaleSystemDeps.useScaleSystemFormValidation(
     existingFileSystemNames,
     componentState.encryptionEnabled
   );
@@ -135,32 +164,37 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
 
     try {
       const formData = getValues();
-      const patchNodes = labelNodes(componentState.selectedNodes);
+      const patchNodes = createScaleSystemDeps.labelNodes(
+        componentState.selectedNodes
+      );
       const { cpuRequest, memoryRequest } = getOptimalResourceRequests(
         componentState.selectedNodes
       );
       if (!isLocalClusterConfigured) {
         await patchNodes();
-        const localClusterPromise = createScaleLocalClusterPayload(
-          undefined,
-          undefined,
-          true,
-          cpuRequest.toString(),
-          memoryRequest
-        );
+        const localClusterPromise =
+          createScaleSystemDeps.createScaleLocalClusterPayload(
+            undefined,
+            undefined,
+            true,
+            cpuRequest.toString(),
+            memoryRequest
+          );
         await localClusterPromise();
-        await configureMetricsNamespaceLabels();
+        await createScaleSystemDeps.configureMetricsNamespaceLabels();
       }
-      const secretPromise = createScaleCaCertSecretPayload(
-        formData.name,
-        componentState.caCertificate
-      );
+      const secretPromise =
+        createScaleSystemDeps.createScaleCaCertSecretPayload(
+          formData.name,
+          componentState.caCertificate
+        );
       const userDetailsSecretName = `${formData.name}-user-details-secret`;
-      const userDetailsSecretPromise = createUserDetailsSecretPayload(
-        userDetailsSecretName,
-        formData.userName,
-        formData.password
-      );
+      const userDetailsSecretPromise =
+        createScaleSystemDeps.createUserDetailsSecretPayload(
+          userDetailsSecretName,
+          formData.userName,
+          formData.password
+        );
       const endpointHostNames = [
         formData['mandatory-endpoint-host'],
         ...(formData['optional-endpoint-1-host']
@@ -171,20 +205,19 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
           : []),
       ];
       const remoteClusterCaCert = `${formData.name}-ca-cert`;
-      const remoteClusterConfigMapPromise = createConfigMapPayload(
-        remoteClusterCaCert,
-        {
+      const remoteClusterConfigMapPromise =
+        createScaleSystemDeps.createConfigMapPayload(remoteClusterCaCert, {
           'ca.crt': componentState.caCertificate,
-        }
-      );
-      const remoteClusterPromise = createScaleRemoteClusterPayload(
-        formData.name,
-        endpointHostNames,
-        formData['mandatory-endpoint-port'],
-        userDetailsSecretName,
-        componentState.caCertificate ? remoteClusterCaCert : undefined
-      );
-      const fileSystemPromise = createFileSystem(
+        });
+      const remoteClusterPromise =
+        createScaleSystemDeps.createScaleRemoteClusterPayload(
+          formData.name,
+          endpointHostNames,
+          formData['mandatory-endpoint-port'],
+          userDetailsSecretName,
+          componentState.caCertificate ? remoteClusterCaCert : undefined
+        );
+      const fileSystemPromise = createScaleSystemDeps.createFileSystem(
         formData.name,
         formData.fileSystemName
       );
@@ -199,7 +232,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
       await remoteClusterPromise();
       await fileSystemPromise();
       if (componentState.encryptionEnabled) {
-        await enableScaleEncryption({
+        await createScaleSystemDeps.enableScaleEncryption({
           certificate: componentState.encryptionCert,
           client: formData.client,
           password: formData.encryptionPassword,
@@ -231,7 +264,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
   return (
     <Form onSubmit={handleSubmit(onCreate)} isWidthLimited>
       <FormSection title={t('General configuration')}>
-        <TextInputWithFieldRequirements
+        <deps.TextInputWithFieldRequirements
           control={control}
           fieldRequirements={fieldRequirements.name}
           popoverProps={{
@@ -264,7 +297,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
               </HelperTextItem>
             </HelperText>
           </FormHelperText>
-          <ScaleNodesSection
+          <deps.ScaleNodesSection
             isDisabled={isLocalClusterConfigured}
             selectedNodes={componentState.selectedNodes}
             setSelectedNodes={(nodes) =>
@@ -286,7 +319,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
         </FormHelperText>
         <Grid hasGutter>
           <GridItem span={6}>
-            <TextInputWithFieldRequirements
+            <deps.TextInputWithFieldRequirements
               control={control}
               fieldRequirements={fieldRequirements.hostname}
               popoverProps={{
@@ -308,7 +341,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
             />
           </GridItem>
           <GridItem span={6}>
-            <TextInputWithFieldRequirements
+            <deps.TextInputWithFieldRequirements
               control={control}
               fieldRequirements={fieldRequirements.port}
               popoverProps={{
@@ -330,7 +363,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
             />
           </GridItem>
           <GridItem span={6}>
-            <TextInputWithFieldRequirements
+            <deps.TextInputWithFieldRequirements
               control={control}
               fieldRequirements={fieldRequirements.hostname}
               popoverProps={{
@@ -351,7 +384,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
             />
           </GridItem>
           <GridItem span={6}>
-            <TextInputWithFieldRequirements
+            <deps.TextInputWithFieldRequirements
               control={control}
               fieldRequirements={fieldRequirements.port}
               popoverProps={{
@@ -372,7 +405,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
             />
           </GridItem>
           <GridItem span={6}>
-            <TextInputWithFieldRequirements
+            <deps.TextInputWithFieldRequirements
               control={control}
               fieldRequirements={fieldRequirements.hostname}
               popoverProps={{
@@ -393,7 +426,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
             />
           </GridItem>
           <GridItem span={6}>
-            <TextInputWithFieldRequirements
+            <deps.TextInputWithFieldRequirements
               control={control}
               fieldRequirements={fieldRequirements.port}
               popoverProps={{
@@ -414,7 +447,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
             />
           </GridItem>
         </Grid>
-        <TextInputWithFieldRequirements
+        <deps.TextInputWithFieldRequirements
           control={control}
           fieldRequirements={fieldRequirements.username}
           popoverProps={{
@@ -434,7 +467,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
             'data-test': 'username',
           }}
         />
-        <ValidatedPasswordInput
+        <deps.ValidatedPasswordInput
           control={control}
           fieldRequirements={fieldRequirements.password}
           popoverProps={{
@@ -483,7 +516,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
             </HelperTextItem>
           </HelperText>
         </FormHelperText>
-        <TextInputWithFieldRequirements
+        <deps.TextInputWithFieldRequirements
           control={control}
           fieldRequirements={fieldRequirements.fileSystemName}
           popoverProps={{
@@ -520,7 +553,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
           />
         </FormGroup>
         {componentState.encryptionEnabled && (
-          <ScaleEncryptionForm
+          <deps.ScaleEncryptionForm
             certificate={componentState.encryptionCert}
             control={control}
             onCertificateChange={(encryptionCert) =>
@@ -541,7 +574,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
           {error}
         </Alert>
       )}
-      <ButtonBar errorMessage={error}>
+      <deps.ButtonBar errorMessage={error}>
         <ActionGroup className="pf-v6-c-form">
           <Button
             type={ButtonType.submit}
@@ -560,7 +593,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
             {t('Cancel')}
           </Button>
         </ActionGroup>
-      </ButtonBar>
+      </deps.ButtonBar>
     </Form>
   );
 };
@@ -568,11 +601,12 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
 export const CreateScaleSystem: React.FC = () => {
   const [componentState, setComponentState] =
     React.useState<ScaleSystemComponentState>(initialComponentState);
-  const { t } = useCustomTranslation();
+  const { t } = createScaleSystemDeps.useCustomTranslation();
+  const deps2 = createScaleSystemDeps;
 
   return (
     <>
-      <PageHeading
+      <deps2.PageHeading
         title={t('Connect IBM Storage Scale')}
         hasUnderline={false}
         breadcrumbs={[
@@ -589,7 +623,7 @@ export const CreateScaleSystem: React.FC = () => {
         {t(
           'Connect to IBM Storage Scale to power Data Foundation with fast, reliable file storage optimized for enterprise performance.'
         )}
-      </PageHeading>
+      </deps2.PageHeading>
       <div className="odf-m-pane__body">
         <CreateScaleSystemForm
           componentState={componentState}

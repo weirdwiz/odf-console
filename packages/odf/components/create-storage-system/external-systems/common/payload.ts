@@ -25,6 +25,12 @@ import {
 } from '@openshift-console/dynamic-plugin-sdk';
 import { WizardNodeState } from '../../reducer';
 
+export const payloadDeps = {
+  k8sPatchByName,
+  // SAFETY: The deps wrapper delegates to k8sCreate; the cast preserves the generic signature for test spying.
+  k8sCreate: k8sCreate as typeof k8sCreate,
+};
+
 /** External KMM registry config from the SAN external registry form. Secure boot when both caCertificateSecret and privateKeySecret are provided. */
 export type ExternalKMMRegistryConfig = {
   imageRegistryUrl?: string;
@@ -46,7 +52,7 @@ export const createUserDetailsSecretPayload = (
     type: 'Opaque',
     stringData: { username, password },
   };
-  return () => k8sCreate({ model: SecretModel, data: secret });
+  return () => payloadDeps.k8sCreate({ model: SecretModel, data: secret });
 };
 
 export const createConfigMapPayload = (
@@ -59,7 +65,8 @@ export const createConfigMapPayload = (
     metadata: { name, namespace: IBM_SCALE_NAMESPACE },
     data,
   };
-  return () => k8sCreate({ model: ConfigMapModel, data: configMap });
+  return () =>
+    payloadDeps.k8sCreate({ model: ConfigMapModel, data: configMap });
 };
 
 export const labelNodes = (
@@ -97,7 +104,9 @@ export const labelNodes = (
         value: node.localClusterRole,
       });
     }
-    requests.push(k8sPatchByName(NodeModel, node.name, null, patch));
+    requests.push(
+      payloadDeps.k8sPatchByName(NodeModel, node.name, null, patch)
+    );
   });
 
   return () => Promise.all(requests);
@@ -188,7 +197,7 @@ export const createScaleLocalClusterPayload = (
     },
     spec,
   };
-  return () => k8sCreate({ model: ClusterModel, data: payload });
+  return () => payloadDeps.k8sCreate({ model: ClusterModel, data: payload });
 };
 
 const labelUserWorkloadMonitoringNamespace = (): Promise<K8sResourceCommon> => {

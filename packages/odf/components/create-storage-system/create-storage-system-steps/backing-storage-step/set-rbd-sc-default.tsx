@@ -12,12 +12,19 @@ import { FormGroup, Checkbox } from '@patternfly/react-core';
 import { WizardDispatch, WizardState } from '../../reducer';
 import './backing-storage-step.scss';
 
+export const setRbdScDefaultDeps = {
+  // SAFETY: The deps wrapper delegates to useK8sGet; the cast preserves the generic function signature for test spying.
+  useK8sGet: useK8sGet as typeof useK8sGet,
+};
+
 export const SetCephRBDStorageClassDefault: React.FC<
   SetCephRBDStorageClassDefaultProps
 > = ({ dispatch, isRBDStorageClassDefault, className }) => {
   const { t } = useCustomTranslation();
   const [sc, scLoaded] =
-    useK8sGet<ListKind<StorageClassResourceKind>>(StorageClassModel);
+    setRbdScDefaultDeps.useK8sGet<ListKind<StorageClassResourceKind>>(
+      StorageClassModel
+    );
 
   // "null" signifies that we don't know value of "doesDefaultSCAlreadyExists" yet
   const doesDefaultSCAlreadyExists = scLoaded

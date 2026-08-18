@@ -13,6 +13,13 @@ import {
   createUserDetailsSecretPayload,
 } from '../create-storage-system/external-systems/common/payload';
 
+export const enableScaleEncryptionDeps = {
+  // SAFETY: The deps wrapper delegates to k8sCreate; the cast preserves the generic signature for test spying.
+  k8sCreate: k8sCreate as typeof k8sCreate,
+  // SAFETY: The deps wrapper delegates to k8sDelete; the cast preserves the generic signature for test spying.
+  k8sDelete: k8sDelete as typeof k8sDelete,
+};
+
 export const ENCRYPTION_CONFIG_NAME = 'encryption-config';
 
 export type ScaleEncryptionInput = {
@@ -60,23 +67,30 @@ export const enableScaleEncryption = async (
   try {
     createdConfigMap = await createConfigMap();
     createdSecret = await createSecret();
-    await k8sCreate({ model: EncryptionConfigModel, data: encryptionConfig });
+    await enableScaleEncryptionDeps.k8sCreate({
+      model: EncryptionConfigModel,
+      data: encryptionConfig,
+    });
   } catch (cause) {
     if (createdSecret) {
-      await k8sDelete({
-        model: SecretModel,
-        resource: createdSecret,
-        requestInit: null,
-        json: null,
-      }).catch(() => undefined);
+      await enableScaleEncryptionDeps
+        .k8sDelete({
+          model: SecretModel,
+          resource: createdSecret,
+          requestInit: null,
+          json: null,
+        })
+        .catch(() => undefined);
     }
     if (createdConfigMap) {
-      await k8sDelete({
-        model: ConfigMapModel,
-        resource: createdConfigMap,
-        requestInit: null,
-        json: null,
-      }).catch(() => undefined);
+      await enableScaleEncryptionDeps
+        .k8sDelete({
+          model: ConfigMapModel,
+          resource: createdConfigMap,
+          requestInit: null,
+          json: null,
+        })
+        .catch(() => undefined);
     }
     throw cause;
   }

@@ -1,26 +1,27 @@
 import * as React from 'react';
 import { CREATE_SS_PAGE_URL } from '@odf/core/constants';
-import * as TestDependency2 from '@odf/shared';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import * as TestDependency1 from 'react-router';
 import {
   ConfigureDFSelections,
   StorageClusterCreateModal,
+  storageClusterCreateModalDeps,
 } from './StorageClusterCreateModal';
 
 // Mock react-router
 const mockNavigate = jest.fn();
 jest
-  .spyOn(TestDependency1, 'useNavigate')
+  .spyOn(storageClusterCreateModalDeps, 'useNavigate')
   .mockImplementation(() => mockNavigate);
 jest
-  .spyOn(TestDependency1, 'useLocation')
+  .spyOn(storageClusterCreateModalDeps, 'useLocation')
   .mockImplementation(jest.fn(() => ({ pathname: '/overview', search: '' })));
-jest.spyOn(TestDependency2, 'useCustomTranslation').mockImplementation(() => ({
-  t: (key: string) => key,
-}));
+jest
+  .spyOn(storageClusterCreateModalDeps, 'useCustomTranslation')
+  .mockImplementation(() => ({
+    t: (key: string) => key,
+  }));
 
 // Mock console.log to verify redirect logging
 const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation(jest.fn());

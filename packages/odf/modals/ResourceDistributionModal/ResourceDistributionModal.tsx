@@ -42,6 +42,14 @@ import {
 } from '../../components/ResourceDistribution/ResourceDistributionTable';
 import { generatePatchForDistributionOfResources } from '../../components/ResourceDistribution/utils';
 
+export const resourceDistributionModalDeps = {
+  useCustomTranslation,
+  // SAFETY: The deps wrapper delegates to useK8sWatchResources; the cast preserves the generic signature for test spying.
+  useK8sWatchResources: useK8sWatchResources as typeof useK8sWatchResources,
+  // SAFETY: The deps wrapper delegates to k8sPatch; the cast preserves the generic signature for test spying.
+  k8sPatch: k8sPatch as typeof k8sPatch,
+};
+
 type Resources = {
   storageClasses: StorageClassResourceKind[];
   volumeSnapshotClasses: VolumeSnapshotClassKind[];
@@ -110,7 +118,7 @@ const VolumeSnapshotClassRowGenerator: React.FC<RowGeneratorProps<any>> = ({
 export const DistributeResourceModal: React.FC<
   CommonModalProps<{ resource: StorageConsumerKind }>
 > = ({ closeModal, isOpen, extraProps: { resource } }) => {
-  const { t } = useCustomTranslation();
+  const { t } = resourceDistributionModalDeps.useCustomTranslation();
   const [selectedResources, setSelectedResources] =
     React.useState<SelectedResources>({
       storageClass: {},
@@ -120,7 +128,8 @@ export const DistributeResourceModal: React.FC<
   const [error, setError] = React.useState('');
   const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
 
-  const data = useK8sWatchResources<Resources>(resources);
+  const data =
+    resourceDistributionModalDeps.useK8sWatchResources<Resources>(resources);
   const filteredStorageClasses = data.storageClasses.data.filter((res) =>
     isCephWithNFSOrNooBaaProvisioner(getProvisioner(res))
   );
@@ -205,7 +214,12 @@ export const DistributeResourceModal: React.FC<
       selectedVolumeSnapshotClasses
     );
     setProgress(true);
-    k8sPatch({ model: StorageConsumerModel, resource, data: patch })
+    resourceDistributionModalDeps
+      .k8sPatch({
+        model: StorageConsumerModel,
+        resource,
+        data: patch,
+      })
       .then(() => {
         setProgress(false);
         closeModal();

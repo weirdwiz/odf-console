@@ -3,12 +3,12 @@ import {
   getPVCStatusGroups,
   getPVStatusGroups,
   getStatusGroups,
+  inventoryDependencies,
   InventoryStatusGroup,
 } from './Inventory';
-import * as TestDependency1 from './Node';
 
 jest
-  .spyOn(TestDependency1, 'nodeStatus')
+  .spyOn(inventoryDependencies, 'nodeStatus')
   .mockImplementation((resource) => resource.status);
 
 describe('tests for getStatusGroups utility function', () => {

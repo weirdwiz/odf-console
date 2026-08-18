@@ -1,6 +1,10 @@
 import { StatusGroupMapper } from '@openshift-console/dynamic-plugin-sdk';
 import { nodeStatus } from './Node';
 
+export const inventoryDependencies = {
+  nodeStatus,
+};
+
 export enum InventoryStatusGroup {
   WARN = 'WARN',
   ERROR = 'ERROR',
@@ -44,7 +48,7 @@ export const getNodeStatusGroups: StatusGroupMapper = (resources) =>
   getStatusGroups(
     resources,
     NODE_STATUS_GROUP_MAPPING,
-    nodeStatus,
+    inventoryDependencies.nodeStatus,
     'node-status'
   );
 

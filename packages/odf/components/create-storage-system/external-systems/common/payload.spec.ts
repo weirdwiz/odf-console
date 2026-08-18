@@ -1,13 +1,12 @@
 import { SCALE_DAEMON_NODE_LABEL } from '@odf/core/constants';
 import { NodeModel } from '@odf/shared';
-import * as TestDependency1 from '@odf/shared/utils';
 import { Patch } from '@openshift-console/dynamic-plugin-sdk';
-import * as TestDependency2 from '@openshift-console/dynamic-plugin-sdk';
 import { WizardNodeState } from '../../reducer';
 import {
   labelNodes,
   createScaleLocalClusterPayload,
   ExternalKMMRegistryConfig,
+  payloadDeps,
 } from './payload';
 
 const LABEL_PATH = '/metadata/labels/scale.spectrum.ibm.com~1daemon-selector';
@@ -30,10 +29,10 @@ const getNodeRolePatchCalls = () =>
 const mockK8sPatchByName = jest.fn().mockResolvedValue({});
 const mockK8sCreate = jest.fn().mockResolvedValue({});
 jest
-  .spyOn(TestDependency1, 'k8sPatchByName')
+  .spyOn(payloadDeps, 'k8sPatchByName')
   .mockImplementation((...args: unknown[]) => mockK8sPatchByName(...args));
 jest
-  .spyOn(TestDependency2, 'k8sCreate')
+  .spyOn(payloadDeps, 'k8sCreate')
   .mockImplementation((...args: unknown[]) => mockK8sCreate(...args));
 
 describe('payload', () => {

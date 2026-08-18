@@ -10,15 +10,25 @@ import NamespaceStoreForm from './namespace-store-form';
 import '../mcg-endpoints/noobaa-provider-endpoints.scss';
 import '../../style.scss';
 
+export const createNamespaceStoreDeps = {
+  // SAFETY: The deps wrapper delegates to NamespaceStoreForm; the cast preserves the component type for test spying.
+  NamespaceStoreForm: NamespaceStoreForm as typeof NamespaceStoreForm,
+  useODFNamespaceSelector,
+  // SAFETY: The deps wrapper delegates to useParams; the cast preserves the generic signature for test spying.
+  useParams: useParams as typeof useParams,
+  // SAFETY: The deps wrapper delegates to useNavigate; the cast preserves the concrete return type for test spying.
+  useNavigate: useNavigate as typeof useNavigate,
+};
+
 const CreateNamespaceStore: React.FC<{}> = () => {
   const { t } = useCustomTranslation();
 
-  const { odfNamespace } = useODFNamespaceSelector();
+  const { odfNamespace } = createNamespaceStoreDeps.useODFNamespaceSelector();
 
-  const { ns } = useParams();
+  const { ns } = createNamespaceStoreDeps.useParams();
   const namespace = ns || odfNamespace;
 
-  const navigate = useNavigate();
+  const navigate = createNamespaceStoreDeps.useNavigate();
   const onCancel = () => navigate(-1);
 
   return (
@@ -37,7 +47,7 @@ const CreateNamespaceStore: React.FC<{}> = () => {
           )}
         </p>
       </div>
-      <NamespaceStoreForm
+      <createNamespaceStoreDeps.NamespaceStoreForm
         onCancel={onCancel}
         redirectHandler={(resources) => {
           const lastIndex = resources.length - 1;

@@ -1,13 +1,12 @@
 import * as React from 'react';
-import * as TestDependency2 from '@odf/shared/status/icons';
 import { HealthState } from '@openshift-console/dynamic-plugin-sdk';
 import { render } from '@testing-library/react';
-import * as TestDependency1 from '@patternfly/react-icons';
 import {
   csvStatusMap,
   healthStateMap,
   healthStateMapping,
   healthStateMessage,
+  statesDependencies,
 } from './states';
 
 const mockGreenCheckCircleIcon = jest.fn((_unused) => {
@@ -32,25 +31,25 @@ const mockRedExclamationCircleIcon = jest.fn((_unused) => {
   return <div id="red-exclamation-circle-icon-mocked" />;
 });
 jest
-  .spyOn(TestDependency1, 'InProgressIcon')
+  .spyOn(statesDependencies, 'InProgressIcon')
   .mockImplementation((props) => mockInProgressIcon(props));
 jest
-  .spyOn(TestDependency2, 'GreenCheckCircleIcon')
+  .spyOn(statesDependencies, 'GreenCheckCircleIcon')
   .mockImplementation((props) => mockGreenCheckCircleIcon(props));
 jest
-  .spyOn(TestDependency2, 'GrayUnknownIcon')
+  .spyOn(statesDependencies, 'GrayUnknownIcon')
   .mockImplementation((props) => mockGreyUnknownIcon(props));
 jest
-  .spyOn(TestDependency2, 'BlueSyncIcon')
+  .spyOn(statesDependencies, 'BlueSyncIcon')
   .mockImplementation((props) => mockBlueSyncIcon(props));
 jest
-  .spyOn(TestDependency2, 'BlueArrowCircleUpIcon')
+  .spyOn(statesDependencies, 'BlueArrowCircleUpIcon')
   .mockImplementation((props) => mockBlueArrowCircleUpIcon(props));
 jest
-  .spyOn(TestDependency2, 'YellowExclamationTriangleIcon')
+  .spyOn(statesDependencies, 'YellowExclamationTriangleIcon')
   .mockImplementation((props) => mockYellowExclamationTriangleIcon(props));
 jest
-  .spyOn(TestDependency2, 'RedExclamationCircleIcon')
+  .spyOn(statesDependencies, 'RedExclamationCircleIcon')
   .mockImplementation((props) => mockRedExclamationCircleIcon(props));
 
 const mockedTFunction = jest.fn().mockImplementation((props) => props);

@@ -27,6 +27,18 @@ import {
   getRGWHealthState,
 } from '../utils';
 
+export const useOcsHealthDeps = {
+  useK8sWatchResource: (
+    ...args: Parameters<typeof useK8sWatchResource>
+  ): ReturnType<typeof useK8sWatchResource> => useK8sWatchResource(...args),
+  useCustomPrometheusPoll,
+  usePrometheusBasePath,
+  useCustomTranslation,
+  getCephHealthState,
+  getRGWHealthState,
+  getNooBaaState,
+};
+
 const cephClusterResource: WatchK8sResource = {
   kind: referenceForModel(CephClusterModel),
   isList: true,
@@ -54,21 +66,36 @@ const AcceptableHealthStates = [
 ];
 
 export const useGetOCSHealth: UseGetOCSHealth = (storageCluster) => {
-  const { t } = useCustomTranslation();
+  const { t } = useOcsHealthDeps.useCustomTranslation();
 
+  // SAFETY: cephClusterResource specifies isList:true; useK8sWatchResource returns [K8sResourceKind[], boolean, any] for list watches.
   const [cephData, cephLoaded, cephLoadError] =
-    useK8sWatchResource<K8sResourceKind[]>(cephClusterResource);
-  const [cephObjData, cephObjLoaded, cephObjLoadError] = useK8sWatchResource<
-    K8sResourceKind[]
-  >(cephObjectStoreResource);
+    useOcsHealthDeps.useK8sWatchResource(cephClusterResource) as [
+      K8sResourceKind[],
+      boolean,
+      any,
+    ];
+  // SAFETY: cephObjectStoreResource specifies isList:true; useK8sWatchResource returns [K8sResourceKind[], boolean, any] for list watches.
+  const [cephObjData, cephObjLoaded, cephObjLoadError] =
+    useOcsHealthDeps.useK8sWatchResource(cephObjectStoreResource) as [
+      K8sResourceKind[],
+      boolean,
+      any,
+    ];
+  // SAFETY: noobaaResource specifies isList:true; useK8sWatchResource returns [K8sResourceKind[], boolean, any] for list watches.
   const [noobaaData, noobaaLoaded, noobaaLoadError] =
-    useK8sWatchResource<K8sResourceKind[]>(noobaaResource);
+    useOcsHealthDeps.useK8sWatchResource(noobaaResource) as [
+      K8sResourceKind[],
+      boolean,
+      any,
+    ];
 
-  const [noobaaHealthStatus, noobaaQueryLoadError] = useCustomPrometheusPoll({
-    query: HEALTH_QUERY[Health.NOOBAA],
-    endpoint: PrometheusEndpoint.QUERY,
-    basePath: usePrometheusBasePath(),
-  });
+  const [noobaaHealthStatus, noobaaQueryLoadError] =
+    useOcsHealthDeps.useCustomPrometheusPoll({
+      query: HEALTH_QUERY[Health.NOOBAA],
+      endpoint: PrometheusEndpoint.QUERY,
+      basePath: useOcsHealthDeps.usePrometheusBasePath(),
+    });
 
   return React.useMemo(() => {
     // Check if any required resources are still loading (not loaded and no error)
@@ -121,7 +148,7 @@ export const useGetOCSHealth: UseGetOCSHealth = (storageCluster) => {
       (noobaa) => getNamespace(noobaa) === systemNamespace
     );
 
-    const cephHealthState = getCephHealthState(
+    const cephHealthState = useOcsHealthDeps.getCephHealthState(
       {
         ceph: {
           data: cephCluster,
@@ -134,13 +161,13 @@ export const useGetOCSHealth: UseGetOCSHealth = (storageCluster) => {
 
     const interimRGWState =
       !cephObjLoadError && cephObjLoaded
-        ? getRGWHealthState(cephObjectStore).state
+        ? useOcsHealthDeps.getRGWHealthState(cephObjectStore).state
         : NA;
 
     // there will only be single NooBaa instance (even for multiple StorageSystems)
     // and its status should only be linked with the corresponding StorageSystem/StorageCluster.
     const interimMCGState = !_.isEmpty(noobaaCluster)
-      ? getNooBaaState(
+      ? useOcsHealthDeps.getNooBaaState(
           [
             {
               response: noobaaHealthStatus,

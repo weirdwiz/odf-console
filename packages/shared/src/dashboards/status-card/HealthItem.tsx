@@ -6,6 +6,19 @@ import { Button, Popover, PopoverPosition } from '@patternfly/react-core';
 import { useCustomTranslation } from '../../useCustomTranslationHook';
 import { healthStateMapping, healthStateMessage } from './states';
 
+export const healthItemDependencies = {
+  classNames,
+  SecondaryStatus: (props: React.ComponentProps<typeof SecondaryStatus>) => (
+    <SecondaryStatus {...props} />
+  ),
+  Popover: (props: React.ComponentProps<typeof Popover>) => (
+    <Popover {...props} />
+  ),
+  Button: (props: React.ComponentProps<typeof Button>) => <Button {...props} />,
+  healthStateMapping,
+  healthStateMessage,
+};
+
 export type HealthItemProps = {
   className?: string;
   title: string;
@@ -23,8 +36,10 @@ export type HealthItemProps = {
 const HealthItemIcon: React.FC<HealthItemIconProps> = ({ state, dataTest }) => (
   <div data-test={dataTest} className="co-dashboard-icon">
     {
-      (healthStateMapping[state] || healthStateMapping[HealthState.UNKNOWN])
-        .icon
+      (
+        healthItemDependencies.healthStateMapping[state] ||
+        healthItemDependencies.healthStateMapping[HealthState.UNKNOWN]
+      ).icon
     }
   </div>
 );
@@ -47,12 +62,15 @@ const HealthItem: React.FC<HealthItemProps> = React.memo(
     const { t } = useCustomTranslation();
 
     const detailMessage = !disableDetails
-      ? details || healthStateMessage(state, t)
+      ? details || healthItemDependencies.healthStateMessage(state, t)
       : '';
 
     return (
       <div
-        className={classNames('co-status-card__health-item', className)}
+        className={healthItemDependencies.classNames(
+          'co-status-card__health-item',
+          className
+        )}
         data-item-id={`${title}-health-item`}
       >
         {state === HealthState.LOADING ? (
@@ -75,24 +93,24 @@ const HealthItem: React.FC<HealthItemProps> = React.memo(
             {(React.Children.toArray(children).length || onClick) &&
             state !== HealthState.LOADING ? (
               !onClick ? (
-                <Popover
+                <healthItemDependencies.Popover
                   position={PopoverPosition.top}
                   headerContent={popupTitle}
                   bodyContent={children}
                   enableFlip
                   maxWidth={maxWidth || '21rem'}
                 >
-                  <Button
+                  <healthItemDependencies.Button
                     variant="link"
                     isInline
                     className="co-status-card__popup"
                     data-test="health-popover-link"
                   >
                     {title}
-                  </Button>
-                </Popover>
+                  </healthItemDependencies.Button>
+                </healthItemDependencies.Popover>
               ) : (
-                <Button
+                <healthItemDependencies.Button
                   variant="link"
                   isInline
                   className="co-status-card__popup"
@@ -100,14 +118,14 @@ const HealthItem: React.FC<HealthItemProps> = React.memo(
                   onClick={onClick}
                 >
                   {title}
-                </Button>
+                </healthItemDependencies.Button>
               )
             ) : (
               title
             )}
           </span>
           {state !== HealthState.LOADING && detailMessage && (
-            <SecondaryStatus
+            <healthItemDependencies.SecondaryStatus
               status={detailMessage}
               className="co-status-card__health-item-text"
               dataStatusID={`${title}-secondary-status`}

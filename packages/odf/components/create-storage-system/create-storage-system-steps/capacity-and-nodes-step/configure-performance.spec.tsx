@@ -1,16 +1,19 @@
 import * as React from 'react';
 import { createWizardNodeState } from '@odf/core/components/utils';
-import { useNodesData } from '@odf/core/hooks';
-import * as TestDependency1 from '@odf/core/hooks';
 import { ResourceProfile } from '@odf/core/types';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { createFakeNodesData } from '../../../../../../jest/helpers';
 import ConfigurePerformance, {
   ProfileRequirementsText,
+  configurePerformanceDeps,
 } from './configure-performance';
 
-jest.spyOn(TestDependency1, 'useNodesData').mockImplementation(jest.fn());
+jest
+  .spyOn(configurePerformanceDeps, 'useNodesData')
+  .mockImplementation(jest.fn());
+
+const useNodesData = configurePerformanceDeps.useNodesData;
 
 const onResourceProfileChange = jest.fn();
 
@@ -40,7 +43,7 @@ describe('Configure Performance', () => {
     const dropdown = screen.getByRole('button', {
       name: /select a performance mode from the list/i,
     });
-    expect(dropdown).toHaveTextContent('{{mode}} mode');
+    expect(dropdown).toHaveTextContent('Balanced mode');
 
     const errorIcon = container.querySelector(errorIconSelector);
     expect(errorIcon).toBeFalsy();
@@ -89,7 +92,7 @@ describe('Configure Performance', () => {
     const dropdown = screen.getByRole('button', {
       name: /select a performance mode from the list/i,
     });
-    expect(dropdown).toHaveTextContent('{{mode}} mode');
+    expect(dropdown).toHaveTextContent('Performance mode');
 
     const errorIcon = container.querySelector(errorIconSelector);
     expect(errorIcon).toBeVisible();
@@ -116,7 +119,7 @@ describe('Configure Performance', () => {
     const dropdown = screen.getByRole('button', {
       name: /select a performance mode from the list/i,
     });
-    expect(dropdown).toHaveTextContent('{{mode}} mode');
+    expect(dropdown).toHaveTextContent('Balanced mode');
     expect(screen.getByText(/42 CPUs/i)).toBeInTheDocument();
     expect(screen.getByText(/102 GiB/i)).toBeInTheDocument();
   });

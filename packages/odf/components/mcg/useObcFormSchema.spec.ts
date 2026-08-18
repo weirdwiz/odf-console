@@ -1,15 +1,12 @@
 import { NOOBAA_PROVISIONER } from '@odf/shared/constants';
-import * as TestDependency2 from '@odf/shared/hooks/useK8sList';
-import * as selectors from '@odf/shared/selectors';
-import * as TestDependency1 from '@odf/shared/selectors';
 import { renderHook } from '@testing-library/react';
 import { State } from './state';
-import useObcFormSchema from './useObcFormSchema';
+import useObcFormSchema, { useObcFormSchemaDeps } from './useObcFormSchema';
 
 jest
-  .spyOn(TestDependency1, 'getName')
+  .spyOn(useObcFormSchemaDeps, 'getName')
   .mockImplementation(jest.fn().mockReturnValue('test'));
-jest.spyOn(TestDependency2, 'useK8sList').mockImplementation(() => [
+jest.spyOn(useObcFormSchemaDeps, 'useK8sList').mockImplementation(() => [
   [
     {
       metadata: {
@@ -48,7 +45,7 @@ describe('useObcFormSchema tests', () => {
   it('should return error "Cannot be used before within the same namespace"', async () => {
     const obcName = 'test';
     const expected = 'Cannot be used before within the same namespace';
-    const spy = jest.spyOn(selectors, 'getName');
+    const spy = jest.spyOn(useObcFormSchemaDeps, 'getName');
     const { result } = renderHook(() =>
       useObcFormSchema(defaultNs, defaultState)
     );
@@ -63,8 +60,8 @@ describe('useObcFormSchema tests', () => {
 
   it('should return error "No more than 253 characters"', async () => {
     const obcName = new Array(254).fill('a').join('');
-    const expected = 'No more than {{max}} characters';
-    const spy = jest.spyOn(selectors, 'getName');
+    const expected = 'No more than 253 characters';
+    const spy = jest.spyOn(useObcFormSchemaDeps, 'getName');
     const { result } = renderHook(() =>
       useObcFormSchema(defaultNs, defaultState)
     );
@@ -80,7 +77,7 @@ describe('useObcFormSchema tests', () => {
   it('should return error "Starts and ends with a lowercase letter or number"', async () => {
     const obcName = '.invalid-name-';
     const expected = 'Starts and ends with a lowercase letter or number';
-    const spy = jest.spyOn(selectors, 'getName');
+    const spy = jest.spyOn(useObcFormSchemaDeps, 'getName');
     const { result } = renderHook(() =>
       useObcFormSchema(defaultNs, defaultState)
     );
@@ -97,7 +94,7 @@ describe('useObcFormSchema tests', () => {
     const obcName = 'invalid---name09';
     const expected =
       'Only lowercase letters, numbers, non-consecutive periods, or hyphens';
-    const spy = jest.spyOn(selectors, 'getName');
+    const spy = jest.spyOn(useObcFormSchemaDeps, 'getName');
     const { result } = renderHook(() =>
       useObcFormSchema(defaultNs, defaultState)
     );
@@ -113,7 +110,7 @@ describe('useObcFormSchema tests', () => {
   it('should pass validation on empty obc name input', async () => {
     const obcName = '';
     const expected = {};
-    const spy = jest.spyOn(selectors, 'getName');
+    const spy = jest.spyOn(useObcFormSchemaDeps, 'getName');
     const { result } = renderHook(() =>
       useObcFormSchema(defaultNs, defaultState)
     );
@@ -128,7 +125,7 @@ describe('useObcFormSchema tests', () => {
   it('should pass validation on valid obc name input', async () => {
     const obcName = 'valid-name';
     const expected = { obcName };
-    const spy = jest.spyOn(selectors, 'getName');
+    const spy = jest.spyOn(useObcFormSchemaDeps, 'getName');
     const { result } = renderHook(() =>
       useObcFormSchema(defaultNs, defaultState)
     );
@@ -143,7 +140,7 @@ describe('useObcFormSchema tests', () => {
   it('should pass validation on max of 253 chars', async () => {
     const obcName = new Array(253).fill('a').join('');
     const expected = { obcName };
-    const spy = jest.spyOn(selectors, 'getName');
+    const spy = jest.spyOn(useObcFormSchemaDeps, 'getName');
     const { result } = renderHook(() =>
       useObcFormSchema(defaultNs, defaultState)
     );
@@ -158,7 +155,7 @@ describe('useObcFormSchema tests', () => {
   it('should return error "sc-dropdown is a required field"', async () => {
     const obcName = 'valid-name';
     const expected = 'sc-dropdown is a required field';
-    const spy = jest.spyOn(selectors, 'getName');
+    const spy = jest.spyOn(useObcFormSchemaDeps, 'getName');
     const { result } = renderHook(() =>
       useObcFormSchema(defaultNs, defaultState)
     );
@@ -174,7 +171,7 @@ describe('useObcFormSchema tests', () => {
   it('should return error "bucketclass is a required field"', async () => {
     const obcName = 'valid-name';
     const expected = 'bucketclass is a required field';
-    const spy = jest.spyOn(selectors, 'getName');
+    const spy = jest.spyOn(useObcFormSchemaDeps, 'getName');
     const { result } = renderHook(() =>
       useObcFormSchema(
         defaultNs,
