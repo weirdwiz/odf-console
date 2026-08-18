@@ -1,10 +1,21 @@
-import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  K8sResourceCommon,
+  K8sResourceKind as ConsoleK8sResourceKind,
+} from '@openshift-console/dynamic-plugin-sdk';
 import {
   K8sKind,
   MatchExpression,
 } from '@openshift-console/dynamic-plugin-sdk/lib/api/common-types';
 import { ObjectMetadata } from '@openshift-console/dynamic-plugin-sdk-internal/lib/extensions/console-types';
 import { K8sResourceCondition } from './common';
+
+export type K8sResourceValue =
+  | string
+  | number
+  | boolean
+  | null
+  | K8sResourceValue[]
+  | { [key: string]: K8sResourceValue };
 
 // The config is a JSON object with the NetworkAttachmentDefinitionConfig type stored as a string
 export type NetworkAttachmentDefinitionSpec = {
@@ -25,14 +36,7 @@ export type StorageClassResourceKind = {
   };
 } & K8sResourceCommon;
 
-export type K8sResourceKind = K8sResourceCommon & {
-  spec?: {
-    selector?: Selector | MatchLabels;
-    [key: string]: any;
-  };
-  status?: { [key: string]: any };
-  data?: { [key: string]: any };
-};
+export type K8sResourceKind = ConsoleK8sResourceKind;
 
 export type MachineConfigNodeKind = K8sResourceCommon & {
   status?: {
@@ -270,12 +274,15 @@ type ContainerSpec = {
   };
   ports?: ContainerPort[];
   imagePullPolicy?: ImagePullPolicy;
-  [key: string]: any;
+  [key: string]: K8sResourceValue;
 };
 
 type Volume = {
   name: string;
-  [key: string]: any;
+  persistentVolumeClaim?: {
+    claimName: string;
+  };
+  [key: string]: K8sResourceValue;
 };
 
 type PodSpec = {
@@ -285,13 +292,13 @@ type PodSpec = {
   restartPolicy?: 'Always' | 'OnFailure' | 'Never';
   terminationGracePeriodSeconds?: number;
   activeDeadlineSeconds?: number;
-  nodeSelector?: any;
+  nodeSelector?: Record<string, string>;
   serviceAccountName?: string;
   priorityClassName?: string;
   tolerations?: Toleration[];
   nodeName?: string;
   hostname?: string;
-  [key: string]: any;
+  [key: string]: K8sResourceValue;
 };
 
 type PodTemplate = {
@@ -305,18 +312,19 @@ type PodCondition = {
 
 type PodStatus = {
   phase: keyof typeof PodPhase;
+  podIP?: string;
   conditions?: PodCondition[];
   message?: string;
   reason?: string;
   startTime?: string;
   initContainerStatuses?: ContainerStatus[];
   containerStatuses?: ContainerStatus[];
-  [key: string]: any;
+  [key: string]: K8sResourceValue;
 };
 
 type ContainerStateValue = {
   reason?: string;
-  [key: string]: any;
+  [key: string]: K8sResourceValue;
 };
 
 type ContainerState = {

@@ -11,7 +11,11 @@ import { ButtonBar } from '@odf/shared/generic/ButtonBar';
 import { TextInputWithFieldRequirements } from '@odf/shared/input-with-requirements';
 import { PersistentVolumeClaimModel, SecretModel } from '@odf/shared/models';
 import { getName } from '@odf/shared/selectors';
-import { PersistentVolumeClaimKind, SecretKind } from '@odf/shared/types';
+import {
+  K8sResourceValue,
+  PersistentVolumeClaimKind,
+  SecretKind,
+} from '@odf/shared/types';
 import { useCustomTranslation } from '@odf/shared/useCustomTranslationHook';
 import validationRegEx from '@odf/shared/utils/validation';
 import { useYupValidationResolver } from '@odf/shared/yup-validation-resolver';
@@ -20,7 +24,9 @@ import {
   k8sCreate,
   K8sResourceCommon,
 } from '@openshift-console/dynamic-plugin-sdk';
+import { K8sKind } from '@openshift-console/dynamic-plugin-sdk/lib/api/common-types';
 import classNames from 'classnames';
+import { isObject } from 'lodash-es';
 import { useForm } from 'react-hook-form';
 import * as Yup from 'yup';
 import {
@@ -63,9 +69,20 @@ const externalProviders = getExternalProviders(StoreType.NS);
 type Payload = K8sResourceCommon & {
   spec: {
     type: string;
-    [key: string]: any;
+    [key: string]: K8sResourceValue;
   };
 };
+
+const getProviderPayload = (value: K8sResourceValue) =>
+  isObject(value) && !Array.isArray(value) ? value : {};
+
+type NamespaceStoreListHook = (
+  kind: K8sKind,
+  namespace?: string
+) => [NamespaceStoreKind[], boolean, unknown];
+
+const useNamespaceStoreList: NamespaceStoreListHook = (kind, namespace) =>
+  useSafeK8sList<NamespaceStoreKind>(kind, namespace);
 
 type NamespaceStoreFormProps = {
   redirectHandler: (resources?: (NamespaceStoreKind | SecretKind)[]) => void;
@@ -75,6 +92,9 @@ type NamespaceStoreFormProps = {
   /** Vector BucketClass flow: Provider dropdown lists Filesystem only. */
   isVector?: boolean;
   isDeepArchive?: boolean;
+  namespaceStoreListHook?: NamespaceStoreListHook;
+  SafetyBoxComponent?: React.ComponentType<React.PropsWithChildren>;
+  EndpointComponent?: typeof S3EndPointType;
 };
 
 const createSecret = async (
@@ -95,10 +115,10 @@ const createSecret = async (
     secretKey
   );
   try {
-    createdSecret = (await k8sCreate({
+    createdSecret = await k8sCreate<SecretKind>({
       model: SecretModel,
       data: secretPayload,
-    })) as SecretKind;
+    });
   } catch {
     secretName = dataSourceName.concat('-');
     const newSecretPayload = {
@@ -108,10 +128,10 @@ const createSecret = async (
         namespace: secretPayload.metadata.namespace,
       },
     };
-    createdSecret = (await k8sCreate({
+    createdSecret = await k8sCreate<SecretKind>({
       model: SecretModel,
       data: newSecretPayload,
-    })) as SecretKind;
+    });
   } finally {
     secretName = createdSecret?.metadata?.name;
     providerDataDispatch({ type: 'setSecretName', value: secretName });
@@ -137,6 +157,9 @@ const NamespaceStoreForm: React.FC<NamespaceStoreFormProps> = (props) => {
     namespace,
     isVector,
     isDeepArchive,
+    namespaceStoreListHook = useNamespaceStoreList,
+    SafetyBoxComponent = NamespaceSafetyBox,
+    EndpointComponent = S3EndPointType,
   } = props;
 
   // If archive is pre-selected (from BucketClass wizard), it's fixed to true
@@ -153,7 +176,7 @@ const NamespaceStoreForm: React.FC<NamespaceStoreFormProps> = (props) => {
     [isVector]
   );
 
-  const [data, loaded, loadError] = useSafeK8sList<NamespaceStoreKind>(
+  const [data, loaded, loadError] = namespaceStoreListHook(
     NooBaaNamespaceStoreModel,
     namespace
   );
@@ -241,7 +264,7 @@ const NamespaceStoreForm: React.FC<NamespaceStoreFormProps> = (props) => {
       }
       /** Payload for nss */
       const nssPayload: Payload = {
-        apiVersion: getAPIVersionForModel(NooBaaNamespaceStoreModel as any),
+        apiVersion: getAPIVersionForModel(NooBaaNamespaceStoreModel),
         kind: NooBaaNamespaceStoreModel.kind,
         metadata: {
           namespace,
@@ -267,25 +290,25 @@ const NamespaceStoreForm: React.FC<NamespaceStoreFormProps> = (props) => {
       switch (provider) {
         case StoreProviders.S3:
           nssPayload.spec.s3Compatible = {
-            ...nssPayload.spec.s3Compatible,
+            ...getProviderPayload(nssPayload.spec.s3Compatible),
             endpoint: providerDataState.endpoint,
           };
           break;
         case StoreProviders.IBM:
           nssPayload.spec.ibmCos = {
-            ...nssPayload.spec.ibmCos,
+            ...getProviderPayload(nssPayload.spec.ibmCos),
             endpoint: providerDataState.endpoint,
           };
           break;
         case StoreProviders.AWS:
           nssPayload.spec.awsS3 = {
-            ...nssPayload.spec.awsS3,
+            ...getProviderPayload(nssPayload.spec.awsS3),
             region: providerDataState.region,
           };
           break;
         case StoreProviders.FILESYSTEM:
           nssPayload.spec.nsfs = {
-            ...nssPayload.spec.nsfs,
+            ...getProviderPayload(nssPayload.spec.nsfs),
             pvcName: getName(pvc),
             subPath: folderName,
           };
@@ -305,7 +328,7 @@ const NamespaceStoreForm: React.FC<NamespaceStoreFormProps> = (props) => {
   };
 
   return (
-    <NamespaceSafetyBox>
+    <SafetyBoxComponent>
       <Form
         className={classNames(
           'nb-endpoints-form',
@@ -388,7 +411,7 @@ const NamespaceStoreForm: React.FC<NamespaceStoreFormProps> = (props) => {
           provider === StoreProviders.S3 ||
           provider === StoreProviders.IBM ||
           provider === StoreProviders.AZURE) && (
-          <S3EndPointType
+          <EndpointComponent
             showSecret={showSecret}
             setShowSecret={setShowSecret}
             control={control}
@@ -477,7 +500,7 @@ const NamespaceStoreForm: React.FC<NamespaceStoreFormProps> = (props) => {
           </ActionGroup>
         </ButtonBar>
       </Form>
-    </NamespaceSafetyBox>
+    </SafetyBoxComponent>
   );
 };
 

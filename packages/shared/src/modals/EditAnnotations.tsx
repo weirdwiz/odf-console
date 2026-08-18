@@ -64,12 +64,13 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
         value: _.fromPairs(usedTags),
       },
     ];
-    k8sPatch({
-      model: resourceModel,
-      resource,
-      data: patch,
-      ...(!!cluster ? { cluster } : {}),
-    })
+    k8sPatch(
+      (() => {
+        const value = { model: resourceModel, resource, data: patch };
+        if (!!cluster) Object.assign(value, { cluster });
+        return value;
+      })()
+    )
       .then(() => {
         closeModal();
       })

@@ -77,7 +77,7 @@ export const dispatchSuccess = (
 };
 
 export const checkErrors = (
-  errorMessages: Record<string, any> = {},
+  errorMessages: Record<string, Record<never, never>> = {},
   errorsDispatched: string[],
   isDirty: boolean,
   dispatch: Dispatch

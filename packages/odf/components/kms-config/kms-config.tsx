@@ -104,6 +104,7 @@ export const KMSConfigure: React.FC<KMSConfigureProps> = ({
     </MenuToggle>
   );
 
+  // SAFETY: value comes from the owner of the ProviderNames contract used at this boundary.
   return (
     <div className="ocs-storage-class-encryption__form-dropdown--padding">
       {!isWizardFlow && (

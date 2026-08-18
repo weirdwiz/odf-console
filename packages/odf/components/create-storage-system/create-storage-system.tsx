@@ -158,8 +158,7 @@ const CreateStorageSystem: React.FC<CreateStorageSystemProps> = ({
     if (extensionsResolved) {
       return [
         ...EXTERNAL_CEPH_STORAGE,
-        ...((extensions?.map((vendor) => vendor.properties) ??
-          []) as unknown as ExternalStorage[]),
+        ...(extensions?.map((vendor) => vendor.properties) ?? []),
       ];
     }
     return EXTERNAL_CEPH_STORAGE;
@@ -290,7 +289,7 @@ const CreateStorageSystemWtihLoader: React.FC = () => {
 
   return (
     <>
-      <CreateStorageSystemHeader state={{} as any} />
+      <CreateStorageSystemHeader />
       {isLoading ? (
         <EmptyState
           icon={Spinner}

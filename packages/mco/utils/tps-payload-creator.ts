@@ -9,7 +9,6 @@ import { createOrUpdate } from '@odf/shared/utils/k8s';
 import {
   k8sDelete,
   k8sGet,
-  K8sModel,
   K8sResourceCommon,
   K8sResourceKind,
   k8sUpdate,
@@ -34,6 +33,63 @@ import {
   type S3Details,
 } from '../types';
 
+type ConfigMapKind = K8sResourceCommon & { data?: Record<string, string> };
+
+interface YAMLDocument {
+  toString: () => string;
+}
+
+const isS3StoreProfile = (
+  value: YAMLDocument
+): value is YAMLDocument & S3StoreProfile =>
+  value instanceof Object &&
+  's3ProfileName' in value &&
+  _.isString(value.s3ProfileName) &&
+  's3Bucket' in value &&
+  _.isString(value.s3Bucket) &&
+  's3Region' in value &&
+  _.isString(value.s3Region) &&
+  's3CompatibleEndpoint' in value &&
+  _.isString(value.s3CompatibleEndpoint) &&
+  's3SecretRef' in value &&
+  value.s3SecretRef instanceof Object &&
+  'name' in value.s3SecretRef &&
+  _.isString(value.s3SecretRef.name) &&
+  (!('namespace' in value.s3SecretRef) ||
+    value.s3SecretRef.namespace === undefined ||
+    _.isString(value.s3SecretRef.namespace));
+
+const isRamenConfig = (
+  value: YAMLDocument
+): value is YAMLDocument & RamenConfig =>
+  value instanceof Object &&
+  's3StoreProfiles' in value &&
+  Array.isArray(value.s3StoreProfiles) &&
+  value.s3StoreProfiles.every(
+    (profile: YAMLDocument) =>
+      profile instanceof Object && isS3StoreProfile(profile)
+  ) &&
+  (!('retainNamespaceSCCAcrossPeers' in value) ||
+    value.retainNamespaceSCCAcrossPeers === undefined ||
+    _.isBoolean(value.retainNamespaceSCCAcrossPeers));
+
+const parseRamenConfig = (raw: string): RamenConfig => {
+  const value = yaml.load(raw);
+  if (value == null) {
+    return { s3StoreProfiles: [] };
+  }
+  if (!(value instanceof Object)) {
+    throw new Error('Ramen configuration has an invalid shape');
+  }
+  if (!('s3StoreProfiles' in value)) {
+    Object.assign(value, { s3StoreProfiles: [] });
+  }
+  if (!isRamenConfig(value)) {
+    throw new Error('Ramen configuration has an invalid shape');
+  }
+  return value;
+};
+
 export function murmur32Hex(str: string, seed = 0): string {
   const h = murmur3(str, seed);
   return h.toString(16).padStart(8, '0');
@@ -42,19 +98,17 @@ export function murmur32Hex(str: string, seed = 0): string {
 export async function fetchRamenS3Profiles(
   namespace: string = ODFMCO_OPERATOR_NAMESPACE
 ): Promise<S3StoreProfile[]> {
-  let cm: K8sResourceCommon & { data?: Record<string, string> };
+  let cm: ConfigMapKind;
 
   try {
-    cm = (await k8sGet({
-      model: ConfigMapModel as K8sModel,
+    cm = await k8sGet<ConfigMapKind>({
+      model: ConfigMapModel,
       name: RAMEN_HUB_OPERATOR_CONFIG_NAME,
       ns: namespace,
-    })) as K8sResourceCommon & { data?: Record<string, string> };
-  } catch (err: any) {
+    });
+  } catch (error: unknown) {
     throw new Error(
-      `Failed to fetch ConfigMap ${RAMEN_HUB_OPERATOR_CONFIG_NAME} in namespace ${namespace}: ${
-        err?.message || JSON.stringify(err)
-      }`
+      `Failed to fetch ConfigMap ${RAMEN_HUB_OPERATOR_CONFIG_NAME} in namespace ${namespace}: ${error instanceof Error ? error.message : JSON.stringify(error)}`
     );
   }
 
@@ -67,12 +121,10 @@ export async function fetchRamenS3Profiles(
 
   let ramenConfig: RamenConfig;
   try {
-    ramenConfig = (yaml.load(raw) || {}) as RamenConfig;
-  } catch (err: any) {
+    ramenConfig = parseRamenConfig(raw);
+  } catch (error: unknown) {
     throw new Error(
-      `Failed to parse YAML from ConfigMap ${RAMEN_HUB_OPERATOR_CONFIG_NAME}: ${
-        err?.message || JSON.stringify(err)
-      }`
+      `Failed to parse YAML from ConfigMap ${RAMEN_HUB_OPERATOR_CONFIG_NAME}: ${error instanceof Error ? error.message : JSON.stringify(error)}`
     );
   }
 
@@ -129,11 +181,11 @@ async function attemptConfigMapUpdate(
   profile: S3StoreProfile,
   remove: boolean
 ): Promise<K8sResourceCommon> {
-  const cm = (await k8sGet({
-    model: ConfigMapModel as K8sModel,
+  const cm = await k8sGet<ConfigMapKind>({
+    model: ConfigMapModel,
     name: RAMEN_HUB_OPERATOR_CONFIG_NAME,
     ns: namespace,
-  })) as K8sResourceCommon & { data?: Record<string, string> };
+  });
 
   const raw = cm.data?.[RAMEN_CONFIG_KEY];
   if (!raw) {
@@ -146,8 +198,7 @@ async function attemptConfigMapUpdate(
     );
   }
 
-  const ramenConfig = (yaml.load(raw) || {}) as RamenConfig;
-  ramenConfig.s3StoreProfiles = ramenConfig.s3StoreProfiles || [];
+  const ramenConfig = parseRamenConfig(raw);
 
   const idx = ramenConfig.s3StoreProfiles.findIndex(
     (p) => p.s3ProfileName === profile.s3ProfileName
@@ -177,10 +228,10 @@ async function attemptConfigMapUpdate(
     },
   };
 
-  return (await k8sUpdate({
-    model: ConfigMapModel as K8sModel,
+  return k8sUpdate<ConfigMapKind>({
+    model: ConfigMapModel,
     data: updatedCm,
-  })) as K8sResourceCommon;
+  });
 }
 
 export function deleteDRCluster(name: string): Promise<K8sResourceKind> {
@@ -190,10 +241,10 @@ export function deleteDRCluster(name: string): Promise<K8sResourceKind> {
     metadata: { name },
     spec: { s3ProfileName: '' },
   };
-  return k8sDelete({
+  return k8sDelete<DRClusterKind>({
     model: DRClusterModel,
     resource: drCluster,
-  }) as Promise<K8sResourceKind>;
+  });
 }
 
 export function createDRCluster(params: {

@@ -23,7 +23,12 @@ const convertToPolicyInfo = (policy?: DRPolicyType): PolicyInfo =>
         schedulingInterval: policy?.schedulingInterval || '0m',
         isValidated: !!policy?.isValidated,
       }
-    : ({} as PolicyInfo);
+    : {
+        name: '',
+        drClusters: [],
+        schedulingInterval: '0m',
+        isValidated: false,
+      };
 
 export const ReplicationTypeWizardContent: React.FC<
   ReplicationTypeWizardContentProps

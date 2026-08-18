@@ -48,6 +48,7 @@ export const generateDataFrames = (
   width?: number
 ): DataFrame[] => {
   if (_.isEmpty(systems) || !ld || !td || !id) {
+    // SAFETY: [] contains only entries produced for the DataFrame[] contract.
     return [] as DataFrame[];
   }
   return systems.reduce<DataFrame[]>((acc, curr) => {

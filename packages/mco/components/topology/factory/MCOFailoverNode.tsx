@@ -1,6 +1,7 @@
 import * as React from 'react';
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
 import { ExclamationCircleIcon, SyncAltIcon } from '@patternfly/react-icons';
+import * as PatternflyTopology from '@patternfly/react-topology';
 import {
   DEFAULT_DECORATOR_PADDING,
   DEFAULT_DECORATOR_RADIUS,
@@ -10,7 +11,6 @@ import {
   NodeModel,
   NodeStatus,
   TopologyQuadrant,
-  getDefaultShapeDecoratorCenter,
   observer,
   ScaleDetailsLevel,
   WithSelectionProps,
@@ -20,6 +20,9 @@ import { getDRStatus, isUserActionRequired } from '../../../utils/dr-status';
 import { FailoverNodeData } from '../types';
 import { getDRNodeStatus } from '../utils/sidebar-utils';
 import '../utils/decorator-utils.scss';
+
+const getDefaultDecoratorCenter =
+  PatternflyTopology['getDefaultShapeDecoratorCenter'];
 
 type MCOFailoverNodeProps = {
   element: Node<NodeModel, FailoverNodeData>;
@@ -75,7 +78,7 @@ const renderCountDecorator = (
   element: Node<NodeModel, FailoverNodeData>,
   count: number
 ): React.ReactNode => {
-  const { x, y } = getDefaultShapeDecoratorCenter(
+  const { x, y } = getDefaultDecoratorCenter(
     TopologyQuadrant.upperRight,
     element
   );

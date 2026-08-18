@@ -11,8 +11,8 @@ export type ModalMap = {
   [key: string]: React.LazyExoticComponent<any>;
 };
 
-export const defaultModalMap: ModalMap = {
+export const defaultModalMap = {
   [ModalKeys.DELETE]: React.lazy(() => import('./DeleteModal')),
   [ModalKeys.EDIT_ANN]: React.lazy(() => import('./EditAnnotations')),
   [ModalKeys.EDIT_LABELS]: React.lazy(() => import('./EditLabelModal')),
-};
+} satisfies ModalMap;

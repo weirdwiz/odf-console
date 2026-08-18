@@ -52,9 +52,7 @@ export const healthStateMessage = (
   }
 };
 
-export const healthStateMapping: {
-  [key in HealthState]: HealthStateMappingValues;
-} = {
+export const healthStateMapping = {
   [HealthState.OK]: {
     priority: 0,
     health: HealthState.OK,
@@ -100,6 +98,8 @@ export const healthStateMapping: {
     health: HealthState.NOT_AVAILABLE,
     icon: <GrayUnknownIcon title="Not available" />,
   },
+} satisfies {
+  [key in HealthState]: HealthStateMappingValues;
 };
 
 export const STATE_PRIORITY = [

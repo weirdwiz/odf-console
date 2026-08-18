@@ -97,6 +97,7 @@ const ObjectListWithSidebarContent: React.FC<
   const [object, setObject] = React.useState<ObjectCrFormat>(null);
   const [objectActions, setObjectActions] =
     React.useState<React.MutableRefObject<IAction[]>>();
+  // SAFETY: This empty ExtraProps accumulator receives only entries created by the reducer below.
   const [extraProps, setExtraProps] = React.useState({} as ExtraProps);
   const [completionTime, setCompletionTime] = React.useState<number>();
   const [listAllVersions, setListAllVersions] = React.useState<boolean>(false);

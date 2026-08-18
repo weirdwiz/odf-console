@@ -1,6 +1,7 @@
 import * as React from 'react';
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
 import { CogIcon } from '@patternfly/react-icons';
+import * as PatternflyTopology from '@patternfly/react-topology';
 import {
   DEFAULT_DECORATOR_PADDING,
   DEFAULT_DECORATOR_RADIUS,
@@ -9,7 +10,6 @@ import {
   Node,
   NodeModel,
   TopologyQuadrant,
-  getDefaultShapeDecoratorCenter,
   observer,
   ScaleDetailsLevel,
   WithSelectionProps,
@@ -19,23 +19,51 @@ import { renderDecorators } from '../utils/decorator-utils';
 import { getDRNodeStatus } from '../utils/sidebar-utils';
 import './MCOStyleAppNode.scss';
 
+const getDefaultDecoratorCenter =
+  PatternflyTopology['getDefaultShapeDecoratorCenter'];
+
 type MCOStyleAppNodeProps = {
   element: Node<NodeModel, AppNodeData>;
 } & Partial<WithSelectionProps & { hover?: boolean }>;
 
+type MCOStyleAppNodeElement = Pick<Node<NodeModel, AppNodeData>, 'getData' | 'getDimensions'>;
+
+type AppNodeRendererProps<Element extends MCOStyleAppNodeElement> = Omit<
+  React.ComponentProps<typeof DefaultNode>,
+  'element'
+> & {
+  element: Element;
+};
+
+type CountDecoratorProps = Pick<
+  React.ComponentProps<typeof Decorator>,
+  'x' | 'y' | 'radius' | 'showBackground' | 'icon'
+>;
+
+type MCOStyleAppNodeViewProps<Element extends MCOStyleAppNodeElement> = {
+  element: Element;
+  detailsLevel: ScaleDetailsLevel;
+  NodeComponent: React.ComponentType<AppNodeRendererProps<Element>>;
+  CountDecoratorComponent: React.ComponentType<CountDecoratorProps>;
+  getCountDecoratorCenter: (element: Element) => { x: number; y: number };
+  renderPhaseDecorators: (
+    element: Element,
+    data: AppNodeData
+  ) => React.ReactNode;
+} & Partial<WithSelectionProps & { hover?: boolean }>;
+
 export const ICON_SIZE = 25;
 
-const renderCountDecorator = (
-  element: Node<NodeModel, AppNodeData>,
-  count: number
+const renderCountDecorator = <Element extends MCOStyleAppNodeElement>(
+  element: Element,
+  count: number,
+  CountDecoratorComponent: React.ComponentType<CountDecoratorProps>,
+  getCountDecoratorCenter: (element: Element) => { x: number; y: number }
 ): React.ReactNode => {
-  const { x, y } = getDefaultShapeDecoratorCenter(
-    TopologyQuadrant.upperRight,
-    element
-  );
+  const { x, y } = getCountDecoratorCenter(element);
 
   return (
-    <Decorator
+    <CountDecoratorComponent
       x={x}
       y={y}
       radius={DEFAULT_DECORATOR_RADIUS}
@@ -56,12 +84,16 @@ const renderCountDecorator = (
   );
 };
 
-const MCOStyleAppNodeComponent: React.FC<MCOStyleAppNodeProps> = ({
+export const MCOStyleAppNodeView = <Element extends MCOStyleAppNodeElement>({
   element,
+  detailsLevel,
+  NodeComponent,
+  CountDecoratorComponent,
+  getCountDecoratorCenter,
+  renderPhaseDecorators,
   ...rest
-}) => {
+}: MCOStyleAppNodeViewProps<Element>) => {
   const data = element.getData();
-  const detailsLevel = useDetailsLevel();
   const { width, height } = element.getDimensions();
 
   const appCount = data?.appCount || 1;
@@ -78,19 +110,24 @@ const MCOStyleAppNodeComponent: React.FC<MCOStyleAppNodeProps> = ({
       : 'mco-app-node--target'
     : undefined;
 
-  const phaseDecorators = renderDecorators(element, data, true);
+  const phaseDecorators = renderPhaseDecorators(element, data);
 
   const isTarget = isOperation && !data.isSource;
 
   return (
-    <DefaultNode
+    <NodeComponent
       element={element}
       className={animationClass}
       scaleLabel={false}
       showLabel={showLabel}
       attachments={
         <>
-          {renderCountDecorator(element, appCount)}
+          {renderCountDecorator(
+            element,
+            appCount,
+            CountDecoratorComponent,
+            getCountDecoratorCenter
+          )}
           {phaseDecorators}
         </>
       }
@@ -119,8 +156,27 @@ const MCOStyleAppNodeComponent: React.FC<MCOStyleAppNodeProps> = ({
           />
         </g>
       )}
-    </DefaultNode>
+    </NodeComponent>
   );
 };
+
+const DefaultAppNodeRenderer: React.FC<
+  AppNodeRendererProps<Node<NodeModel, AppNodeData>>
+> = (props) => <DefaultNode {...props} />;
+
+const MCOStyleAppNodeComponent: React.FC<MCOStyleAppNodeProps> = (props) => (
+  <MCOStyleAppNodeView<Node<NodeModel, AppNodeData>>
+    {...props}
+    detailsLevel={useDetailsLevel()}
+    NodeComponent={DefaultAppNodeRenderer}
+    CountDecoratorComponent={Decorator}
+    getCountDecoratorCenter={(element) =>
+      getDefaultDecoratorCenter(TopologyQuadrant.upperRight, element)
+    }
+    renderPhaseDecorators={(element, data) =>
+      renderDecorators(element, data, true)
+    }
+  />
+);
 
 export const MCOStyleAppNode = observer(MCOStyleAppNodeComponent);

@@ -7,10 +7,10 @@ import {
   ExclamationTriangleIcon,
 } from '@patternfly/react-icons';
 import { PoolUtilizationPopoverContent } from '../dashboards/persistent-internal/pool-utilization-card/PoolUtilizationPopoverContent';
-import { StoragePoolTableData } from '../dashboards/persistent-internal/pool-utilization-card/types';
+import { StoragePool } from '../types';
 
 export const PoolUtilizationDisplay: React.FC<{
-  pool: StoragePoolTableData;
+  pool: StoragePool;
   usedCapacityDisplay: string;
   utilizationPercentage: number;
   isCritical: boolean;
@@ -35,16 +35,14 @@ export const PoolUtilizationDisplay: React.FC<{
       aria-label="Pool utilization information"
       bodyContent={
         <PoolUtilizationPopoverContent
-          pool={
-            {
-              ...pool,
-              utilization: utilizationPercentage,
-              usedCapacity: usedCapacityDisplay,
-              totalCapacity: totalCapacity,
-              critical: isCritical,
-              warning: isWarning,
-            } as StoragePoolTableData
-          }
+          pool={{
+            ...pool,
+            utilization: utilizationPercentage,
+            usedCapacity: usedCapacityDisplay,
+            totalCapacity: totalCapacity,
+            critical: isCritical,
+            warning: isWarning,
+          }}
         />
       }
       hasAutoWidth

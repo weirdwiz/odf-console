@@ -15,21 +15,19 @@ import {
 import { useSortList } from '../hooks/sort-list';
 import { useCustomTranslation } from '../useCustomTranslationHook';
 
-export type TableColumnProps = ThProps & {
+export type TableColumnProps<T = K8sResourceCommon> = ThProps & {
   thProps?: TableThProps;
   columnName: string | React.ReactNode;
-  sortFunction?: <T>(a: T, b: T, c: SortByDirection) => number;
+  sortFunction?: (a: T, b: T, direction: SortByDirection) => number;
 };
 
-export type RowComponentType<T extends K8sResourceCommon | unknown> = {
+export type RowComponentType<T, ExtraProps = undefined> = {
   row: T;
   rowIndex?: number;
-  extraProps?: any;
+  extraProps: ExtraProps;
 };
 
-export const ComposableTable: ComposableTableProps = <
-  T extends K8sResourceCommon,
->({
+export const ComposableTable: ComposableTableProps = <T, ExtraProps = undefined>({
   columns,
   rows,
   RowComponent,
@@ -42,7 +40,7 @@ export const ComposableTable: ComposableTableProps = <
   variant,
   isFavorites,
   selectProps,
-}) => {
+}: TableProps<T, ExtraProps>) => {
   const {
     onSort,
     sortIndex: activeSortIndex,
@@ -51,15 +49,19 @@ export const ComposableTable: ComposableTableProps = <
   } = useSortList<T>(rows, columns, false);
   const { t } = useCustomTranslation();
 
-  const getSortParams = (columnIndex: number): ThProps['sort'] => ({
-    ...(isFavorites ? { isFavorites: columnIndex === 0 } : {}),
-    sortBy: {
-      index: activeSortIndex,
-      direction: activeSortDirection,
-    },
-    onSort: onSort,
-    columnIndex,
-  });
+  const getSortParams = (columnIndex: number): ThProps['sort'] =>
+    (() => {
+      const value = {
+        sortBy: {
+          index: activeSortIndex,
+          direction: activeSortDirection,
+        },
+        onSort: onSort,
+        columnIndex,
+      };
+      if (isFavorites) Object.assign(value, { isFavorites: columnIndex === 0 });
+      return value;
+    })();
 
   return (
     <StatusBox
@@ -91,7 +93,7 @@ export const ComposableTable: ComposableTableProps = <
               <Th
                 {...(!!col?.thProps ? col.thProps : {})}
                 {...(!!col?.sortFunction ? { sort: getSortParams(index) } : {})}
-                key={col?.columnName}
+                key={index}
               >
                 {col?.columnName}
               </Th>
@@ -121,14 +123,14 @@ export type SelectAllProps = {
   isAllSelected: boolean;
 };
 
-export type TableProps<T extends K8sResourceCommon | unknown> = {
+export type TableProps<T, ExtraProps = undefined> = {
   rows: T[];
-  columns: TableColumnProps[];
-  RowComponent: React.ComponentType<RowComponentType<T>>;
-  extraProps?: any;
+  columns: TableColumnProps<T>[];
+  RowComponent: React.ComponentType<RowComponentType<T, ExtraProps>>;
+  extraProps?: ExtraProps;
   loaded: boolean;
-  loadError?: any;
-  unfilteredData?: [];
+  loadError?: unknown;
+  unfilteredData?: T[];
   noDataMsg?: React.FC;
   emptyRowMessage?: React.FC;
   variant?: TableVariant;
@@ -136,6 +138,6 @@ export type TableProps<T extends K8sResourceCommon | unknown> = {
   selectProps?: SelectAllProps;
 };
 
-type ComposableTableProps = <T extends K8sResourceCommon>(
-  props: React.PropsWithoutRef<TableProps<T>>
+type ComposableTableProps = <T, ExtraProps = undefined>(
+  props: React.PropsWithoutRef<TableProps<T, ExtraProps>>
 ) => ReturnType<React.FC>;

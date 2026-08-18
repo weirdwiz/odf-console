@@ -27,13 +27,17 @@ import {
 import { ModalViewContext } from '../utils/reducer';
 import {
   ApplicationInfoType,
-  ApplicationType,
   DRPlacementControlType,
   DRPolicyType,
   ModalType,
   PlacementType,
   PVCQueryFilter,
 } from '../utils/types';
+
+export const subscriptionManageParserDependencies = {
+  useDisasterRecoveryResourceWatch,
+  useSubscriptionResourceWatch,
+};
 
 export const getSubscriptionResources = (
   appResource: ApplicationKind,
@@ -44,45 +48,52 @@ export const getSubscriptionResources = (
   subscriptionName: string,
   isWatchApplication: boolean
 ) => ({
-  resources: {
-    ...(isWatchApplication
-      ? {
-          applications: getApplicationResourceObj({
-            name: getName(appResource),
-            namespace,
-          }),
-        }
-      : {}),
-    subscriptions: getSubscriptionResourceObj({
-      ...(!!subscriptionName ? { name: subscriptionName } : {}),
-      namespace,
-    }),
-    placementRules: getPlacementRuleResourceObj({
-      namespace,
-    }),
-    placements: getPlacementResourceObj({
-      namespace,
-    }),
-    placementDecisions: getPlacementDecisionsResourceObj({
-      namespace,
-    }),
-  },
+  resources: (() => {
+    const value = {
+      subscriptions: getSubscriptionResourceObj(
+        (() => {
+          const value = { namespace };
+          if (!!subscriptionName)
+            Object.assign(value, { name: subscriptionName });
+          return value;
+        })()
+      ),
+      placementRules: getPlacementRuleResourceObj({
+        namespace,
+      }),
+      placements: getPlacementResourceObj({
+        namespace,
+      }),
+      placementDecisions: getPlacementDecisionsResourceObj({
+        namespace,
+      }),
+    };
+    if (isWatchApplication)
+      Object.assign(value, {
+        applications: getApplicationResourceObj({
+          name: getName(appResource),
+          namespace,
+        }),
+      });
+    return value;
+  })(),
   drResources: {
     data: drResources,
     loaded: drLoaded,
     loadError: drLoadError,
   },
-  overrides: {
-    ...(!isWatchApplication
-      ? {
-          applications: {
-            data: appResource,
-            loaded: true,
-            loadError: '',
-          },
-        }
-      : {}),
-  },
+  overrides: (() => {
+    const value = {};
+    if (!isWatchApplication)
+      Object.assign(value, {
+        applications: {
+          data: appResource,
+          loaded: true,
+          loadError: '',
+        },
+      });
+    return value;
+  })(),
 });
 
 export const SubscriptionParser: React.FC<SubscriptionParserProps> = ({
@@ -94,11 +105,12 @@ export const SubscriptionParser: React.FC<SubscriptionParserProps> = ({
   modalType,
 }) => {
   const namespace = getNamespace(application);
-  const [drResources, drLoaded, drLoadError] = useDisasterRecoveryResourceWatch(
+  const [drResources, drLoaded, drLoadError] =
+    subscriptionManageParserDependencies.useDisasterRecoveryResourceWatch(
     getDRResources(namespace)
   );
   const [subscriptionResourceList, loaded, loadError] =
-    useSubscriptionResourceWatch(
+    subscriptionManageParserDependencies.useSubscriptionResourceWatch(
       getSubscriptionResources(
         application,
         namespace,
@@ -112,7 +124,7 @@ export const SubscriptionParser: React.FC<SubscriptionParserProps> = ({
   const subscriptionResources = subscriptionResourceList?.[0];
   const { drPolicies } = drResources;
   const applicationInfo: ApplicationInfoType = React.useMemo(() => {
-    let applicationInfo: ApplicationInfoType = {};
+    let applicationInfo: ApplicationInfoType;
     if (loaded && !loadError) {
       const app = subscriptionResources.application;
       const unProtectedPlacements: PlacementType[] = [];
@@ -181,7 +193,7 @@ export const SubscriptionParser: React.FC<SubscriptionParserProps> = ({
   const matchingPolicies: DRPolicyType[] = React.useMemo(
     () =>
       !_.isEmpty(applicationInfo)
-        ? getMatchingDRPolicies(applicationInfo as ApplicationType, drPolicies)
+        ? getMatchingDRPolicies(applicationInfo, drPolicies)
         : [],
     [applicationInfo, drPolicies]
   );

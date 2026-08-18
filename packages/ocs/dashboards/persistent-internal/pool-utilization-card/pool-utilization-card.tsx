@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useGetInternalClusterDetails } from '@odf/core/redux/utils';
 import { getCephBlockPoolResource } from '@odf/core/resources';
 import { CephFileSystemModel } from '@odf/shared';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,
@@ -17,7 +18,6 @@ import {
   VirtualizedTable,
   useK8sWatchResources,
   WatchK8sResources,
-  WatchK8sResults,
 } from '@openshift-console/dynamic-plugin-sdk';
 import * as _ from 'lodash-es';
 import {
@@ -119,10 +119,15 @@ const PoolRowRenderer: React.FC<RowProps<StoragePoolTableData, CustomData>> = ({
   );
 };
 
+type PoolResources = {
+  blockPools?: StoragePoolKind[];
+  filesystem?: CephFilesystemKind;
+};
+
 const getResources = (
   namespace: string,
   clusterName: string
-): WatchK8sResources<{ [key: string]: any }> => ({
+): WatchK8sResources<PoolResources> => ({
   blockPools: getCephBlockPoolResource(clusterName),
   filesystem: {
     kind: referenceForModel(CephFileSystemModel),
@@ -138,13 +143,9 @@ export const PoolUtilizationCard: React.FC = () => {
   const { clusterNamespace: clusterNs, clusterName: ocsClusterName } =
     useGetInternalClusterDetails();
 
-  const resources = useK8sWatchResources(
+  const { blockPools, filesystem } = useK8sWatchResources<PoolResources>(
     ocsClusterName ? getResources(clusterNs, ocsClusterName) : {}
   );
-  const { blockPools, filesystem } = resources as WatchK8sResults<{
-    blockPools: StoragePoolKind[];
-    filesystem: CephFilesystemKind;
-  }>;
 
   const { allPools, poolNames } = React.useMemo(() => {
     if (!ocsClusterName) {
@@ -178,7 +179,7 @@ export const PoolUtilizationCard: React.FC = () => {
   const [poolUtilizationData, poolMetricsError, poolMetricsLoaded] =
     useCustomPrometheusPoll({
       query: utilizationQuery,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 
@@ -193,7 +194,7 @@ export const PoolUtilizationCard: React.FC = () => {
   const [poolCapacityData, poolCapacityError, poolCapacityLoaded] =
     useCustomPrometheusPoll({
       query: capacityQuery,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 
@@ -208,7 +209,7 @@ export const PoolUtilizationCard: React.FC = () => {
   const [poolUsedCapacityData, poolUsedCapacityError, poolUsedCapacityLoaded] =
     useCustomPrometheusPoll({
       query: usedCapacityQuery,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 

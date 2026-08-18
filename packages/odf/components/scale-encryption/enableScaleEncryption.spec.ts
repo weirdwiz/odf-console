@@ -3,16 +3,14 @@ import {
   k8sCreate,
   k8sDelete,
 } from '@openshift-console/dynamic-plugin-sdk';
+import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
 import {
   enableScaleEncryption,
   ScaleEncryptionInput,
 } from './enableScaleEncryption';
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  k8sCreate: jest.fn(),
-  k8sDelete: jest.fn(),
-}));
+jest.spyOn(TestDependency1, 'k8sCreate').mockImplementation(jest.fn());
+jest.spyOn(TestDependency1, 'k8sDelete').mockImplementation(jest.fn());
 
 const input: ScaleEncryptionInput = {
   certificate: 'certificate',
@@ -31,13 +29,16 @@ const createdResource = ({ data }: { data: K8sResourceCommon }) =>
 describe('enableScaleEncryption', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (k8sCreate as jest.Mock).mockImplementation(createdResource);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (k8sDelete as jest.Mock).mockResolvedValue(undefined);
   });
 
   it('creates the encryption resources in dependency order', async () => {
     await enableScaleEncryption(input);
 
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     expect(
       (k8sCreate as jest.Mock).mock.calls.map(([request]) => request.data)
     ).toEqual([
@@ -65,6 +66,7 @@ describe('enableScaleEncryption', () => {
   });
 
   it('removes created dependencies when setup fails', async () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (k8sCreate as jest.Mock)
       .mockImplementationOnce(createdResource)
       .mockImplementationOnce(createdResource)
@@ -74,6 +76,7 @@ describe('enableScaleEncryption', () => {
       'EncryptionConfig failed'
     );
 
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     expect(
       (k8sDelete as jest.Mock).mock.calls.map(
         ([request]) => request.resource.metadata.name

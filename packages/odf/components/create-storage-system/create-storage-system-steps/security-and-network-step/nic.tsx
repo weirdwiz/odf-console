@@ -101,9 +101,7 @@ export const NICSelectComponent: React.FC<NICSelectComponentProps> = ({
                             : 'default'
                       }
                     >
-                      {(typeof clusterCidrError === 'string'
-                        ? clusterCidrError
-                        : null) ??
+                      {clusterCidrError ||
                         (clusterCidrValid && nodes.length > 0
                           ? t('Validated')
                           : t('Use CIDR notation. Eg: 192.168.200.0/24'))}

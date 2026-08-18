@@ -47,6 +47,18 @@ import { getReplicationType, isDRPolicyValidated } from '../../utils';
 import { Header, kebabActionItems, tableColumnInfo } from './helper';
 import './drpolicy-list-page.scss';
 
+const useListPageFilterDependency: typeof useListPageFilter = (...args) =>
+  useListPageFilter(...args);
+
+export const drPolicyListDependencies = {
+  useAccessReview,
+  useK8sWatchResource,
+  useListPageFilter: useListPageFilterDependency,
+  useLocation,
+  useNavigate,
+  useProtectedApplicationsWatch,
+};
+
 const DRPolicyRow: React.FC<RowProps<DRPolicyKind, RowData>> = ({
   obj,
   activeColumnIDs,
@@ -215,19 +227,21 @@ const getUnpairedDRClusters = (
 export const DRPolicyListPage: React.FC = () => {
   const { t } = useCustomTranslation();
   const [drPolicies, drPoliciesLoaded, drPoliciesLoadError] =
-    useK8sWatchResource<DRPolicyKind[]>(getDRPolicyResourceObj());
+    drPolicyListDependencies.useK8sWatchResource<DRPolicyKind[]>(
+      getDRPolicyResourceObj()
+    );
   const [policyToAppCount, appCountLoadedWOError] =
-    useProtectedApplicationsWatch();
+    drPolicyListDependencies.useProtectedApplicationsWatch();
 
   const [mirrorPeers, mirrorPeerLoaded, mirrorPeerLoadError] =
-    useK8sWatchResource<MirrorPeerKind[]>({
+    drPolicyListDependencies.useK8sWatchResource<MirrorPeerKind[]>({
       kind: referenceForModel(MirrorPeerModel),
       isList: true,
       namespaced: false,
     });
 
   const [drClusters, drClustersLoaded, drClustersLoadError] =
-    useK8sWatchResource<DRClusterKind[]>({
+    drPolicyListDependencies.useK8sWatchResource<DRClusterKind[]>({
       kind: referenceForModel(DRClusterModel),
       isList: true,
       namespaced: false,
@@ -276,13 +290,13 @@ export const DRPolicyListPage: React.FC = () => {
     return map;
   }, [unpairedDRClusters, drPolicies, drPoliciesLoaded, drPoliciesLoadError]);
 
-  const location = useLocation();
+  const location = drPolicyListDependencies.useLocation();
   const drPolicyListPagePath = location.pathname.replace(/\/$/, '');
   const drPolicyCreatePagePath = `${drPolicyListPagePath}/${referenceForModel(
     DRPolicyModel
   )}/~new`;
 
-  const [canDeleteDRPolicy] = useAccessReview(
+  const [canDeleteDRPolicy] = drPolicyListDependencies.useAccessReview(
     {
       group: DRPolicyModel?.apiGroup,
       resource: DRPolicyModel?.plural,
@@ -291,8 +305,9 @@ export const DRPolicyListPage: React.FC = () => {
     },
     HUB_CLUSTER_NAME
   );
-  const [data, filteredData, onFilterChange] = useListPageFilter(drPolicies);
-  const navigate = useNavigate();
+  const [data, filteredData, onFilterChange] =
+    drPolicyListDependencies.useListPageFilter(drPolicies);
+  const navigate = drPolicyListDependencies.useNavigate();
 
   return (
     <ListPageBody>

@@ -190,7 +190,31 @@ export const getColumns = (t: TFunction, showVersioning: boolean) => {
   ];
 };
 
-export const TableRow: React.FC<RowComponentType<ObjectCrFormat>> = ({
+type ObjectTableRowExtraProps = {
+  launcher: LaunchModal;
+  bucketName: string;
+  foldersPath: string;
+  s3Client: S3Commands;
+  setDeleteResponse: SetObjectsDeleteResponse;
+  refreshTokens: () => Promise<void>;
+  onRowClick: (
+    object: ObjectCrFormat,
+    actionItems: React.MutableRefObject<IAction[]>,
+    extraProps: {
+      setDeleteResponse: SetObjectsDeleteResponse;
+      refreshTokens: () => Promise<void>;
+      closeObjectSidebar: () => void;
+    }
+  ) => void;
+  closeObjectSidebar: () => void;
+  showVersioning: boolean;
+  isVersioningEnabledOrSuspended: boolean;
+  blockDataPath?: boolean;
+};
+
+export const TableRow: React.FC<
+  RowComponentType<ObjectCrFormat, ObjectTableRowExtraProps>
+> = ({
   row: object,
   extraProps,
 }) => {
@@ -222,6 +246,7 @@ export const TableRow: React.FC<RowComponentType<ObjectCrFormat>> = ({
   const prefix = getEncodedPrefix(name, foldersPath);
   const isLatest = object?.isLatest;
   const isDeleteMarker = object?.isDeleteMarker;
+  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
   const providerType = s3Client.providerType as S3ProviderType;
 
   const columnNames = getColumnNames(t);

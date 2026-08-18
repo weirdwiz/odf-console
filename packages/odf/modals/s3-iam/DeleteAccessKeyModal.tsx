@@ -27,6 +27,7 @@ type DeleteAccessKeyModalProps = {
   refreshTokens: () => void;
 };
 
+// SAFETY: The receiving library accepts t; its published type does not expose this supported value.
 const getTextInputLabel = (t: TFunction) => (
   <Trans t={t as any} values={{ delete: t('delete') }}>
     <b>

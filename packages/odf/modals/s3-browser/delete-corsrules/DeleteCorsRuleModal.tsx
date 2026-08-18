@@ -66,6 +66,7 @@ const DeleteCorsRuleModal: React.FC<
   const [inProgress, setInProgress] = React.useState<boolean>(false);
   const [error, setError] = React.useState<Error>();
 
+  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
   const providerType = s3Client.providerType as S3ProviderType;
 
   const onDelete = async (event) => {
@@ -79,6 +80,7 @@ const DeleteCorsRuleModal: React.FC<
         latestRules = await s3Client.getBucketCors({ Bucket: bucketName });
       } catch (err) {
         if (isNoCorsRuleError(err)) {
+          // SAFETY: { CORSRules: [] } comes from the owner of the GetBucketCorsCommandOutput contract used at this boundary.
           latestRules = { CORSRules: [] } as GetBucketCorsCommandOutput;
         } else {
           throw err;

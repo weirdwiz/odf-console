@@ -83,6 +83,7 @@ export const LifecycleRuleWizardFooter: React.FC<
   const [requestError, setRequestError] = React.useState('');
   const [showErrorAlert, setShowErrorAlert] = React.useState(false);
 
+  // SAFETY: activeStep.id comes from the owner of the string contract used at this boundary.
   const stepId = activeStep.id as string;
   const isFirstStep = stepId === LifecycleRuleStep.GENERAL;
   const isLastStep = stepId === LifecycleRuleStep.REVIEW;

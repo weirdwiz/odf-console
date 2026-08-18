@@ -116,7 +116,7 @@ export const SubscriptionParser: React.FC<SubscriptionParserProps> = ({
     const mostSevereHealthStatus = getMostSevereHealthStatus(drStatusList);
 
     const drpcInAction = drStatusList.find((status) =>
-      [Phase.FailingOver, Phase.Relocating].includes(status.phase as Phase)
+      [Phase.FailingOver, Phase.Relocating].includes(status.phase)
     );
 
     const selectedDRPC = drpcInAction || drStatusList[0];
@@ -129,7 +129,7 @@ export const SubscriptionParser: React.FC<SubscriptionParserProps> = ({
           targetCluster: selectedDRPC.targetCluster,
           volumeReplicationHealth: mostSevereHealthStatus,
           volumeLastGroupSyncTime: selectedDRPC.lastGroupSyncTime,
-          phase: selectedDRPC.phase as Phase,
+          phase: selectedDRPC.phase,
           isLoadedWOError: isLoadedWOError,
           action: selectedDRPC.action,
           progression: selectedDRPC.progression,

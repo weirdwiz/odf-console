@@ -201,6 +201,7 @@ export const createBucketClass = (config: BucketClassConfig) => {
   setGeneralData(config.type);
   cy.contains('Next').click();
   if (config.type === BucketClassType.STANDARD) {
+    // SAFETY: config comes from the owner of the StandardBucketClassConfig contract used at this boundary.
     const { tiers } = config as StandardBucketClassConfig;
     cy.log('Select Placement policy');
     setPlacementPolicy(tiers);
@@ -210,11 +211,13 @@ export const createBucketClass = (config: BucketClassConfig) => {
     cy.log('Select Backing Store');
     setBackingStores(tiers);
   } else {
+    // SAFETY: config comes from the owner of the NamespaceBucketClassConfig contract used at this boundary.
     const { namespacePolicyType } = config as NamespaceBucketClassConfig;
     cy.log('Select Namespace policy');
     cy.byTestID(`${namespacePolicyType.toLowerCase()}-radio`).click();
     cy.contains('Next').click();
     cy.log('Select Namespace Store');
+    // SAFETY: config comes from the owner of the NamespaceBucketClassConfig contract used at this boundary.
     configureNamespaceBucketClass(
       namespacePolicyType,
       config as NamespaceBucketClassConfig

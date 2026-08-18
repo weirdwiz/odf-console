@@ -1,5 +1,6 @@
 import { McgPerformanceProfile, ResourceProfile } from '@odf/core/types';
 import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
+import { K8sResourceValue } from './k8s';
 
 export type ErasureCodedPoolSpec = {
   dataChunks: number;
@@ -145,7 +146,7 @@ export type DeviceSet = {
   count: number;
   replica: number;
   resources: ResourceConstraints;
-  config?: Record<string, unknown>;
+  config?: Record<string, K8sResourceValue>;
   encrypted?: boolean;
   placement?: any;
   portable: boolean;

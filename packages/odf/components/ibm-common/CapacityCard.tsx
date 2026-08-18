@@ -119,12 +119,14 @@ export const CapacityCardInternal: React.FC<CapacityCardInternalProps> = ({
     [ScaleDashboardQuery.BY_USED]: queryByUsed,
     [ScaleDashboardQuery.TOTAL_USED]: queryTotalUsed,
   } = getBreakdownByStorageClass(storageClassName);
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [modelByUsed, modelUsedError, modelUsedLoading] =
     useCustomPrometheusPoll({
       query: queryByUsed,
       endpoint: 'api/v1/query' as any,
       basePath: usePrometheusBasePath(),
     });
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [modelTotalUsed, modelTotalError, modalTotalLoading] =
     useCustomPrometheusPoll({
       query: queryTotalUsed,
@@ -158,6 +160,7 @@ export const CapacityCardInternal: React.FC<CapacityCardInternalProps> = ({
     _e,
     storageClassNameSelection
   ) => {
+    // SAFETY: The receiving library accepts storageClassNameSelection; its published type does not expose this supported value.
     setStorageClassName(storageClassNameSelection as any);
     setBreakdownSelect(!isOpenBreakdownSelect);
   };

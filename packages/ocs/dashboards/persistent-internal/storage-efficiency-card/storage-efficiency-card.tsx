@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useGetInternalClusterDetails } from '@odf/core/redux/utils';
 import { EfficiencyItemBody } from '@odf/shared/dashboards/storage-efficiency/storage-efficiency-card-item';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,
@@ -24,7 +25,7 @@ export const StorageEfficiencyContent: React.FC = () => {
         POOL_STORAGE_EFFICIENCY_QUERIES(managedByOCS)[
           StorageDashboardQuery.POOL_CAPACITY_RATIO
         ],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 
@@ -33,7 +34,7 @@ export const StorageEfficiencyContent: React.FC = () => {
       POOL_STORAGE_EFFICIENCY_QUERIES(managedByOCS)[
         StorageDashboardQuery.POOL_SAVED_CAPACITY
       ],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const ratio = getGaugeValue(poolCapacityRatioResult);

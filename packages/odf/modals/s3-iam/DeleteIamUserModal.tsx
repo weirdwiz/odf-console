@@ -40,6 +40,7 @@ type DeleteIamUserModalProps = {
   refreshTokens: () => void;
 };
 
+// SAFETY: The receiving library accepts t; its published type does not expose this supported value.
 const getTextInputLabel = (t: TFunction) => (
   <Trans t={t as any} values={{ delete: 'delete' }}>
     <b>
@@ -128,6 +129,7 @@ export const DeleteIamUserModal: React.FC<
       refreshTokens();
       navigate(IAM_BASE_ROUTE);
     } catch (err) {
+      // SAFETY: err comes from the owner of the Error contract used at this boundary.
       setError(err as Error);
     } finally {
       setInProgress(false);
@@ -170,6 +172,7 @@ export const DeleteIamUserModal: React.FC<
 
       setDeleteSuccess(true);
     } catch (err) {
+      // SAFETY: err comes from the owner of the Error contract used at this boundary.
       setError(err as Error);
     } finally {
       setInProgress(false);

@@ -209,6 +209,7 @@ const PublicAccessBlockContent: React.FC<PublicAccessBlockProps['obj']> = ({
     `${s3Client.providerType}-${bucketName}-${BUCKET_POLICY_STATUS_CACHE_KEY_SUFFIX}`,
     () => s3Client.getBucketPolicyStatus({ Bucket: bucketName })
   );
+  // SAFETY: This empty PabOutput accumulator receives only entries created by the reducer below.
   const {
     data: pabData = {} as PabOutput,
     isMutating: isLoading,

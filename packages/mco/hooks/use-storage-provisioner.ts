@@ -1,7 +1,34 @@
 import * as React from 'react';
+import { SearchResultItemType } from '@odf/mco/types';
 import { CEPH_PROVISIONERS, IBM_PROVISIONERS } from '@odf/shared';
+import { isObject, isString } from 'lodash-es';
 import { queryStorageClassesUsingClusterNames } from '../utils';
 import { useACMSafeFetch } from './acm-safe-fetch';
+
+type StorageClassSearchItem = SearchResultItemType & {
+  provisioner: string;
+};
+
+const isStorageClassSearchItem = (
+  item: SearchResultItemType
+): item is StorageClassSearchItem =>
+  isObject(item) &&
+  'apiversion' in item &&
+  isString(item.apiversion) &&
+  'kind' in item &&
+  isString(item.kind) &&
+  'cluster' in item &&
+  isString(item.cluster) &&
+  'name' in item &&
+  isString(item.name) &&
+  'created' in item &&
+  isString(item.created) &&
+  'label' in item &&
+  isString(item.label) &&
+  '_uid' in item &&
+  isString(item._uid) &&
+  'provisioner' in item &&
+  isString(item.provisioner);
 
 export type Provider = { displayName: string; count: number };
 export type ClusterProviders = {
@@ -9,12 +36,7 @@ export type ClusterProviders = {
   providers: Provider[];
 };
 
-export function useStorageProvisioners(clusters: string[]): {
-  providersByCluster: ClusterProviders[];
-  count: number;
-  loaded: boolean;
-  error: any;
-} {
+export function useStorageProvisioners(clusters: string[]) {
   const searchQuery = React.useMemo(
     () => queryStorageClassesUsingClusterNames(clusters),
     [clusters]
@@ -26,11 +48,12 @@ export function useStorageProvisioners(clusters: string[]): {
   >(() => {
     return (
       result?.data?.searchResult
-        ?.flatMap((sr: any) => sr.items || [])
-        .map((i: any) => ({
-          cluster: i.cluster as string,
-          name: i.metadata?.name ?? i.name,
-          provisioner: i.provisioner as string,
+        ?.flatMap((searchResult) => searchResult.items || [])
+        .filter(isStorageClassSearchItem)
+        .map(({ cluster, name, provisioner }) => ({
+          cluster,
+          name,
+          provisioner,
         })) ?? []
     );
   }, [result]);
@@ -38,6 +61,10 @@ export function useStorageProvisioners(clusters: string[]): {
   const itemsByCluster = React.useMemo<
     Record<string, Array<{ name: string; provisioner: string }>>
   >(() => {
+    const initialItemsByCluster: Record<
+      string,
+      Array<{ name: string; provisioner: string }>
+    > = {};
     return rawItems.reduce(
       (acc, { cluster, name, provisioner }) => {
         if (!acc[cluster]) {
@@ -46,7 +73,7 @@ export function useStorageProvisioners(clusters: string[]): {
         acc[cluster].push({ name, provisioner });
         return acc;
       },
-      {} as Record<string, Array<{ name: string; provisioner: string }>>
+      initialItemsByCluster
     );
   }, [rawItems]);
 

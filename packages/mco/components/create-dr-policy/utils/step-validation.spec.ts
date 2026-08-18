@@ -32,7 +32,7 @@ const validS3 = (overrides: Partial<S3Details> = {}): S3Details => ({
 const cluster = (name: string) =>
   ({
     metadata: { name },
-  }) as DRPolicyState['clusters']['selectedClusters'][number];
+  }) satisfies DRPolicyState['clusters']['selectedClusters'][number];
 
 type StateOverrides = {
   clusters?: Partial<DRPolicyState['clusters']>;

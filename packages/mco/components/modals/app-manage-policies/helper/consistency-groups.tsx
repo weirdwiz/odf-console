@@ -27,6 +27,7 @@ import {
   WatchK8sResultsObject,
 } from '@openshift-console/dynamic-plugin-sdk';
 import { TFunction } from 'i18next';
+import { isObject } from 'lodash-es';
 import {
   Button,
   ButtonVariant,
@@ -222,7 +223,7 @@ const buildConsistencyGroupMap = (
     );
     if (!cgLabel) return;
 
-    const cgName = cgLabel[1] as string;
+    const cgName = cgLabel[1];
     const schedulingInterval = vrg.spec.async?.schedulingInterval;
     const dataLastSyncedOn = pvc.lastSyncTime;
     const healthStatus = getReplicationHealth(
@@ -265,12 +266,21 @@ const convertCGMapToGroups = (cgMap: Map<string, ConsistencyGroupInfo>) => {
   return groups;
 };
 
-const extractVRGFromMCV = (mcvData): DRVolumeReplicationGroupKind | null =>
-  mcvData.data?.status?.result as DRVolumeReplicationGroupKind;
+const isDRVolumeReplicationGroup = (
+  value: K8sResourceCommon
+): value is DRVolumeReplicationGroupKind =>
+  'spec' in value && isObject(value.spec);
+
+const extractVRGFromMCV = (
+  mcvData: WatchK8sResultsObject<ACMManagedClusterViewKind>
+): DRVolumeReplicationGroupKind | null => {
+  const result = mcvData.data?.status?.result;
+  return result && isDRVolumeReplicationGroup(result) ? result : null;
+};
 
 export const extractConsistencyGroups = (mcvs: {
-  [key in string]: WatchK8sResultsObject<K8sResourceCommon>;
-}): { loaded: boolean; loadError: any; data: ConsistencyGroupInfo[] } => {
+  [key in string]: WatchK8sResultsObject<ACMManagedClusterViewKind>;
+}) => {
   let allLoaded = true;
   let anyError = '';
   const groups: ConsistencyGroupInfo[] = [];
@@ -321,7 +331,7 @@ export type ConsistencyGroupsContentProps = {
   consistencyGroups: ConsistencyGroupInfo[];
   namespace?: string;
   loaded: boolean;
-  loadError: any;
+  loadError: unknown;
 };
 
 type GroupInfoProps = {

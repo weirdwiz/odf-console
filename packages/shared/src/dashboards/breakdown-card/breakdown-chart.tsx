@@ -167,7 +167,10 @@ export type LabelPadding = {
 export type LinkableLegendProps = {
   metricModel: K8sKind;
   datum?: {
-    [key: string]: any;
+    labelId?: string;
+    labels?: Record<string, string | number>;
+    link?: string;
+    ns?: string;
   };
   ocsVersion?: string;
   odfNamespace?: string;

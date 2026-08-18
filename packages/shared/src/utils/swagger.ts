@@ -84,6 +84,7 @@ export const getSwaggerPath = (
   followRef: boolean
 ): string[] => {
   const nextPath = [...currentPath, 'properties', name];
+  // SAFETY: _.get(allProperties, nextPath) comes from the owner of the SwaggerDefinition contract used at this boundary.
   const definition = _.get(allProperties, nextPath) as SwaggerDefinition;
   if (!definition) {
     return null;
@@ -118,6 +119,7 @@ const findDefinition = (
     [rootPath]
   );
 
+  // SAFETY: _.get(swaggerDefinitions, path) comes from the owner of the SwaggerDefinition contract used at this boundary.
   return path ? (_.get(swaggerDefinitions, path) as SwaggerDefinition) : null;
 };
 
@@ -158,6 +160,5 @@ export type SwaggerDefinitions = {
 export type SwaggerAPISpec = {
   swagger: string;
   info: { title: string; version: string };
-  paths: { [path: string]: any };
   definitions: SwaggerDefinitions;
 };

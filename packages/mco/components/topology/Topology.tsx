@@ -43,13 +43,33 @@ import { TopologyViewLevel, FilterType } from './types';
 import { generateClusterNodesModel } from './utils/node-generator';
 import './topology.scss';
 
+export const topologyDependencies = {
+  BaseTopologyView: (props: React.ComponentProps<typeof BaseTopologyView>) => (
+    <BaseTopologyView {...props} />
+  ),
+  VisualizationProvider: (
+    props: React.ComponentProps<typeof VisualizationProvider>
+  ) => <VisualizationProvider {...props} />,
+  getManagedClusterInfoTypes,
+  getManagedClusterResourceObj,
+  useActiveDROperations,
+  useDRPoliciesByClusterPair,
+  useFetchCsv,
+  useK8sWatchResource,
+  useProtectedAppsByCluster,
+  useSelectionHandler,
+  useTopologyControls,
+  useVisualizationController,
+  useVisualizationSetup,
+};
+
 const TopologyViewComponent: React.FC = () => {
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
   const [searchValue, setSearchValue] = React.useState('');
   const [selectedFilters, setSelectedFilters] = React.useState<FilterType[]>([
     FilterType.Cluster,
   ]);
-  const controller = useVisualizationController();
+  const controller = topologyDependencies.useVisualizationController();
 
   const [isSideBarOpen, setSideBarOpen] = React.useState(false);
   const {
@@ -65,7 +85,7 @@ const TopologyViewComponent: React.FC = () => {
     setSelectedIds([]);
   }, []);
 
-  useSelectionHandler({
+  topologyDependencies.useSelectionHandler({
     controller,
     setSelectedElement,
     setSelectedIds,
@@ -168,7 +188,9 @@ const TopologyViewComponent: React.FC = () => {
     };
   }, [controller, model, structureKey, isSearchActive]);
 
-  const controlButtons = useTopologyControls({ controller });
+  const controlButtons = topologyDependencies.useTopologyControls({
+    controller,
+  });
 
   const selectedElement = React.useContext(TopologyDataContext).selectedElement;
   const selectedElementId = selectedElement?.getId();
@@ -213,7 +235,7 @@ const TopologyViewComponent: React.FC = () => {
         onFilterChange={setSelectedFilters}
       />
       <div className="mco-topology__content">
-        <BaseTopologyView
+        <topologyDependencies.BaseTopologyView
           controlButtons={controlButtons}
           sideBar={
             <TopologySideBar
@@ -251,18 +273,20 @@ const TopologyEmptyState: React.FC = () => {
 };
 
 const Topology: React.FC = () => {
-  const controller = useVisualizationSetup({
+  const controller = topologyDependencies.useVisualizationSetup({
     componentFactory: mcoTopologyComponentFactory,
     layoutFactory: mcoLayoutFactory,
   });
   const [selectedElement, setSelectedElement] =
     React.useState<GraphElement | null>(null);
 
-  const [managedClusters, loaded, loadError] = useK8sWatchResource<
+  const [managedClusters, loaded, loadError] =
+    topologyDependencies.useK8sWatchResource<
     ACMManagedClusterKind[]
-  >(getManagedClusterResourceObj());
+  >(topologyDependencies.getManagedClusterResourceObj());
 
-  const [mcvs, mcvsLoaded, mcvsLoadError] = useK8sWatchResource<
+  const [mcvs, mcvsLoaded, mcvsLoadError] =
+    topologyDependencies.useK8sWatchResource<
     ACMManagedClusterViewKind[]
   >({
     kind: referenceForModel(ACMManagedClusterViewModel),
@@ -273,15 +297,16 @@ const Topology: React.FC = () => {
   });
 
   const [clusterAppsMap, appsLoaded, appsLoadError] =
-    useProtectedAppsByCluster();
+    topologyDependencies.useProtectedAppsByCluster();
 
   const [clusterPairPoliciesMap, policiesLoaded, policiesLoadError] =
-    useDRPoliciesByClusterPair();
+    topologyDependencies.useDRPoliciesByClusterPair();
 
   const [clusterPairOperationsMap, operationsLoaded, operationsLoadError] =
-    useActiveDROperations();
+    topologyDependencies.useActiveDROperations();
 
-  const [csv, csvLoaded, csvLoadError] = useFetchCsv({
+  const [csv, csvLoaded, csvLoadError] =
+    topologyDependencies.useFetchCsv({
     specName: ODFMCO_OPERATOR,
   });
   const odfMCOVersion = getMajorVersion(csv?.spec?.version);
@@ -292,7 +317,7 @@ const Topology: React.FC = () => {
       return [];
     }
 
-    const allClusters = getManagedClusterInfoTypes(
+    const allClusters = topologyDependencies.getManagedClusterInfoTypes(
       managedClusters,
       mcvs,
       odfMCOVersion,
@@ -343,7 +368,7 @@ const Topology: React.FC = () => {
 
   return (
     <TopologyDataContext.Provider value={topologyDataContextData}>
-      <VisualizationProvider controller={controller}>
+      <topologyDependencies.VisualizationProvider controller={controller}>
         <div className="mco-topology" id="mco-topology">
           {hasNoClusters ? (
             <TopologyEmptyState />
@@ -372,7 +397,7 @@ const Topology: React.FC = () => {
             </HandleErrorAndLoading>
           )}
         </div>
-      </VisualizationProvider>
+      </topologyDependencies.VisualizationProvider>
     </TopologyDataContext.Provider>
   );
 };

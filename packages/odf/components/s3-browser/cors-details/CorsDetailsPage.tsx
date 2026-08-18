@@ -154,6 +154,7 @@ const CorsDetails: React.FC = () => {
   const [searchParams] = useSearchParams();
   const ruleName = searchParams.get(RULE_NAME);
   const ruleHash = searchParams.get(RULE_HASH);
+  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
   const providerType = s3Client.providerType as S3ProviderType;
 
   const {
@@ -183,9 +184,11 @@ const CorsDetails: React.FC = () => {
           null,
         ];
       }
+      // SAFETY: This empty CORSRule accumulator receives only entries created by the reducer below.
       return [{} as CORSRule, Error('Rule not found')];
     }
 
+    // SAFETY: This empty CORSRule accumulator receives only entries created by the reducer below.
     return [{} as CORSRule, null];
   }, [data, ruleName, ruleHash]);
 

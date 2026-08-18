@@ -17,7 +17,7 @@ import { CommonModalProps } from '@odf/shared/modals';
 import { useCustomTranslation } from '@odf/shared/useCustomTranslationHook';
 import validationRegEx from '@odf/shared/utils/validation';
 import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
-import { useForm, FieldValues, Control } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import * as Yup from 'yup';
 import {
   Button,
@@ -92,6 +92,7 @@ const AddRemoteFileSystemModal: React.FC<
     };
   }, [t, existingFileSystemNames]);
 
+  // SAFETY: The receiving library accepts useYupValidationResolver(formSchema); its published type does not expose this supported value.
   const resolver = useYupValidationResolver(formSchema) as any;
 
   const { control, watch, handleSubmit } = useForm({
@@ -119,6 +120,7 @@ const AddRemoteFileSystemModal: React.FC<
       setInProgress(false);
     }
   });
+  // SAFETY: control comes from the owner of the Control<FieldValues> contract used at this boundary.
   return (
     <Modal
       title={t('Add Remote FileSystem')}
@@ -149,7 +151,7 @@ const AddRemoteFileSystemModal: React.FC<
     >
       <Form>
         <TextInputWithFieldRequirements
-          control={control as Control<FieldValues>}
+          control={control}
           fieldRequirements={fieldRequirements.remoteFileSystemName}
           popoverProps={{
             headerContent: t('File system name requirements'),

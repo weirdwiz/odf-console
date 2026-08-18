@@ -29,7 +29,7 @@ export class CustomError extends Error {
     });
     // Use captureStackTrace when available to remove contructor from stack trace
     // Add message to the stack trace
-    if (typeof Error.captureStackTrace === 'function') {
+    if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);
     } else {
       this.stack = new Error(message).stack;

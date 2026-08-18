@@ -14,12 +14,22 @@ import { useNavigate } from 'react-router';
 import { Button, ButtonVariant } from '@patternfly/react-core';
 import './getting-started-card.scss';
 
+export const gettingStartedHelperDependencies = {
+  EnrollApplicationButton: (
+    props: React.ComponentProps<typeof EnrollApplicationButton>
+  ) => <EnrollApplicationButton {...props} />,
+  useK8sWatchResource,
+  useNavigate,
+};
+
 const PolicyFooterSection: React.FC = () => {
   const { t } = useCustomTranslation();
 
-  const navigate = useNavigate();
+  const navigate = gettingStartedHelperDependencies.useNavigate();
   const [drPolicies, drPoliciesLoaded, drPoliciesLoadError] =
-    useK8sWatchResource<DRPolicyKind[]>(getDRPolicyResourceObj());
+    gettingStartedHelperDependencies.useK8sWatchResource<DRPolicyKind[]>(
+      getDRPolicyResourceObj()
+    );
 
   const loadedWOError = drPoliciesLoaded && !drPoliciesLoadError;
   const policyCount = drPolicies?.length;
@@ -63,7 +73,10 @@ const EnrollAppFooterSection: React.FC = () => {
 
   return (
     <div className="mco-enroll-app--footer pf-v6-u-mt-xl pf-v6-u-mb-xl">
-      <EnrollApplicationButton toggleVariant="primary" isNoDataMessage />
+      <gettingStartedHelperDependencies.EnrollApplicationButton
+        toggleVariant="primary"
+        isNoDataMessage
+      />
       <Trans t={t}>
         <p className="text-muted pf-v6-u-mt-sm">
           View enrolled apps under{' '}

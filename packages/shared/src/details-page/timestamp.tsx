@@ -40,6 +40,7 @@ export const Timestamp = (props: TimestampProps) => {
     return <div className="co-timestamp">-</div>;
   }
 
+  // SAFETY: props.timestamp comes from the owner of the number contract used at this boundary.
   const mdate = props.isUnix
     ? new Date((props.timestamp as number) * 1000)
     : new Date(props.timestamp);

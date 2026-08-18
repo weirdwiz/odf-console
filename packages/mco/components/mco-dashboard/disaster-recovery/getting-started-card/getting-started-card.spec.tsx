@@ -1,37 +1,35 @@
 import * as React from 'react';
-import { EnrollApplicationButton } from '@odf/mco/components/protected-applications/components';
 import { gettingStartedDRDocs } from '@odf/mco/constants';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { GettingStartedCard } from './getting-started-card';
+import {
+  GettingStartedCard,
+  gettingStartedCardDependencies,
+} from './getting-started-card';
+import { gettingStartedHelperDependencies } from './helper';
 
 const setIsOpen = jest.fn(() => null);
 const navigate = jest.fn(() => null);
-
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  useFlag: jest.fn(() => true),
-  useK8sWatchResource: jest.fn(() => [['policy1', 'policy2'], true, '']),
-  useUserSettings: jest.fn(() => [true, setIsOpen]),
-  AlertSeverity: { Critical: 'critical' },
-}));
-
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useNavigate: () => navigate,
-}));
-
-jest.mock('@odf/shared/hooks', () => ({
-  ...jest.requireActual('@odf/shared/hooks'),
-  DOC_VERSION: '1.2',
-}));
-
-jest.mock('@odf/mco/components/protected-applications/components', () => ({
-  ...jest.requireActual(
-    '@odf/mco/components/protected-applications/components'
-  ),
-  EnrollApplicationButton: jest.fn(() => null),
-}));
+jest
+  .spyOn(gettingStartedCardDependencies, 'useFlag')
+  .mockImplementation(jest.fn(() => true));
+jest
+  .spyOn(gettingStartedCardDependencies, 'useUserSettings')
+  .mockImplementation(jest.fn(() => [true, setIsOpen]));
+jest.replaceProperty(
+  gettingStartedCardDependencies,
+  'mcoDocVersion',
+  '1.2'
+);
+jest
+  .spyOn(gettingStartedHelperDependencies, 'useK8sWatchResource')
+  .mockImplementation(jest.fn(() => [['policy1', 'policy2'], true, '']));
+jest
+  .spyOn(gettingStartedHelperDependencies, 'useNavigate')
+  .mockImplementation(() => navigate);
+const mockEnrollApplicationButton = jest
+  .spyOn(gettingStartedHelperDependencies, 'EnrollApplicationButton')
+  .mockImplementation(jest.fn(() => null));
 
 describe('Test getting started card (GettingStartedCard)', () => {
   afterEach(() => jest.clearAllMocks());
@@ -72,6 +70,6 @@ describe('Test getting started card (GettingStartedCard)', () => {
     await user.click(viewPolicyButton);
     expect(navigate).toHaveBeenCalledTimes(2); // called once before via "policyButton" click
 
-    expect(EnrollApplicationButton).toHaveBeenCalledTimes(1);
+    expect(mockEnrollApplicationButton).toHaveBeenCalledTimes(1);
   });
 });

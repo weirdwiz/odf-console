@@ -1,120 +1,129 @@
 import * as React from 'react';
 import { useRawCapacity } from '@odf/core/hooks';
+import * as TestDependency5 from '@odf/core/hooks';
 import { useODFNamespaceSelector } from '@odf/core/redux/selectors';
+import * as TestDependency6 from '@odf/core/redux/selectors';
+import * as TestDependency1 from '@odf/core/resources';
+import * as TestDependency2 from '@odf/core/utils';
+import * as TestDependency4 from '@odf/ocs/constants/charts';
 import { useGetOCSHealth } from '@odf/ocs/hooks/useOcsHealth';
+import * as TestDependency13 from '@odf/ocs/hooks/useOcsHealth';
+import * as TestDependency3 from '@odf/ocs/queries';
 import { getDataResiliencyState } from '@odf/ocs/utils';
+import * as TestDependency14 from '@odf/ocs/utils';
 import { DASH, useFetchCsv } from '@odf/shared';
+import * as TestDependency8 from '@odf/shared';
+import * as TestDependency9 from '@odf/shared/generic/ErrorCardBody';
 import { useCustomPrometheusPoll } from '@odf/shared/hooks/custom-prometheus-poll';
+import * as TestDependency10 from '@odf/shared/hooks/custom-prometheus-poll';
+import * as TestDependency11 from '@odf/shared/useCustomTranslationHook';
+import * as TestDependency12 from '@odf/shared/utils';
 import {
   HealthState,
   useK8sWatchResource,
 } from '@openshift-console/dynamic-plugin-sdk';
+import * as TestDependency7 from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { isString } from 'lodash-es';
 import { BrowserRouter } from 'react-router';
+import * as TestDependency15 from 'react-router';
 import { StorageClusterCard } from './StorageClusterCard';
 
-// Mock resources before other imports
-jest.mock('@odf/core/resources', () => ({
-  odfSubscriptionResource: jest.fn((ns) => ({
+jest.spyOn(TestDependency1, 'odfSubscriptionResource').mockImplementation(
+  jest.fn((ns) => ({
     kind: 'Subscription',
     fieldSelector: 'metadata.name=odf-operator',
     isList: false,
     namespace: ns,
-  })),
-  storageClusterResource: {
-    isList: true,
-    kind: 'StorageCluster',
-  },
-}));
-
-jest.mock('@odf/core/utils', () => ({
-  getStorageClusterInNs: jest.fn((clusters, namespace) => {
+  }))
+);
+jest.replaceProperty(TestDependency1, 'storageClusterResource', {
+  isList: true,
+  kind: 'StorageCluster',
+});
+jest.spyOn(TestDependency2, 'getStorageClusterInNs').mockImplementation(
+  jest.fn((clusters, namespace) => {
     return clusters?.find(
       (cluster) => cluster?.metadata?.namespace === namespace
     );
-  }),
-}));
-
-jest.mock('@odf/ocs/queries', () => ({
-  resiliencyProgressQuery: jest.fn(() => 'ceph_health_query'),
-  StatusCardQueries: {
-    MCG_REBUILD_PROGRESS_QUERY: 'mcg_rebuild_query',
-  },
-}));
-
-jest.mock('@odf/ocs/constants/charts', () => ({
-  DANGER_THRESHOLD: 0.85,
-  WARNING_THRESHOLD: 0.8,
-}));
-
-// Mock all dependencies
-jest.mock('@odf/core/hooks', () => ({
-  useRawCapacity: jest.fn(),
-  useSafeK8sWatchResource: jest.fn(),
-}));
-
-jest.mock('@odf/core/redux/selectors', () => ({
-  useODFNamespaceSelector: jest.fn(),
-}));
-
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  useK8sWatchResource: jest.fn(),
-  HealthState: {
-    OK: 'OK',
-    WARNING: 'WARNING',
-    ERROR: 'ERROR',
-    LOADING: 'LOADING',
-    UNKNOWN: 'UNKNOWN',
-    NOT_AVAILABLE: 'NOT_AVAILABLE',
-  },
-}));
-
-jest.mock('@odf/shared', () => ({
-  ...jest.requireActual('@odf/shared'),
-  useFetchCsv: jest.fn(),
-  getName: jest.fn((obj) => obj?.metadata?.name || ''),
-  healthStateMapping: {
-    OK: { icon: <span>✓</span> },
-    WARNING: { icon: <span>⚠</span> },
-    ERROR: { icon: <span>✗</span> },
-    LOADING: { icon: <span>...</span> },
-    UNKNOWN: { icon: <span>?</span> },
-    NOT_AVAILABLE: { icon: <span>-</span> },
-  },
-  healthStateMessage: jest.fn((state) => state),
-  ODF_OPERATOR: 'odf-operator',
-  DASH: '-',
-}));
-
-jest.mock('@odf/shared/generic/ErrorCardBody', () => ({
-  ErrorCardBody: ({ title }: { title: string }) => <div>{title}</div>,
-}));
-
-jest.mock('@odf/shared/hooks/custom-prometheus-poll', () => ({
-  useCustomPrometheusPoll: jest.fn(),
-  usePrometheusBasePath: jest.fn(() => '/prometheus'),
-}));
-
-jest.mock('@odf/shared/useCustomTranslationHook', () => ({
-  useCustomTranslation: jest.fn(() => ({
+  })
+);
+jest
+  .spyOn(TestDependency3, 'resiliencyProgressQuery')
+  .mockImplementation(jest.fn(() => 'ceph_health_query'));
+jest.replaceProperty(TestDependency3, 'StatusCardQueries', {
+  MCG_REBUILD_PROGRESS_QUERY: 'mcg_rebuild_query',
+});
+jest.replaceProperty(TestDependency4, 'DANGER_THRESHOLD', 0.85);
+jest.replaceProperty(TestDependency4, 'WARNING_THRESHOLD', 0.8);
+jest.spyOn(TestDependency5, 'useRawCapacity').mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency5, 'useSafeK8sWatchResource')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency6, 'useODFNamespaceSelector')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency7, 'useK8sWatchResource')
+  .mockImplementation(jest.fn());
+jest.replaceProperty(TestDependency7, 'HealthState', {
+  OK: 'OK',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR',
+  LOADING: 'LOADING',
+  UNKNOWN: 'UNKNOWN',
+  NOT_AVAILABLE: 'NOT_AVAILABLE',
+});
+jest.spyOn(TestDependency8, 'useFetchCsv').mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency8, 'getName')
+  .mockImplementation(jest.fn((obj) => obj?.metadata?.name || ''));
+jest.replaceProperty(TestDependency8, 'healthStateMapping', {
+  OK: { icon: <span>✓</span> },
+  WARNING: { icon: <span>⚠</span> },
+  ERROR: { icon: <span>✗</span> },
+  LOADING: { icon: <span>...</span> },
+  UNKNOWN: { icon: <span>?</span> },
+  NOT_AVAILABLE: { icon: <span>-</span> },
+});
+jest
+  .spyOn(TestDependency8, 'healthStateMessage')
+  .mockImplementation(jest.fn((state) => state));
+jest.replaceProperty(TestDependency8, 'ODF_OPERATOR', 'odf-operator');
+jest.replaceProperty(TestDependency8, 'DASH', '-');
+jest
+  .spyOn(TestDependency9, 'ErrorCardBody')
+  .mockImplementation(({ title }: { title: string }) => <div>{title}</div>);
+jest
+  .spyOn(TestDependency10, 'useCustomPrometheusPoll')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency10, 'usePrometheusBasePath')
+  .mockImplementation(jest.fn(() => '/prometheus'));
+jest.spyOn(TestDependency11, 'useCustomTranslation').mockImplementation(
+  jest.fn(() => ({
     t: (key: string) => key,
-  })),
-}));
-
-jest.mock('@odf/shared/utils', () => ({
-  getOprChannelFromSub: jest.fn((sub) => sub?.spec?.channel || DASH),
-  getOprVersionFromCSV: jest.fn((csv) => csv?.spec?.version || DASH),
-  getStorageClusterMetric: jest.fn((metric) => {
+  }))
+);
+jest
+  .spyOn(TestDependency12, 'getOprChannelFromSub')
+  .mockImplementation(jest.fn((sub) => sub?.spec?.channel || DASH));
+jest
+  .spyOn(TestDependency12, 'getOprVersionFromCSV')
+  .mockImplementation(jest.fn((csv) => csv?.spec?.version || DASH));
+jest.spyOn(TestDependency12, 'getStorageClusterMetric').mockImplementation(
+  jest.fn((metric) => {
     if (!metric) return null;
     return metric;
-  }),
-  humanizeBinaryBytes: jest.fn((value, _nullValue = null, preferredUnit) => {
+  })
+);
+jest.spyOn(TestDependency12, 'humanizeBinaryBytes').mockImplementation(
+  jest.fn((value, _nullValue = null, preferredUnit) => {
     if (!value || value === '0' || value === 0) {
       return { value: 0, unit: 'B', string: '0 B' };
     }
-    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    const numValue = isString(value) ? parseFloat(value) : value;
     if (preferredUnit === 'TiB') {
       return {
         value: numValue / 1024 ** 4,
@@ -137,16 +146,12 @@ jest.mock('@odf/shared/utils', () => ({
       };
     }
     return { value: numValue, unit: 'B', string: `${numValue} B` };
-  }),
-}));
-
-jest.mock('@odf/ocs/hooks/useOcsHealth', () => ({
-  useGetOCSHealth: jest.fn(),
-}));
-
-jest.mock('@odf/ocs/utils', () => ({
-  getDataResiliencyState: jest.fn(),
-}));
+  })
+);
+jest.spyOn(TestDependency13, 'useGetOCSHealth').mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency14, 'getDataResiliencyState')
+  .mockImplementation(jest.fn());
 
 const mockStorageCluster = {
   apiVersion: 'ocs.openshift.io/v1',
@@ -208,32 +213,34 @@ describe('StorageClusterCard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Mock react-router
-    jest.mock('react-router', () => ({
-      ...jest.requireActual('react-router'),
-      useNavigate: () => mockNavigate,
-    }));
+    jest
+      .spyOn(TestDependency15, 'useNavigate')
+      .mockImplementation(() => mockNavigate);
 
     // Default mocks
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useODFNamespaceSelector as jest.Mock).mockReturnValue({
       odfNamespace: 'openshift-storage',
       isNsSafe: true,
     });
 
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useK8sWatchResource as jest.Mock).mockReturnValue([
       [mockStorageCluster],
       true,
       undefined,
     ]);
 
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useFetchCsv as jest.Mock).mockReturnValue([mockCSV, true, undefined]);
 
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useGetOCSHealth as jest.Mock).mockReturnValue({
       healthState: HealthState.OK,
       message: 'Healthy',
     });
 
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useRawCapacity as jest.Mock).mockReturnValue([
       mockPrometheusMetric('10995116277760'), // 10 TiB
       mockPrometheusMetric('5497558138880'), // 5 TiB
@@ -241,11 +248,13 @@ describe('StorageClusterCard', () => {
       undefined,
     ]);
 
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
       createPrometheusResponse('0'),
       undefined,
     ]);
 
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (getDataResiliencyState as jest.Mock).mockReturnValue({
       state: HealthState.OK,
       message: 'Healthy',
@@ -253,6 +262,7 @@ describe('StorageClusterCard', () => {
 
     // Mock useSafeK8sWatchResource for subscription
     const { useSafeK8sWatchResource } = require('@odf/core/hooks');
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useSafeK8sWatchResource as jest.Mock).mockReturnValue([
       mockSubscription,
       true,
@@ -276,6 +286,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should render loading state when storage clusters are not loaded', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useK8sWatchResource as jest.Mock).mockReturnValue([
         [],
         false,
@@ -294,6 +305,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should render error state when storage clusters fail to load', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useK8sWatchResource as jest.Mock).mockReturnValue([
         [],
         true,
@@ -312,6 +324,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should render error state when no storage cluster is found', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useK8sWatchResource as jest.Mock).mockReturnValue([[], true, undefined]);
 
       render(
@@ -342,6 +355,7 @@ describe('StorageClusterCard', () => {
 
   describe('Health Status', () => {
     it('should display healthy cluster status', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useGetOCSHealth as jest.Mock).mockReturnValue({
         healthState: HealthState.OK,
         message: 'Healthy',
@@ -359,6 +373,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display warning cluster status', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useGetOCSHealth as jest.Mock).mockReturnValue({
         healthState: HealthState.WARNING,
         message: 'Warning',
@@ -374,6 +389,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display error cluster status', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useGetOCSHealth as jest.Mock).mockReturnValue({
         healthState: HealthState.ERROR,
         message: 'Error',
@@ -391,6 +407,7 @@ describe('StorageClusterCard', () => {
 
   describe('Resiliency Status', () => {
     it('should display healthy ceph resiliency', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (getDataResiliencyState as jest.Mock).mockReturnValue({
         state: HealthState.OK,
         message: 'Healthy',
@@ -408,6 +425,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display warning ceph resiliency', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (getDataResiliencyState as jest.Mock).mockImplementation(() => {
         return {
           state: HealthState.WARNING,
@@ -425,6 +443,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display error object resiliency', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (getDataResiliencyState as jest.Mock).mockImplementation(() => {
         return {
           state: HealthState.ERROR,
@@ -443,6 +462,7 @@ describe('StorageClusterCard', () => {
 
     it('should handle different states for ceph and object resiliency', () => {
       let callCount = 0;
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (getDataResiliencyState as jest.Mock).mockImplementation(() => {
         callCount++;
         // First call returns WARNING, second call returns OK
@@ -478,6 +498,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display DASH when CSV is not loaded', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useFetchCsv as jest.Mock).mockReturnValue([null, false, undefined]);
 
       render(
@@ -491,6 +512,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display DASH when CSV has error', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useFetchCsv as jest.Mock).mockReturnValue([
         null,
         true,
@@ -518,6 +540,7 @@ describe('StorageClusterCard', () => {
 
     it('should display DASH when subscription is not loaded', () => {
       const { useSafeK8sWatchResource } = require('@odf/core/hooks');
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useSafeK8sWatchResource as jest.Mock).mockReturnValue([
         null,
         false,
@@ -535,6 +558,7 @@ describe('StorageClusterCard', () => {
 
     it('should display DASH when subscription has error', () => {
       const { useSafeK8sWatchResource } = require('@odf/core/hooks');
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useSafeK8sWatchResource as jest.Mock).mockReturnValue([
         null,
         true,
@@ -565,6 +589,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display "No capacity data available" when capacity is loading', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useRawCapacity as jest.Mock).mockReturnValue([
         null,
         null,
@@ -584,6 +609,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display "No capacity data available" when capacity has error', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useRawCapacity as jest.Mock).mockReturnValue([
         null,
         null,
@@ -603,6 +629,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display "No capacity data available" when total capacity is zero', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useRawCapacity as jest.Mock).mockReturnValue([
         mockPrometheusMetric('0'),
         mockPrometheusMetric('0'),
@@ -623,6 +650,7 @@ describe('StorageClusterCard', () => {
 
     it('should calculate capacity ratio correctly for general state', () => {
       // 2 TiB used out of 10 TiB total = 20% (under 80% warning threshold)
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useRawCapacity as jest.Mock).mockReturnValue([
         mockPrometheusMetric('10995116277760'), // 10 TiB
         mockPrometheusMetric('2199023255552'), // 2 TiB
@@ -643,6 +671,7 @@ describe('StorageClusterCard', () => {
 
     it('should handle warning threshold capacity ratio (80-85%)', () => {
       // 8.3 TiB used out of 10 TiB total = 83%
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useRawCapacity as jest.Mock).mockReturnValue([
         mockPrometheusMetric('10995116277760'), // 10 TiB
         mockPrometheusMetric('9125805605683'), // 8.3 TiB
@@ -663,6 +692,7 @@ describe('StorageClusterCard', () => {
 
     it('should handle danger threshold capacity ratio (>85%)', () => {
       // 9.5 TiB used out of 10 TiB total = 95%
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useRawCapacity as jest.Mock).mockReturnValue([
         mockPrometheusMetric('10995116277760'), // 10 TiB
         mockPrometheusMetric('10445360463872'), // 9.5 TiB
@@ -682,6 +712,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle edge case with zero used capacity', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useRawCapacity as jest.Mock).mockReturnValue([
         mockPrometheusMetric('10995116277760'), // 10 TiB
         mockPrometheusMetric('0'), // 0 used
@@ -701,6 +732,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle edge case with full capacity', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useRawCapacity as jest.Mock).mockReturnValue([
         mockPrometheusMetric('10995116277760'), // 10 TiB
         mockPrometheusMetric('10995116277760'), // 10 TiB used (100%)
@@ -750,6 +782,7 @@ describe('StorageClusterCard', () => {
 
   describe('Namespace Handling', () => {
     it('should handle different namespace correctly', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useODFNamespaceSelector as jest.Mock).mockReturnValue({
         odfNamespace: 'custom-namespace',
         isNsSafe: true,
@@ -763,6 +796,7 @@ describe('StorageClusterCard', () => {
         },
       };
 
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useK8sWatchResource as jest.Mock).mockReturnValue([
         [customStorageCluster],
         true,
@@ -779,6 +813,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle unsafe namespace', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useODFNamespaceSelector as jest.Mock).mockReturnValue({
         odfNamespace: 'openshift-storage',
         isNsSafe: false,
@@ -813,6 +848,7 @@ describe('StorageClusterCard', () => {
         },
       ];
 
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useK8sWatchResource as jest.Mock).mockReturnValue([
         clusters,
         true,
@@ -833,6 +869,7 @@ describe('StorageClusterCard', () => {
   describe('Prometheus Errors', () => {
     it('should handle ceph resiliency prometheus error', () => {
       let callCount = 0;
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useCustomPrometheusPoll as jest.Mock).mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
@@ -852,6 +889,7 @@ describe('StorageClusterCard', () => {
 
     it('should handle object resiliency prometheus error', () => {
       let callCount = 0;
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useCustomPrometheusPoll as jest.Mock).mockImplementation(() => {
         callCount++;
         if (callCount === 2) {
@@ -870,6 +908,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle both resiliency prometheus errors', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
         null,
         new Error('Prometheus error'),
@@ -900,6 +939,7 @@ describe('StorageClusterCard', () => {
 
   describe('Edge Cases', () => {
     it('should handle null storage cluster gracefully', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useK8sWatchResource as jest.Mock).mockReturnValue([
         [null],
         true,
@@ -918,6 +958,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle storage cluster without metadata', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useK8sWatchResource as jest.Mock).mockReturnValue([
         [{ kind: 'StorageCluster' }],
         true,
@@ -934,6 +975,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle empty CSV response', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useFetchCsv as jest.Mock).mockReturnValue([{}, true, undefined]);
 
       render(
@@ -947,6 +989,7 @@ describe('StorageClusterCard', () => {
 
     it('should handle empty subscription response', () => {
       const { useSafeK8sWatchResource } = require('@odf/core/hooks');
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useSafeK8sWatchResource as jest.Mock).mockReturnValue([
         {},
         true,
@@ -963,6 +1006,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle missing capacity data gracefully', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useRawCapacity as jest.Mock).mockReturnValue([
         null,
         null,
@@ -982,6 +1026,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle invalid capacity metric format', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useRawCapacity as jest.Mock).mockReturnValue([
         { metric: {}, value: null },
         { metric: {}, value: null },
@@ -1022,12 +1067,14 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle all data loaded with mixed health states', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useGetOCSHealth as jest.Mock).mockReturnValue({
         healthState: HealthState.WARNING,
         message: 'Warning',
       });
 
       let callCount = 0;
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (getDataResiliencyState as jest.Mock).mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
@@ -1048,13 +1095,16 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle partial data loading state', () => {
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useK8sWatchResource as jest.Mock).mockReturnValue([
         [mockStorageCluster],
         true,
         undefined,
       ]);
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useFetchCsv as jest.Mock).mockReturnValue([null, false, undefined]);
       const { useSafeK8sWatchResource } = require('@odf/core/hooks');
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useSafeK8sWatchResource as jest.Mock).mockReturnValue([
         null,
         false,
@@ -1083,6 +1133,7 @@ describe('StorageClusterCard', () => {
       ).not.toBeInTheDocument();
 
       // Update capacity to show no data
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useRawCapacity as jest.Mock).mockReturnValue([
         mockPrometheusMetric('0'),
         mockPrometheusMetric('0'),

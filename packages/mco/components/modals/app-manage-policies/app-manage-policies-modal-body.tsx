@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { ArgoApplicationSetModel, VirtualMachineModel } from '@odf/shared';
-import { ApplicationModel } from '@odf/shared/models';
+import { isACMApplication, isArgoApplicationSet } from '@odf/mco/utils';
+import { VirtualMachineModel } from '@odf/shared';
 import { getGVKofResource, referenceForModel } from '@odf/shared/utils';
 import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
 import {
@@ -10,23 +10,33 @@ import {
 } from './parsers';
 import { ModalViewContext } from './utils/reducer';
 
-const ComponentMap = {
-  [referenceForModel(ArgoApplicationSetModel)]: ApplicationSetParser,
-  [referenceForModel(ApplicationModel)]: SubscriptionParser,
-  [referenceForModel(VirtualMachineModel)]: VirtualMachineParser,
-};
-
 // Memoizing the component to prevent unnecessary re-renders.
 // Problem: Without React.memo, the component re-renders even if props haven't changed.
 // Fix: React.memo ensures the component only re-renders when `application`, `cluster`, or `setCurrentModalContext` changes.
 export const AppManagePoliciesModalBody: React.FC<AppManagePoliciesModalBodyProps> =
   React.memo(({ application, cluster, setCurrentModalContext }) => {
-    const gvk = getGVKofResource(application);
-    const SelectedComponent = ComponentMap[gvk];
+    if (isArgoApplicationSet(application)) {
+      return (
+        <ApplicationSetParser
+          application={application}
+          setCurrentModalContext={setCurrentModalContext}
+        />
+      );
+    }
 
-    return SelectedComponent ? (
-      <SelectedComponent
-        application={application as any}
+    if (isACMApplication(application)) {
+      return (
+        <SubscriptionParser
+          application={application}
+          setCurrentModalContext={setCurrentModalContext}
+        />
+      );
+    }
+
+    return getGVKofResource(application) ===
+      referenceForModel(VirtualMachineModel) ? (
+      <VirtualMachineParser
+        application={application}
         cluster={cluster}
         setCurrentModalContext={setCurrentModalContext}
       />

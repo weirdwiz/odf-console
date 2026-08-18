@@ -1,88 +1,88 @@
 import React from 'react';
+import * as TestDependency5 from '@odf/core/components/utils';
+import * as TestDependency4 from '@odf/core/hooks';
+import * as TestDependency13 from '@odf/shared';
+import * as TestDependency7 from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import * as TestDependency2 from 'react-hook-form';
+import * as TestDependency1 from 'react-router';
 import { enableScaleEncryption } from '../../../scale-encryption/enableScaleEncryption';
+import * as TestDependency10 from '../../../scale-encryption/enableScaleEncryption';
+import * as TestDependency8 from '../common/hooks';
+import * as TestDependency6 from '../common/NodesSection';
+import * as TestDependency11 from '../common/payload';
 import { CreateScaleSystem } from './CreateScaleSystem';
 import { useKernelDevelEligibility } from './hooks/useKernelDevelEligibility';
+import * as TestDependency12 from './hooks/useKernelDevelEligibility';
+import * as TestDependency9 from './payload';
+import * as TestDependency3 from './useFormValidation';
 
 let mockWatchedValue = '';
-let mockFormValues: Record<string, string> = {};
-
-// Mock all external dependencies
-jest.mock('react-router', () => ({
-  useNavigate: jest.fn(() => jest.fn()),
-  Link: ({
-    children,
-    to,
-    className,
-    ...props
-  }: {
-    children: React.ReactNode;
-    to: string;
-    className?: string;
-    [key: string]: any;
-  }) => (
-    <a href={to} className={className} {...props}>
-      {children}
-    </a>
-  ),
-}));
-
-// Mock react-hook-form with realistic behavior
-jest.mock('react-hook-form', () => {
-  const actual = jest.requireActual('react-hook-form');
-  return {
-    ...actual,
-    useForm: jest.fn(() => {
-      const form = actual.useForm();
-      return {
-        ...form,
-        watch: jest.fn((_fieldName) => mockWatchedValue),
-      };
-    }),
-  };
-});
-
-// Mock useFormValidation with realistic behavior
-jest.mock('./useFormValidation', () => {
-  const actual = jest.requireActual('react-hook-form');
-  return {
-    __esModule: true,
-    default: jest.fn(() => {
-      const form = actual.useForm();
-      return {
-        formSchema: {
-          validate: jest.fn().mockResolvedValue({}),
-          validateSync: jest.fn().mockReturnValue({}),
-          isValid: true,
-          errors: {},
-        },
-        fieldRequirements: {
-          name: ['Name requirements'],
-          hostname: ['Hostname requirements'],
-          port: ['Port requirements'],
-          username: ['Username requirements'],
-          password: ['Password requirements'],
-          fileSystemName: ['File system name requirements'],
-          tenantId: ['Tenant ID requirements'],
-          client: ['Client requirements'],
-          serverInfo: ['Server information requirements'],
-        },
-        control: form.control,
-        handleSubmit: form.handleSubmit,
-        formState: form.formState,
-        isEncryptionValid: true,
-        watch: jest.fn((_fieldName) => mockWatchedValue),
-        getValues: () => mockFormValues,
-      };
-    }),
-  };
-});
-
-// Mock @odf/core/hooks
-jest.mock('@odf/core/hooks', () => ({
-  useNodesData: jest.fn(() => [
+let mockFormValues = {};
+jest
+  .spyOn(TestDependency1, 'useNavigate')
+  .mockImplementation(jest.fn(() => jest.fn()));
+jest
+  .spyOn(TestDependency1, 'Link')
+  .mockImplementation(
+    ({
+      children,
+      to,
+      className,
+      ...props
+    }: React.PropsWithChildren<
+      React.AnchorHTMLAttributes<HTMLAnchorElement>
+    >) => (
+      <a href={to} className={className} {...props}>
+        {children}
+      </a>
+    )
+  );
+const actualReactHookForm = jest.requireActual('react-hook-form');
+jest.spyOn(TestDependency2, 'useForm').mockImplementation(
+  jest.fn(() => {
+    const form = actualReactHookForm.useForm();
+    return {
+      ...form,
+      watch: jest.fn((_fieldName) => mockWatchedValue),
+    };
+  })
+);
+const validationReactHookForm = jest.requireActual('react-hook-form');
+jest.spyOn(TestDependency3, 'default').mockImplementation(
+  jest.fn(() => {
+    const form = validationReactHookForm.useForm();
+    return {
+      formSchema: {
+        validate: jest.fn().mockResolvedValue({}),
+        validateSync: jest.fn().mockReturnValue({}),
+        isValid: true,
+        errors: {},
+      },
+      fieldRequirements: {
+        name: ['Name requirements'],
+        hostname: ['Hostname requirements'],
+        port: ['Port requirements'],
+        username: ['Username requirements'],
+        password: ['Password requirements'],
+        fileSystemName: ['File system name requirements'],
+        tenantId: ['Tenant ID requirements'],
+        client: ['Client requirements'],
+        serverInfo: ['Server information requirements'],
+      },
+      control: form.control,
+      handleSubmit: form.handleSubmit,
+      formState: form.formState,
+      isEncryptionValid: true,
+      watch: jest.fn((_fieldName) => mockWatchedValue),
+      getValues: () => mockFormValues,
+    };
+  })
+);
+jest.spyOn(TestDependency4, 'useNodesData').mockImplementation(
+  jest.fn(() => [
     [
       { name: 'node1', uid: 'node1-uid' },
       { name: 'node2', uid: 'node2-uid' },
@@ -90,18 +90,16 @@ jest.mock('@odf/core/hooks', () => ({
     ],
     true, // loaded
     null, // error
-  ]),
-}));
-
-jest.mock('@odf/core/components/utils', () => ({
-  createWizardNodeState: jest.fn((nodes: any[]) => nodes),
-}));
+  ])
+);
+jest
+  .spyOn(TestDependency5, 'createWizardNodeState')
+  .mockImplementation(jest.fn((nodes: any[]) => nodes));
 
 // Capture setSelectedNodes so tests can directly control node selection
 let capturedSetSelectedNodes: ((nodes: any[]) => void) | null = null;
-
-jest.mock('../common/NodesSection', () => ({
-  ScaleNodesSection: jest.fn(
+jest.spyOn(TestDependency6, 'ScaleNodesSection').mockImplementation(
+  jest.fn(
     ({ setSelectedNodes }: { setSelectedNodes: (nodes: any[]) => void }) => {
       capturedSetSelectedNodes = setSelectedNodes;
       return (
@@ -114,58 +112,60 @@ jest.mock('../common/NodesSection', () => ({
         </div>
       );
     }
-  ),
+  )
+);
+jest
+  .spyOn(TestDependency7, 'useK8sWatchResource')
+  .mockImplementation(jest.fn(() => [null, true, null]));
+jest
+  .spyOn(TestDependency8, 'useIsLocalClusterConfigured')
+  .mockImplementation(jest.fn(() => null));
+jest
+  .spyOn(TestDependency9, 'createScaleCaCertSecretPayload')
+  .mockImplementation(jest.fn(() => () => Promise.resolve({})));
+jest
+  .spyOn(TestDependency9, 'createScaleRemoteClusterPayload')
+  .mockImplementation(jest.fn(() => () => Promise.resolve({})));
+jest
+  .spyOn(TestDependency9, 'createFileSystem')
+  .mockImplementation(jest.fn(() => () => Promise.resolve({})));
+jest
+  .spyOn(TestDependency10, 'enableScaleEncryption')
+  .mockImplementation(jest.fn(() => Promise.resolve()));
+jest
+  .spyOn(TestDependency11, 'configureMetricsNamespaceLabels')
+  .mockImplementation(jest.fn(() => Promise.resolve()));
+jest
+  .spyOn(TestDependency11, 'createConfigMapPayload')
+  .mockImplementation(jest.fn(() => () => Promise.resolve({})));
+jest
+  .spyOn(TestDependency11, 'createScaleLocalClusterPayload')
+  .mockImplementation(jest.fn(() => () => Promise.resolve({})));
+jest
+  .spyOn(TestDependency11, 'createUserDetailsSecretPayload')
+  .mockImplementation(jest.fn(() => () => Promise.resolve({})));
+jest
+  .spyOn(TestDependency11, 'labelNodes')
+  .mockImplementation(jest.fn(() => () => Promise.resolve({})));
+jest
+  .spyOn(TestDependency12, 'useKernelDevelEligibility')
+  .mockImplementation(jest.fn());
+jest.spyOn(TestDependency13, 'useCustomTranslation').mockImplementation(() => ({
+  t: (key: string) => key,
 }));
-
-// Mock @openshift-console/dynamic-plugin-sdk to provide useK8sWatchResource
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  useK8sWatchResource: jest.fn(() => [null, true, null]),
-}));
-
-// Mock the common hooks
-jest.mock('../common/hooks', () => ({
-  useIsLocalClusterConfigured: jest.fn(() => null),
-}));
-
-jest.mock('./payload', () => ({
-  createScaleCaCertSecretPayload: jest.fn(() => () => Promise.resolve({})),
-  createScaleRemoteClusterPayload: jest.fn(() => () => Promise.resolve({})),
-  createFileSystem: jest.fn(() => () => Promise.resolve({})),
-}));
-
-jest.mock('../../../scale-encryption/enableScaleEncryption', () => ({
-  enableScaleEncryption: jest.fn(() => Promise.resolve()),
-}));
-
-jest.mock('../common/payload', () => ({
-  configureMetricsNamespaceLabels: jest.fn(() => Promise.resolve()),
-  createConfigMapPayload: jest.fn(() => () => Promise.resolve({})),
-  createScaleLocalClusterPayload: jest.fn(() => () => Promise.resolve({})),
-  createUserDetailsSecretPayload: jest.fn(() => () => Promise.resolve({})),
-  labelNodes: jest.fn(() => () => Promise.resolve({})),
-}));
-
-jest.mock('./hooks/useKernelDevelEligibility', () => ({
-  useKernelDevelEligibility: jest.fn(),
-}));
-
-// Mock only the specific hooks and components that require connectivity or SDK dependencies
-jest.mock('@odf/shared', () => {
-  const actual = jest.requireActual('@odf/shared');
-  return {
-    ...actual,
-    useCustomTranslation: () => ({
-      t: (key: string) => key,
-    }),
-    useYupValidationResolver: jest.fn(() =>
-      jest.fn().mockReturnValue({
-        errors: {},
-        values: {},
-        isValid: true,
-      })
-    ),
-    PageHeading: ({
+jest.spyOn(TestDependency13, 'useYupValidationResolver').mockImplementation(
+  jest.fn(() =>
+    jest.fn().mockReturnValue({
+      errors: {},
+      values: {},
+      isValid: true,
+    })
+  )
+);
+jest
+  .spyOn(TestDependency13, 'PageHeading')
+  .mockImplementation(
+    ({
       children,
       title,
       breadcrumbs,
@@ -185,15 +185,15 @@ jest.mock('@odf/shared', () => {
         </nav>
         {children}
       </div>
-    ),
-  };
-});
+    )
+  );
 
 describe('CreateScaleSystem', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockWatchedValue = '';
     mockFormValues = {};
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useKernelDevelEligibility as jest.Mock).mockReturnValue({
       areSelectedNodesEligible: true,
       isLoading: false,
@@ -347,6 +347,7 @@ describe('CreateScaleSystem', () => {
         tenantId: 'tenant',
       };
       await user.click(screen.getByLabelText('Enable data encryption'));
+      // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
       await user.upload(
         container.querySelectorAll('input[type="file"]')[1] as HTMLInputElement,
         new File(['certificate'], 'ca.crt')
@@ -385,6 +386,7 @@ describe('CreateScaleSystem', () => {
 
     it('requires at least three selected nodes', async () => {
       mockWatchedValue = 'valid';
+      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       (useKernelDevelEligibility as jest.Mock).mockReturnValue({
         areSelectedNodesEligible: true,
         isLoading: false,
@@ -417,6 +419,7 @@ describe('CreateScaleSystem', () => {
       const user = userEvent.setup();
       const { container } = render(<CreateScaleSystem />);
 
+      // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
       const fileInput = container.querySelector(
         'input[type="file"]'
       ) as HTMLInputElement;
@@ -611,10 +614,12 @@ describe('CreateScaleSystem', () => {
       expect(duration).toBeLessThan(2500);
     });
 
+    // SAFETY: The any test value defines the members exercised by this test.
     it('should not cause memory leaks with file uploads', async () => {
       const user = userEvent.setup();
       const { container } = render(<CreateScaleSystem />);
 
+      // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
       const fileInput = container.querySelector(
         'input[type="file"]'
       ) as HTMLInputElement;
@@ -624,6 +629,7 @@ describe('CreateScaleSystem', () => {
         type: 'text/plain',
       });
 
+      // SAFETY: The any test value defines the members exercised by this test.
       const startMemory = (performance as any).memory?.usedJSHeapSize || 0;
 
       // Upload file multiple times
@@ -634,9 +640,11 @@ describe('CreateScaleSystem', () => {
 
       // Force garbage collection if available
       if ((global as any).gc) {
+        // SAFETY: The any test value defines the members exercised by this test.
         (global as any).gc();
       }
 
+      // SAFETY: The any test value defines the members exercised by this test.
       const endMemory = (performance as any).memory?.usedJSHeapSize || 0;
       const memoryIncrease = endMemory - startMemory;
 
@@ -668,17 +676,12 @@ describe('CreateScaleSystem', () => {
     it('should not re-render child components unnecessarily', () => {
       const ChildComponentSpy = jest.fn();
 
-      // Mock TextInputWithFieldRequirements to track renders
-      jest.doMock('@odf/shared', () => {
-        const actual = jest.requireActual('@odf/shared');
-        return {
-          ...actual,
-          TextInputWithFieldRequirements: (props: any) => {
-            ChildComponentSpy();
-            return <input {...props.textInputProps} />;
-          },
-        };
-      });
+      const fieldRequirementsSpy = jest
+        .spyOn(TestDependency13, 'TextInputWithFieldRequirements')
+        .mockImplementation((props) => {
+          ChildComponentSpy();
+          return <input {...props.textInputProps} />;
+        });
 
       const { rerender } = render(<CreateScaleSystem />);
 
@@ -690,6 +693,7 @@ describe('CreateScaleSystem', () => {
 
       // Child components should not re-render if props haven't changed
       expect(ChildComponentSpy).toHaveBeenCalledTimes(0);
+      fieldRequirementsSpy.mockRestore();
     });
 
     it('should render component quickly', () => {

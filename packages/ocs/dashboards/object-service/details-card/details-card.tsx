@@ -10,6 +10,7 @@ import {
   ODF_OPERATOR,
   OCS_OPERATOR,
   DEFAULT_INFRASTRUCTURE,
+  PrometheusEndpoint,
 } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
@@ -59,13 +60,13 @@ export const ObjectServiceDetailsCard: React.FC<{}> = () => {
   const { odfNamespace, isNsSafe } = useODFNamespaceSelector();
   const [systemResult, systemLoadError] = useCustomPrometheusPoll({
     query: NOOBAA_SYSTEM_NAME_QUERY,
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [dashboardLinkResult, dashboardLinkLoadError] = useCustomPrometheusPoll(
     {
       query: NOOBAA_DASHBOARD_LINK_QUERY,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     }
   );

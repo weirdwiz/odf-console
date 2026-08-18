@@ -1,5 +1,6 @@
 import { getLabel, getName } from '@odf/shared/selectors';
 import { NodeKind, PodKind } from '@odf/shared/types';
+import { isString } from 'lodash-es';
 import { OsdInformation } from '../sidebar/types';
 
 // Constants
@@ -22,7 +23,7 @@ const extractOsdId = (
   input: string | PodKind | undefined
 ): string | undefined => {
   if (!input) return undefined;
-  if (typeof input === 'string') {
+  if (isString(input)) {
     // input like "osd.2"
     const parts = input.split('.');
     return parts.length >= 2 ? parts[1] : undefined;

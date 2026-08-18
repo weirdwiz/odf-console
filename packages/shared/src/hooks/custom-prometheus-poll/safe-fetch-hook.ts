@@ -16,6 +16,7 @@ export const useSafeFetch = () => {
     return () => ctrl.abort();
   }, []);
 
+  // SAFETY: controller.current.signal comes from the owner of the AbortSignal contract used at this boundary.
   return (props: SafeFetchProps) =>
     consoleFetchJSON(
       props.url,

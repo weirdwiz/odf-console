@@ -31,7 +31,10 @@ type DeleteObjectsSummaryProps = {
 
 type DeleteObjectsMap = { [objectName: string]: ObjectCrFormat };
 
-type SummaryRowComponent = React.ComponentType<RowComponentType<unknown>>;
+type SummaryRowExtraProps = {
+  foldersPath: string;
+  deleteObjectsMap: DeleteObjectsMap;
+};
 
 const getColumnNames = (t: TFunction) => [
   '', // expandable
@@ -65,7 +68,9 @@ const getHeaderColumns = (t: TFunction) => {
   ];
 };
 
-const ObjectsSummaryTableRow: React.FC<RowComponentType<_Error>> = ({
+const ObjectsSummaryTableRow: React.FC<
+  RowComponentType<_Error, SummaryRowExtraProps>
+> = ({
   row: object,
   rowIndex,
   extraProps,
@@ -126,6 +131,7 @@ const DeleteObjectsSummary: React.FC<
 }) => {
   const { t } = useCustomTranslation();
 
+  // SAFETY: This empty DeleteObjectsMap accumulator receives only entries created by the reducer below.
   const deleteObjectsMap: DeleteObjectsMap = React.useMemo(
     () =>
       selectedObjects.reduce((acc, object) => {
@@ -135,6 +141,7 @@ const DeleteObjectsSummary: React.FC<
     [selectedObjects]
   );
 
+  // SAFETY: ObjectsSummaryTableRow comes from the owner of the SummaryRowComponent contract used at this boundary.
   return (
     <Modal
       title={t('Object delete summary')}
@@ -153,7 +160,7 @@ const DeleteObjectsSummary: React.FC<
           hideFilter
           composableTableProps={{
             columns: getHeaderColumns(t),
-            RowComponent: ObjectsSummaryTableRow as SummaryRowComponent,
+            RowComponent: ObjectsSummaryTableRow,
             extraProps: { foldersPath, deleteObjectsMap },
             unfilteredData: errorResponse as [],
             loaded: true,

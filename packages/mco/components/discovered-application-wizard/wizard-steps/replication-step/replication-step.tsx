@@ -19,6 +19,8 @@ import {
 } from './replication-selection-helper';
 
 // Convert DRPolicyKind to PolicyInfo
+export const replicationStepDependencies = { useK8sList };
+
 const convertToPolicyInfo = (policy?: DRPolicyKind): PolicyInfo =>
   !_.isEmpty(policy)
     ? {
@@ -27,7 +29,12 @@ const convertToPolicyInfo = (policy?: DRPolicyKind): PolicyInfo =>
         schedulingInterval: policy?.spec?.schedulingInterval || '0m',
         isValidated: isDRPolicyValidated(policy),
       }
-    : ({} as PolicyInfo);
+    : {
+        name: '',
+        drClusters: [],
+        schedulingInterval: '0m',
+        isValidated: false,
+      };
 
 export const ReplicationSelection: React.FC<ReplicationSelectionProps> = ({
   state,
@@ -39,7 +46,7 @@ export const ReplicationSelection: React.FC<ReplicationSelectionProps> = ({
     state.replication;
 
   const [drPolicies, loaded, loadError] =
-    useK8sList<DRPolicyKind>(DRPolicyModel);
+    replicationStepDependencies.useK8sList<DRPolicyKind>(DRPolicyModel);
 
   const [ramenConfig] = useRamenConfig();
   const retainNamespaceSCCAcrossPeers =

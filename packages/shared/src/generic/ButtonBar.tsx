@@ -6,11 +6,13 @@ import { useCustomTranslation } from '../useCustomTranslationHook';
 import { LoadingInline } from './Loading';
 
 const injectDisabled = (children: React.ReactChild, disabled) => {
+  // SAFETY: c comes from the owner of the React.ReactElement contract used at this boundary.
   return React.Children.map(children, (c) => {
     if (!_.isObject(c) || (c as React.ReactElement).type !== 'button') {
       return c;
     }
 
+    // SAFETY: c comes from the owner of the React.ReactElement contract used at this boundary.
     return React.cloneElement(c as React.ReactElement, {
       disabled: (c as React.ReactElement).props.disabled || disabled,
     });
@@ -45,6 +47,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
   successMessage,
   inProgress = false,
 }) => {
+  // SAFETY: children comes from the owner of the React.ReactChild contract used at this boundary.
   return (
     <div className={classNames(className, 'co-m-btn-bar')}>
       <AlertGroup

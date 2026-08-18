@@ -3,12 +3,10 @@ import { DRClusterAppsMap } from '@odf/mco/types';
 import { PrometheusResponse } from '@openshift-console/dynamic-plugin-sdk';
 
 export const OperatorStatusesContext =
-  React.createContext<OperatorStatusesContextType>(
-    {} as OperatorStatusesContextType
-  );
+  React.createContext<OperatorStatusesContextType>({});
 
 export const DRResourcesContext = React.createContext<DRResourcesContextType>(
-  {} as DRResourcesContextType
+  {}
 );
 
 type StatusesContextType = {
@@ -18,13 +16,13 @@ type StatusesContextType = {
 };
 
 type OperatorStatusesContextType = {
-  csvStatus: StatusesContextType;
+  csvStatus?: StatusesContextType;
   // Alternate way for non CSV operator status monitoring
-  podStatus: StatusesContextType;
+  podStatus?: StatusesContextType;
 };
 
 type DRResourcesContextType = {
-  drClusterAppsMap: DRClusterAppsMap;
-  loaded: boolean;
-  loadError: any;
+  drClusterAppsMap?: DRClusterAppsMap;
+  loaded?: boolean;
+  loadError?: any;
 };

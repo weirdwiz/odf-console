@@ -1,29 +1,28 @@
 import { NOOBAA_PROVISIONER } from '@odf/shared/constants';
+import * as TestDependency2 from '@odf/shared/hooks/useK8sList';
 import * as selectors from '@odf/shared/selectors';
+import * as TestDependency1 from '@odf/shared/selectors';
 import { renderHook } from '@testing-library/react';
 import { State } from './state';
 import useObcFormSchema from './useObcFormSchema';
 
-jest.mock('@odf/shared/selectors', () => ({
-  getName: jest.fn().mockReturnValue('test'),
-}));
-
-jest.mock('@odf/shared/hooks/useK8sList', () => ({
-  __esModule: true,
-  useK8sList: () => [
-    [
-      {
-        metadata: {
-          name: 'test',
-        },
+jest
+  .spyOn(TestDependency1, 'getName')
+  .mockImplementation(jest.fn().mockReturnValue('test'));
+jest.spyOn(TestDependency2, 'useK8sList').mockImplementation(() => [
+  [
+    {
+      metadata: {
+        name: 'test',
       },
-    ],
-    true,
-    undefined,
+    },
   ],
-}));
+  true,
+  undefined,
+]);
 
 const defaultNs = 'test-namespace';
+// SAFETY: The State test value defines the members exercised by this test.
 const defaultState = { scProvisioner: '' } as State;
 const defaultSc = 'test-storageclass';
 
@@ -158,6 +157,7 @@ describe('useObcFormSchema tests', () => {
     const obcName = 'valid-name';
     const expected = 'bucketclass is a required field';
     const spy = jest.spyOn(selectors, 'getName');
+    // SAFETY: The State test value defines the members exercised by this test.
     const { result } = renderHook(() =>
       useObcFormSchema(defaultNs, {
         scProvisioner: NOOBAA_PROVISIONER,

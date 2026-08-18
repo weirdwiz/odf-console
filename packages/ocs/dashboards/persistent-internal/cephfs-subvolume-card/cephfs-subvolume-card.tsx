@@ -116,6 +116,7 @@ const fetchPodsForPVC = async (
 
     const podList = Array.isArray(response) ? response : response?.items || [];
 
+    // SAFETY: k8sList returns Promise<any>; PodModel query yields Pod resources.
     const relatedPods = (podList as PodKind[]).filter((pod: PodKind) => {
       const volumes = pod?.spec?.volumes ?? [];
       return volumes.some(
@@ -129,14 +130,15 @@ const fetchPodsForPVC = async (
   }
 };
 
-const CephFSSubvolumeRow: React.FC<RowComponentType<SubvolumeRow>> = ({
+const CephFSSubvolumeRow: React.FC<
+  RowComponentType<SubvolumeRow, CephFSSubvolumeExtraProps>
+> = ({
   row,
   rowIndex,
   extraProps,
 }) => {
   const { t } = useCustomTranslation();
-  const { metricLabel, fetchPodsForPVC: fetchPods }: CephFSSubvolumeExtraProps =
-    extraProps;
+  const { metricLabel, fetchPodsForPVC: fetchPods } = extraProps;
   const [relatedPods, setRelatedPods] = React.useState<PodKind[]>([]);
   const [isLoadingPods, setIsLoadingPods] = React.useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);

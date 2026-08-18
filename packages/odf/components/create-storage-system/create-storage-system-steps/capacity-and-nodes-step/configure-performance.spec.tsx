@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { createWizardNodeState } from '@odf/core/components/utils';
 import { useNodesData } from '@odf/core/hooks';
+import * as TestDependency1 from '@odf/core/hooks';
 import { ResourceProfile } from '@odf/core/types';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -9,9 +10,7 @@ import ConfigurePerformance, {
   ProfileRequirementsText,
 } from './configure-performance';
 
-jest.mock('@odf/core/hooks', () => ({
-  useNodesData: jest.fn(),
-}));
+jest.spyOn(TestDependency1, 'useNodesData').mockImplementation(jest.fn());
 
 const onResourceProfileChange = jest.fn();
 
@@ -27,6 +26,7 @@ describe('Configure Performance', () => {
     const memory = 32 * 1000 * 1000 * 1000;
     const nodes = createFakeNodesData(3, cpu, memory);
     const selectedNodes = createWizardNodeState(nodes);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValueOnce([nodes, true, null]);
 
     const user = userEvent.setup();
@@ -47,6 +47,7 @@ describe('Configure Performance', () => {
     expect(errorIcon).toBeFalsy();
 
     await user.click(dropdown);
+    // SAFETY: The HTMLButtonElement test value defines the members exercised by this test.
     const performanceOption = screen
       .getByTestId('Performance mode')
       .querySelector('button') as HTMLButtonElement;
@@ -58,6 +59,7 @@ describe('Configure Performance', () => {
   });
 
   it('forces Lean when selectable nodes do not allow higher profiles', () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValueOnce([[], true, null]);
 
     render(
@@ -78,6 +80,7 @@ describe('Configure Performance', () => {
     const memory = 32 * 1000 * 1000 * 1000;
     const nodes = createFakeNodesData(3, cpu, memory);
     const selectedNodes = createWizardNodeState(nodes);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValueOnce([nodes, true, null]);
 
     const { container } = render(
@@ -102,6 +105,7 @@ describe('Configure Performance', () => {
     const memory = 32 * 1000 * 1000 * 1000;
     const nodes = createFakeNodesData(3, cpu, memory);
     const selectedNodes = createWizardNodeState(nodes);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValueOnce([nodes, true, null]);
 
     render(
@@ -130,6 +134,7 @@ describe('Configure Performance', () => {
       node.status.nodeInfo = { architecture: 's390x' };
     });
     const selectedNodes = createWizardNodeState(nodes);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValueOnce([nodes, true, null]);
 
     render(
@@ -153,6 +158,7 @@ describe('Configure Performance', () => {
       node.status.nodeInfo = { architecture: 's390x' };
     });
     const selectedNodes = createWizardNodeState(nodes);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValueOnce([nodes, true, null]);
 
     render(
@@ -176,6 +182,7 @@ describe('Configure Performance', () => {
       node.status.nodeInfo = { architecture: 's390x' };
     });
     const selectedNodes = createWizardNodeState(nodes);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValueOnce([nodes, true, null]);
 
     render(
@@ -199,6 +206,7 @@ describe('Configure Performance', () => {
       node.status.nodeInfo = { architecture: 's390x' };
     });
     const selectedNodes = createWizardNodeState(nodes);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValueOnce([nodes, true, null]);
 
     render(

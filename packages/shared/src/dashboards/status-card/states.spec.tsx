@@ -1,6 +1,8 @@
 import * as React from 'react';
+import * as TestDependency2 from '@odf/shared/status/icons';
 import { HealthState } from '@openshift-console/dynamic-plugin-sdk';
 import { render } from '@testing-library/react';
+import * as TestDependency1 from '@patternfly/react-icons';
 import {
   csvStatusMap,
   healthStateMap,
@@ -29,20 +31,27 @@ const mockYellowExclamationTriangleIcon = jest.fn((_unused) => {
 const mockRedExclamationCircleIcon = jest.fn((_unused) => {
   return <div id="red-exclamation-circle-icon-mocked" />;
 });
-
-jest.mock('@patternfly/react-icons', () => ({
-  InProgressIcon: (props) => mockInProgressIcon(props),
-}));
-
-jest.mock('@odf/shared/status/icons', () => ({
-  GreenCheckCircleIcon: (props) => mockGreenCheckCircleIcon(props),
-  GrayUnknownIcon: (props) => mockGreyUnknownIcon(props),
-  BlueSyncIcon: (props) => mockBlueSyncIcon(props),
-  BlueArrowCircleUpIcon: (props) => mockBlueArrowCircleUpIcon(props),
-  YellowExclamationTriangleIcon: (props) =>
-    mockYellowExclamationTriangleIcon(props),
-  RedExclamationCircleIcon: (props) => mockRedExclamationCircleIcon(props),
-}));
+jest
+  .spyOn(TestDependency1, 'InProgressIcon')
+  .mockImplementation((props) => mockInProgressIcon(props));
+jest
+  .spyOn(TestDependency2, 'GreenCheckCircleIcon')
+  .mockImplementation((props) => mockGreenCheckCircleIcon(props));
+jest
+  .spyOn(TestDependency2, 'GrayUnknownIcon')
+  .mockImplementation((props) => mockGreyUnknownIcon(props));
+jest
+  .spyOn(TestDependency2, 'BlueSyncIcon')
+  .mockImplementation((props) => mockBlueSyncIcon(props));
+jest
+  .spyOn(TestDependency2, 'BlueArrowCircleUpIcon')
+  .mockImplementation((props) => mockBlueArrowCircleUpIcon(props));
+jest
+  .spyOn(TestDependency2, 'YellowExclamationTriangleIcon')
+  .mockImplementation((props) => mockYellowExclamationTriangleIcon(props));
+jest
+  .spyOn(TestDependency2, 'RedExclamationCircleIcon')
+  .mockImplementation((props) => mockRedExclamationCircleIcon(props));
 
 const mockedTFunction = jest.fn().mockImplementation((props) => props);
 

@@ -73,7 +73,7 @@ export const InventoryCard: React.FC = () => {
           dataTest="inventory-sc"
           isLoading={!scLoaded}
           error={!!scLoadError}
-          kind={StorageClassModel as any}
+          kind={StorageClassModel}
           resources={poolSc}
           showLink
         />
@@ -81,7 +81,7 @@ export const InventoryCard: React.FC = () => {
           dataTest="inventory-pvc"
           isLoading={!pvcLoaded}
           error={!!pvcLoadError}
-          kind={PersistentVolumeClaimModel as any}
+          kind={PersistentVolumeClaimModel}
           resources={pvcs}
           mapper={getPVCStatusGroups}
           showLink

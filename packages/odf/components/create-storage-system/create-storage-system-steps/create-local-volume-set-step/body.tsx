@@ -115,31 +115,24 @@ const getDiskTypeValidationError = (
   state: WizardState['createLocalVolumeSet'],
   t: TFunction
 ) => {
-  let validationError: {
-    title: string;
-    description: string;
-    variant?: AlertVariant;
-  };
-
   // "chartNodes" signify the nodes (selected by the user) on which disks (SSDs only, other types are disabled) are attached
   // if no such nodes found, it means no SSD is present as well
-  if (state.chartNodes.size === 0)
-    validationError = {
+  if (state.chartNodes.size === 0) {
+    return {
       title: t('No SSD/NVMe disks detected'),
       description: t(
         'You do not have any SSD/NVMe disks available. Data Foundation supports only SSD/NVMe disk type in internal mode.'
       ),
     };
-  else
-    validationError = {
-      title: t('Disk type is set to SSD/NVMe'),
-      description: t(
-        'Data Foundation supports only SSD/NVMe disk type for internal mode deployment.'
-      ),
-      variant: AlertVariant.info,
-    };
+  }
 
-  return validationError;
+  return {
+    title: t('Disk type is set to SSD/NVMe'),
+    description: t(
+      'Data Foundation supports only SSD/NVMe disk type for internal mode deployment.'
+    ),
+    variant: AlertVariant.info,
+  };
 };
 
 export const LocalVolumeSetBody: React.FC<LocalVolumeSetBodyProps> = ({

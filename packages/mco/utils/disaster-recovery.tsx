@@ -416,7 +416,10 @@ export const parseSyncInterval = (
   );
   const splittedArray = scheduledSyncInterval?.match(regex);
   const interval = Number(splittedArray?.[0] || 0);
-  const unit = (splittedArray?.[1] || TimeUnits.Minutes) as TimeUnits;
+  const unit =
+    Object.values(TimeUnits).find(
+      (timeUnit) => timeUnit === splittedArray?.[1]
+    ) || TimeUnits.Minutes;
   return [unit, interval];
 };
 
@@ -513,10 +516,20 @@ export const getDRStatus = ({
   }
 };
 
+type VRGManagedClusterView = ACMManagedClusterViewKind & {
+  status: { result: DRVolumeReplicationGroupKind };
+};
+
+const isVRGManagedClusterView = (
+  mcv: ACMManagedClusterViewKind
+): mcv is VRGManagedClusterView =>
+  mcv?.spec?.scope?.kind === DRVolumeReplicationGroup.kind &&
+  _.isObject(mcv?.status?.result) &&
+  'spec' in mcv.status.result &&
+  _.isObject(mcv.status.result.spec);
+
 const filterMulticlusterView = (mcvs: ACMManagedClusterViewKind[]) =>
-  mcvs?.filter(
-    (mcv) => mcv?.spec?.scope?.kind === DRVolumeReplicationGroup.kind
-  );
+  mcvs?.filter(isVRGManagedClusterView);
 
 export const getProtectedPVCFromVRG = (
   mcvs: ACMManagedClusterViewKind[]
@@ -526,7 +539,7 @@ export const getProtectedPVCFromVRG = (
     const drpcName = mcv?.metadata?.annotations?.[DRPC_NAME_ANNOTATION];
     const drpcNamespace =
       mcv?.metadata?.annotations?.[DRPC_NAMESPACE_ANNOTATION];
-    const vrg = mcv?.status?.result as DRVolumeReplicationGroupKind;
+    const vrg = mcv.status.result;
     const pvcInfo: ProtectedPVCData[] = vrg?.status?.protectedPVCs?.map(
       (pvc) => ({
         drpcName,
@@ -657,7 +670,7 @@ export const getLastAppDeploymentClusterName = (
   ] || '';
 
 export const findDeploymentClusters = (
-  placementDecision: ACMPlacementDecisionKind,
+  placementDecision: ACMPlacementDecisionKind | ACMPlacementRuleKind,
   drPlacementControl: DRPlacementControlKind
 ): string[] => {
   if ((placementDecision ?? {}).status?.decisions?.length > 0) {

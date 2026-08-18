@@ -303,6 +303,9 @@ export const MirroringCard: React.FC = () => {
               >
                 <StatusIconAndText
                   title={healthStateMessage(mirroringHealth?.health, t)}
+                  // SAFETY: HealthStateMappingValues.icon is ReactNode;
+                  // StatusIconAndText expects ReactElement. The mapping
+                  // always assigns JSX elements to icon.
                   icon={mirroringHealth?.icon as React.ReactElement}
                   className="pf-v6-u-ml-xs"
                 />
@@ -314,6 +317,7 @@ export const MirroringCard: React.FC = () => {
               >
                 <StatusIconAndText
                   title={healthStateMessage(imageHealth?.health, t)}
+                  // SAFETY: same ReactNode→ReactElement narrowing as above.
                   icon={imageHealth?.icon as React.ReactElement}
                   className="pf-v6-u-ml-xs"
                 />

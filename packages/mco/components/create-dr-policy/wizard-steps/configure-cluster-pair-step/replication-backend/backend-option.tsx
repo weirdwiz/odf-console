@@ -18,10 +18,7 @@ type BackendOptionProps = {
   onSelect: (selected: BackendType) => void;
 };
 
-const getBackendOptionDetails = (
-  backendType: BackendType,
-  t: TFunction
-): { title: string; description: string; showRecommended?: boolean } => {
+const getBackendOptionDetails = (backendType: BackendType, t: TFunction) => {
   switch (backendType) {
     case BackendType.DataFoundation:
       return {

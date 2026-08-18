@@ -55,6 +55,7 @@ export const useLSOProvisionedVolumes: UseLSOProvisionedVolumes = (
     const discoveredDisks: DiscoveredDisk[] =
       createDiscoveredDiskData(lvdResults);
 
+    // SAFETY: This empty VolumesMap accumulator receives only entries created by the reducer below.
     return (
       provisionedPVs.reduce((acc, pv: K8sResourceKind) => {
         const pvNode = getLabel(pv, LSO_HOSTNAME_LABEL);

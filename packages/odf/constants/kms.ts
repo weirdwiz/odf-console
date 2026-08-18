@@ -40,7 +40,7 @@ type SupportedProvidersProps = {
  * all of them are not supported by UI. "supported" will have a list of all the UI supported
  * implementations for a particular KMS provider (AWS, Vault, IBM etc).
  */
-export const SupportedProviders: SupportedProvidersProps = {
+export const SupportedProviders = {
   [ProviderNames.VAULT]: {
     group: KmsProviderNames.VAULT,
     supported: [
@@ -71,7 +71,7 @@ export const SupportedProviders: SupportedProvidersProps = {
     supported: [KmsImplementations.AZURE],
     allowedPlatforms: ['Azure'],
   },
-};
+} satisfies SupportedProvidersProps;
 
 export const DescriptionKey = {
   [KmsImplementations.VAULT_TOKENS]: 'VAULT_ADDR',

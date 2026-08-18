@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useCustomTranslation } from '@odf/shared/useCustomTranslationHook';
+import { isString } from 'lodash-es';
 import {
   Toolbar,
   ToolbarContent,
@@ -48,9 +49,9 @@ export const DRPCFilterToolbar: React.FC<DRPCFilterToolbarProps> = ({
     label: ToolbarLabel | string
   ) => {
     let val: string;
-    if (typeof label === 'string') {
+    if (isString(label)) {
       val = label;
-    } else if ('key' in label && typeof label.key === 'string') {
+    } else if ('key' in label && isString(label.key)) {
       val = label.key;
     } else {
       // Fallback: convert to string

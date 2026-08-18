@@ -35,6 +35,14 @@ import {
 } from '../../utils/reducer';
 import './namespace-step.scss';
 
+const useListPageFilterDependency: typeof useListPageFilter = (...args) =>
+  useListPageFilter(...args);
+
+export const namespaceTableDependencies = {
+  useACMSafeFetch,
+  useListPageFilter: useListPageFilterDependency,
+};
+
 export const findAllEligiblePolicies = (
   clusterName: string,
   drPolicies: DRPolicyKind[]
@@ -147,7 +155,7 @@ export const NamespaceSelectionTable: React.FC<
 
   // ACM search proxy API call (skip if no cluster selected)
   const [searchResult, searchError, searchLoaded] =
-    useACMSafeFetch(searchQuery);
+    namespaceTableDependencies.useACMSafeFetch(searchQuery);
 
   const userNamespaces: K8sResourceCommon[] = React.useMemo(() => {
     if (searchLoaded && !searchError) {
@@ -168,7 +176,7 @@ export const NamespaceSelectionTable: React.FC<
   }, [searchResult, protectedNamespaces, searchLoaded, searchError]);
 
   const [data, filteredData, onFilterChange] =
-    useListPageFilter(userNamespaces);
+    namespaceTableDependencies.useListPageFilter(userNamespaces);
 
   const setSelectedNamespaces = (selectedNamespaces: K8sResourceCommon[]) =>
     dispatch({

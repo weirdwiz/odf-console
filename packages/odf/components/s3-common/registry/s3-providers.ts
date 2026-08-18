@@ -96,10 +96,7 @@ export const NOOBAA_STATIC_CONFIG: ProviderConfig = {
   skipSignatureCalculation: false,
 };
 
-export const S3_PROVIDER_REGISTRY: Record<
-  S3ProviderType,
-  ProviderRegistryEntry
-> = {
+export const S3_PROVIDER_REGISTRY = {
   [S3ProviderType.Noobaa]: {
     dynamicConfig: {
       getConfig: (
@@ -174,4 +171,4 @@ export const S3_PROVIDER_REGISTRY: Record<
     },
   },
   [S3ProviderType.RgwExt]: {},
-};
+} satisfies Record<S3ProviderType, ProviderRegistryEntry>;

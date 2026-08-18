@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useODFNamespaceSelector } from '@odf/core/redux';
 import { useGetExternalClusterDetails } from '@odf/core/redux/utils';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import { BreakdownCardBody } from '@odf/shared/dashboards/breakdown-card/breakdown-body';
 import { getSelectOptions } from '@odf/shared/dashboards/breakdown-card/breakdown-dropdown';
 import {
@@ -61,13 +62,13 @@ export const BreakdownCard: React.FC = () => {
   const queryKeys = Object.keys(queries);
 
   const [byUsed, byUsedError, byUsedLoading] = useCustomPrometheusPoll({
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     query: queries[queryKeys[0]],
     basePath: usePrometheusBasePath(),
   });
   const [totalUsed, totalUsedError, totalUsedLoading] = useCustomPrometheusPoll(
     {
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       query: queries[queryKeys[1]],
       basePath: usePrometheusBasePath(),
     }
@@ -84,6 +85,8 @@ export const BreakdownCard: React.FC = () => {
   const metricTotal = totalUsed?.data?.result[0]?.value[1];
 
   const handleMetricsChange: SelectProps['onSelect'] = (_e, breakdown) => {
+    // SAFETY: PF Select onSelect types value as `any`; all option IDs in
+    // dropdownOptions are BreakdownCardFields members.
     setMetricType(breakdown as BreakdownCardFields);
     setBreakdownSelect(!isOpenBreakdownSelect);
   };

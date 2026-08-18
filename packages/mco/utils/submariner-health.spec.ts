@@ -19,7 +19,7 @@ const addonWithConditions = (
   ({
     metadata: { name: 'submariner' },
     status: { conditions },
-  }) as SubmarinerAddOnKind;
+  }) satisfies SubmarinerAddOnKind;
 
 const healthyAddon = () =>
   addonWithConditions([
@@ -45,8 +45,8 @@ const degradedAddon = () =>
 const cluster = (
   addon: SubmarinerAddOnKind | undefined,
   loaded = true,
-  loadError: unknown = null
-) => ({ addon, loaded, loadError });
+  cause: unknown = null
+) => ({ addon, loaded, loadError: cause });
 
 describe('evaluateSubmarinerPrePair', () => {
   it('reports Healthy when both addons are available and not connection-degraded', () => {

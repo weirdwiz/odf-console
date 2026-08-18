@@ -11,6 +11,7 @@ import { CAPACITY_INFO_QUERIES, StorageDashboardQuery } from '../queries';
 export const useRawCapacity = (
   clusterName: string
 ): [PrometheusResponse, PrometheusResponse, boolean, any] => {
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [totalCapacity, totalError, totalLoading] = useCustomPrometheusPoll({
     query:
       CAPACITY_INFO_QUERIES(clusterName)[
@@ -19,6 +20,7 @@ export const useRawCapacity = (
     endpoint: 'api/v1/query' as any,
     basePath: usePrometheusBasePath(),
   });
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [usedCapacity, usedError, usedLoading] = useCustomPrometheusPoll({
     query:
       CAPACITY_INFO_QUERIES(clusterName)[

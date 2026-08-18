@@ -1,3 +1,5 @@
+import { isObject, isString } from 'lodash-es';
+
 export const ipToNumber = (ip: string): number | null => {
   if (!ip) {
     return null;
@@ -100,20 +102,29 @@ export const evaluateCidrListsOverlap = (
     : CidrOverlapResult.None;
 };
 
-export const asStringArray = (value: unknown): string[] => {
-  if (typeof value === 'string') {
+type CidrConfigValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | { cidr?: string | number | boolean | null }
+  | CidrConfigValue[];
+
+export const asStringArray = (value: CidrConfigValue): string[] => {
+  if (isString(value)) {
     return [value];
   }
   if (!Array.isArray(value)) {
     return [];
   }
   return value.flatMap((item) => {
-    if (typeof item === 'string') {
+    if (isString(item)) {
       return [item];
     }
-    if (item && typeof item === 'object' && 'cidr' in item) {
-      const cidr = (item as { cidr: unknown }).cidr;
-      return typeof cidr === 'string' ? [cidr] : [];
+    if (isObject(item) && !Array.isArray(item) && 'cidr' in item) {
+      const { cidr } = item;
+      return isString(cidr) ? [cidr] : [];
     }
     return [];
   });

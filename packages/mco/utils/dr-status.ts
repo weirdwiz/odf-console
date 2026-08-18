@@ -20,6 +20,9 @@ import { getVolumeReplicationHealth } from '../utils';
  * Unified DR Status enum - Single source of truth for all DR status values.
  * Combines Phase, Progression, VolumeReplicationHealth, and custom protection statuses.
  */
+export const parseDRPhase = (value?: string): Phase | undefined =>
+  Object.values(Phase).find((phase) => phase === value);
+
 export enum DRStatus {
   // Phases from ramen.ts
   WaitForUser = Phase.WaitForUser,
@@ -96,7 +99,7 @@ const isWithinSyncThreshold = (
  */
 const shouldShowProtecting = (
   isCleanupRequired: boolean,
-  phase: Phase,
+  phase: Phase | undefined,
   protectedCondition?: K8sResourceCondition,
   volumeLastGroupSyncTime?: string,
   actionStartTime?: string,
@@ -185,7 +188,7 @@ export const getDRStatus = ({
   dryRun,
 }: {
   isCleanupRequired?: boolean;
-  phase: Phase;
+  phase?: Phase;
   volumeReplicationHealth?: VolumeReplicationHealth;
   kubeObjectReplicationHealth?: VolumeReplicationHealth;
   progression?: string;

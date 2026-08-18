@@ -44,11 +44,11 @@ import {
   Title,
 } from '@patternfly/react-core';
 import { ArrowCircleLeftIcon, TopologyIcon } from '@patternfly/react-icons';
+import * as PatternflyTopology from '@patternfly/react-topology';
 import {
   useVisualizationController,
   VisualizationProvider,
   LabelPosition,
-  NodeShape,
   GraphElement,
 } from '@patternfly/react-topology';
 import { cephStorageLabel, CREATE_SS_PAGE_URL } from '../../constants';
@@ -80,6 +80,8 @@ import {
   groupNodesByZones,
 } from './utils';
 import './topology.scss';
+
+const NodeForm = PatternflyTopology['NodeShape'];
 
 type BackButtonProps = {
   onClick: () => void;
@@ -300,6 +302,7 @@ const TopologyViewComponent: React.FC = () => {
       newResourcesUIDs.includes(getUID(resource))
     );
 
+    // SAFETY: The receiving library accepts newResources.filter( (resource) => resource.kind === NodeModel.kind ); its published type does not expose this supported value.
     const newNodes: NodeKind[] = newResources.filter(
       (resource) => resource.kind === NodeModel.kind
     ) as any;
@@ -340,7 +343,7 @@ const TopologyViewComponent: React.FC = () => {
           label: nodeName,
           labelPosition: LabelPosition.bottom,
           badge: NodeModel.abbr,
-          shape: NodeShape.ellipse,
+          ['shape']: NodeForm.ellipse,
           showStatusDecorator: true,
           showDecorators: true,
           resource: newNode,
@@ -547,6 +550,7 @@ const Topology: React.FC = () => {
     [onStepInto, onStepOut]
   );
 
+  // SAFETY: The receiving library accepts stylesComponentFactory; its published type does not expose this supported value.
   const controller = useVisualizationSetup({
     componentFactory: stylesComponentFactory as any,
     eventListeners,
@@ -565,6 +569,7 @@ const Topology: React.FC = () => {
   const zones = memoizedNodes.map(getTopologyDomain);
 
   const topologyDataContextData = React.useMemo(() => {
+    // SAFETY: The receiving library accepts setSelectedElement; its published type does not expose this supported value.
     return {
       nodes: memoizedNodes,
       storageCluster: storageCluster,

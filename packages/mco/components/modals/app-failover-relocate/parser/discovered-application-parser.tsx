@@ -30,6 +30,11 @@ import { FailoverRelocateModal } from '../failover-relocate-modal';
 import { PlacementControlProps } from '../failover-relocate-modal-body';
 import { ValidateManagedClusterCondition } from './argo-application-set-parser';
 
+export const discoveredApplicationParserDependencies = {
+  useDisasterRecoveryResourceWatch,
+  useK8sWatchResource,
+};
+
 const getDRResources = (drPlacementControl: DRPlacementControlKind) => ({
   resources: {
     drClusters: getDRClusterResourceObj(),
@@ -85,12 +90,15 @@ export const DRPlacementControlParser: React.FC<
 > = ({ isOpen, closeModal, extraProps: { application, action } }) => {
   const { t } = useCustomTranslation();
 
-  const [drResources, drLoaded, drLoadError] = useDisasterRecoveryResourceWatch(
+  const [drResources, drLoaded, drLoadError] =
+    discoveredApplicationParserDependencies.useDisasterRecoveryResourceWatch(
     getDRResources(application)
   );
 
   const [managedClusters, managedClusterLoaded, managedClusterLoadError] =
-    useK8sWatchResource<ACMManagedClusterKind[]>(
+    discoveredApplicationParserDependencies.useK8sWatchResource<
+      ACMManagedClusterKind[]
+    >(
       getManagedClusterResourceObj()
     );
 

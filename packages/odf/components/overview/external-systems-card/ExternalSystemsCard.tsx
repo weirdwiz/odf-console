@@ -162,6 +162,7 @@ export const ExternalSystemsCard: React.FC<CardProps> = ({ className }) => {
     !flashSystemClusters?.loadError &&
     flashClusters.length > 0
   ) {
+    // SAFETY: flashClusters contains only entries produced for the K8sResourceKind[] contract.
     connectedRows.push({
       id: 'flash',
       label: t('IBM FlashSystem clusters'),
@@ -174,6 +175,7 @@ export const ExternalSystemsCard: React.FC<CardProps> = ({ className }) => {
     !storageClusters?.loadError &&
     externalCephClusters.length > 0
   ) {
+    // SAFETY: externalCephClusters contains only entries produced for the K8sResourceKind[] contract.
     connectedRows.push({
       id: 'ceph',
       label: t('Red Hat Ceph clusters'),

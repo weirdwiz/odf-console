@@ -65,7 +65,7 @@ const convertLifecycleRuleToRuleState = (rule: LifecycleRule): RuleState => {
   ruleState.conditionalFilters.prefix = prefix;
   ruleState.conditionalFilters.objectTags = tags;
 
-  if (!!sizeGreater && typeof sizeGreater === 'number') {
+  if (!!sizeGreater && _.isNumber(sizeGreater)) {
     ruleState.conditionalFilters.minObjectSize.isChecked = true;
     ruleState.conditionalFilters.minObjectSize.sizeInB = sizeGreater;
     ruleState.conditionalFilters.minObjectSize.unit = SizeUnit.KiB;
@@ -75,7 +75,7 @@ const convertLifecycleRuleToRuleState = (rule: LifecycleRule): RuleState => {
       SizeUnit.KiB
     ).value;
   }
-  if (!!sizeLess && typeof sizeLess === 'number') {
+  if (!!sizeLess && _.isNumber(sizeLess)) {
     ruleState.conditionalFilters.maxObjectSize.isChecked = true;
     ruleState.conditionalFilters.maxObjectSize.sizeInB = sizeLess;
     ruleState.conditionalFilters.maxObjectSize.unit = SizeUnit.KiB;
@@ -88,7 +88,7 @@ const convertLifecycleRuleToRuleState = (rule: LifecycleRule): RuleState => {
 
   // actions
   if (rule.Expiration) {
-    if (!!rule.Expiration?.Days && typeof rule.Expiration.Days === 'number') {
+    if (!!rule.Expiration?.Days && _.isNumber(rule.Expiration.Days)) {
       ruleState.ruleActions.deleteCurrent.isChecked = true;
       ruleState.ruleActions.deleteCurrent.days = rule.Expiration.Days;
     }
@@ -99,7 +99,7 @@ const convertLifecycleRuleToRuleState = (rule: LifecycleRule): RuleState => {
   if (rule.NoncurrentVersionExpiration) {
     if (
       !!rule.NoncurrentVersionExpiration?.NoncurrentDays &&
-      typeof rule.NoncurrentVersionExpiration.NoncurrentDays === 'number'
+      _.isNumber(rule.NoncurrentVersionExpiration.NoncurrentDays)
     ) {
       ruleState.ruleActions.deleteNonCurrent.isChecked = true;
       ruleState.ruleActions.deleteNonCurrent.days =
@@ -111,8 +111,7 @@ const convertLifecycleRuleToRuleState = (rule: LifecycleRule): RuleState => {
   if (rule.AbortIncompleteMultipartUpload) {
     if (
       !!rule.AbortIncompleteMultipartUpload?.DaysAfterInitiation &&
-      typeof rule.AbortIncompleteMultipartUpload.DaysAfterInitiation ===
-        'number'
+      _.isNumber(rule.AbortIncompleteMultipartUpload.DaysAfterInitiation)
     ) {
       ruleState.ruleActions.deleteIncompleteMultiparts.isChecked = true;
       ruleState.ruleActions.deleteIncompleteMultiparts.days =
@@ -152,6 +151,7 @@ const setEditRuleState = (
   existingRules: GetBucketLifecycleConfigurationCommandOutput,
   dispatch: React.Dispatch<RuleAction>
 ) => {
+  // SAFETY: This empty LifecycleRule accumulator receives only entries created by the reducer below.
   let lifecycleRule = {} as LifecycleRule;
   if (!!ruleName) {
     lifecycleRule = existingRules?.Rules?.find((rule) => rule.ID === ruleName);

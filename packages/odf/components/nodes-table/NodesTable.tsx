@@ -94,6 +94,7 @@ export const NodesTable: React.FC<NodesTableProps> = ({
   nameColumnTitle,
 }) => {
   const { t } = useCustomTranslation();
+  // SAFETY: nameSort comes from the owner of the <T>( a: T, b: T, direction: SortByDirection ) => number contract used at this boundary.
   const columns = React.useMemo<TableColumnProps[]>(
     () => [
       {
@@ -125,6 +126,7 @@ export const NodesTable: React.FC<NodesTableProps> = ({
     [nameColumnTitle, t]
   );
 
+  // SAFETY: isRowSelectable comes from the owner of the (row: any) => boolean contract used at this boundary.
   return (
     <div className="ceph-odf-install__select-nodes-table">
       <SelectableTable<NodeData>

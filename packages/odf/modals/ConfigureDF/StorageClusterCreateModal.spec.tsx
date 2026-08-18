@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { CREATE_SS_PAGE_URL } from '@odf/core/constants';
+import * as TestDependency2 from '@odf/shared';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import * as TestDependency1 from 'react-router';
 import {
   ConfigureDFSelections,
   StorageClusterCreateModal,
@@ -10,18 +12,14 @@ import {
 
 // Mock react-router
 const mockNavigate = jest.fn();
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useNavigate: () => mockNavigate,
-  useLocation: jest.fn(() => ({ pathname: '/overview', search: '' })),
-}));
-
-// Mock useCustomTranslation
-jest.mock('@odf/shared', () => ({
-  ...jest.requireActual('@odf/shared'),
-  useCustomTranslation: () => ({
-    t: (key: string) => key,
-  }),
+jest
+  .spyOn(TestDependency1, 'useNavigate')
+  .mockImplementation(() => mockNavigate);
+jest
+  .spyOn(TestDependency1, 'useLocation')
+  .mockImplementation(jest.fn(() => ({ pathname: '/overview', search: '' })));
+jest.spyOn(TestDependency2, 'useCustomTranslation').mockImplementation(() => ({
+  t: (key: string) => key,
 }));
 
 // Mock console.log to verify redirect logging
@@ -76,6 +74,7 @@ describe('ConfigureDFSelections', () => {
       <ConfigureDFSelections closeModal={mockCloseModal} />
     );
 
+    // SAFETY: The Element test value defines the members exercised by this test.
     const storageClusterCard = container.querySelector(
       '#storage-cluster'
     ) as Element;
@@ -93,6 +92,7 @@ describe('ConfigureDFSelections', () => {
       <ConfigureDFSelections closeModal={mockCloseModal} />
     );
 
+    // SAFETY: The Element test value defines the members exercised by this test.
     const externalSystemCard = container.querySelector(
       '#external-system'
     ) as Element;
@@ -107,6 +107,7 @@ describe('ConfigureDFSelections', () => {
       <ConfigureDFSelections closeModal={mockCloseModal} />
     );
 
+    // SAFETY: The Element test value defines the members exercised by this test.
     const mcgCard = container.querySelector('#object-storage') as Element;
     await user.click(mcgCard);
 
@@ -262,6 +263,7 @@ describe('Integration Tests', () => {
     const user = userEvent.setup();
     render(<StorageClusterCreateModal closeModal={mockCloseModal} />);
 
+    // SAFETY: The Element test value defines the members exercised by this test.
     const storageClusterCard = document.body.querySelector(
       '#storage-cluster'
     ) as Element;
@@ -279,6 +281,7 @@ describe('Integration Tests', () => {
     render(<StorageClusterCreateModal closeModal={mockCloseModal} />);
 
     // Click MCG card
+    // SAFETY: The Element test value defines the members exercised by this test.
     const mcgCard = document.body.querySelector('#object-storage') as Element;
     await user.click(mcgCard);
 

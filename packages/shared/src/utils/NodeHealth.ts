@@ -5,6 +5,7 @@ import { NodeStatus } from '@patternfly/react-topology';
 
 const isNodeReady = (node: NodeKind): boolean => {
   const conditions = node?.status?.conditions || [];
+  // SAFETY: _.find(conditions, { type: 'Ready' }) comes from the owner of the NodeCondition contract used at this boundary.
   const readyState = _.find(conditions, { type: 'Ready' }) as NodeCondition;
 
   return readyState && readyState.status === 'True';
@@ -24,6 +25,7 @@ const isMonitoredCondition = (condition: Condition): boolean =>
   ].includes(condition);
 
 const getDegradedStates = (node: NodeKind): Condition[] => {
+  // SAFETY: type comes from the owner of the Condition contract used at this boundary.
   return node?.status?.conditions
     ?.filter(
       ({ status, type }) =>
@@ -36,7 +38,7 @@ export const getNodeStatusWithDescriptors = (
   node: NodeKind,
   deployments: DeploymentKind[],
   t: TFunction
-): { status: NodeStatus; message: string } => {
+) => {
   // Check node is ready and no pressure in node
   const isDegraded: boolean = getDegradedStates(node)?.length > 0;
   const isNodeUp: boolean = isNodeReady(node);
@@ -61,9 +63,13 @@ export const getNodeStatusWithDescriptors = (
   return { status: NodeStatus.success, message: '' };
 };
 
+// SAFETY: _.identity comes from the owner of the TFunction contract used at this boundary.
 export const getNodeStatus = (
   node: NodeKind,
   deployments: DeploymentKind[]
 ): NodeStatus =>
-  getNodeStatusWithDescriptors(node, deployments, _.identity as TFunction)
-    .status;
+  getNodeStatusWithDescriptors(
+    node,
+    deployments,
+    /* SAFETY: The value is supplied by the TFunction owner and follows that contract. */ _.identity as TFunction
+  ).status;

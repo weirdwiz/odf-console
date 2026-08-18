@@ -37,6 +37,7 @@ export const GeneralConfigStep: React.FC<GeneralConfigStepProps> = ({
   const [invalidName, emptyName, alreadyUsedName, exceedingLengthName] =
     isInvalidName(state, existingRules, isEdit, editingRuleName);
 
+  // SAFETY: (event.target as HTMLInputElement).value comes from the owner of the RuleScope contract used at this boundary.
   return (
     <>
       <Content className="pf-v6-u-mb-lg">

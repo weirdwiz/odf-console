@@ -7,14 +7,17 @@ import {
   InfoCircleIcon,
   InProgressIcon,
 } from '@patternfly/react-icons';
+import * as PatternflyTopology from '@patternfly/react-topology';
 import {
   Node,
   Decorator,
   DEFAULT_DECORATOR_RADIUS,
-  getDefaultShapeDecoratorCenter,
 } from '@patternfly/react-topology';
 import { DecoratorIcon, TopologyDecorator, TopologyNodeData } from '../types';
 import './decorator-utils.scss';
+
+const getDefaultDecoratorCenter =
+  PatternflyTopology['getDefaultShapeDecoratorCenter'];
 
 /**
  * Maps icon string identifiers to their corresponding React icon components
@@ -69,7 +72,7 @@ export const DecoratorWithTooltip: React.FC<{
 }> = ({ decorator, element }) => {
   const decoratorRef = React.useRef<SVGGElement>(null);
   const { quadrant, icon, tooltip } = decorator;
-  const { x, y } = getDefaultShapeDecoratorCenter(quadrant, element);
+  const { x, y } = getDefaultDecoratorCenter(quadrant, element);
   const decoratorIcon = icon ? getDecoratorIcon(icon) : null;
 
   return (

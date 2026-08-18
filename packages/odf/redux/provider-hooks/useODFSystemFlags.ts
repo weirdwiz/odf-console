@@ -59,6 +59,7 @@ const useODFSystemFlagsPayload = ({
 }: UseODFSystemFlagsPayload): ODFSystemFlagsPayload => {
   const payload: ODFSystemFlagsPayload = React.useMemo(() => {
     if (allLoaded && !anyError) {
+      // SAFETY: { systemFlags: {}, areFlagsLoaded: allLoaded, flagsLoadError: anyError comes from the owner of the ODFSystemFlagsPayload contract used at this boundary.
       return storageClusters?.reduce(
         (acc: ODFSystemFlagsPayload, sc) => {
           if (!isClusterIgnored(sc)) {

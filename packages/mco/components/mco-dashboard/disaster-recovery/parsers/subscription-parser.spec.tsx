@@ -17,7 +17,10 @@ import {
   DRPolicyKind,
 } from '../../../../types';
 import { createRefFromK8Resource } from '../../../../utils';
-import { useSubscriptionParser } from './subscription-parser';
+import {
+  subscriptionParserDependencies,
+  useSubscriptionParser,
+} from './subscription-parser';
 
 let isUnProtectedApplicationTestCase = true;
 
@@ -239,24 +242,24 @@ const appResources2 = {
 const managedClusters = [];
 const managedClusterLoaded = true;
 const managedClusterLoadError = null;
-
-jest.mock('@odf/mco/hooks/disaster-recovery', () => ({
-  __esModule: true,
-  useDisasterRecoveryResourceWatch: jest.fn(() => {
-    return [drResources1, true, ''];
-  }),
-}));
-
-jest.mock('@odf/mco/hooks/subscription', () => ({
-  __esModule: true,
-  useSubscriptionResourceWatch: jest.fn(() => {
+jest
+  .spyOn(subscriptionParserDependencies, 'useDisasterRecoveryResourceWatch')
+  .mockImplementation(
+    jest.fn(() => {
+      return [drResources1, true, ''];
+    })
+  );
+jest
+  .spyOn(subscriptionParserDependencies, 'useSubscriptionResourceWatch')
+  .mockImplementation(
+  jest.fn(() => {
     if (isUnProtectedApplicationTestCase) {
       return [[appResources1], true, ''];
     } else {
       return [[appResources1, appResources2], true, ''];
     }
-  }),
-}));
+  })
+);
 
 describe('useApplicationSetParser', () => {
   test('Application count with unprotected applications', async () => {

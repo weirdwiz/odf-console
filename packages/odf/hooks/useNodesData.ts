@@ -27,6 +27,7 @@ export const useNodesData = (
 ): [NodeData[], boolean, any] => {
   const [nodes, nodesLoaded, nodesLoadError] =
     useK8sWatchResource<NodeKind[]>(nodeResource);
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [utilization, , promLoading] = useCustomPrometheusPoll({
     query: allNodesUtilizationQueries[NodeQueries.ALL_NODES_MEMORY_TOTAL],
     endpoint: 'api/v1/query' as any,
@@ -58,6 +59,7 @@ export const useNodesData = (
             getName(node),
           ]);
           node['metrics'] = { memory: metric ? metric.value[1] : undefined };
+          // SAFETY: node comes from the owner of the NodeData contract used at this boundary.
           return node as NodeData;
         });
     }

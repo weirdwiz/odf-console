@@ -2,42 +2,6 @@ import { renderHook } from '@testing-library/react';
 import * as Yup from 'yup';
 import useScaleSystemFormValidation from './useFormValidation';
 
-// Mock the translation hook
-jest.mock('@odf/shared/useCustomTranslationHook', () => ({
-  useCustomTranslation: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
-// Mock the @odf/shared module to include STORAGE_SIZE_UNIT_NAME_MAP
-jest.mock('@odf/shared', () => ({
-  ...jest.requireActual('@odf/shared'),
-  STORAGE_SIZE_UNIT_NAME_MAP: {
-    Ti: 'TiB',
-    Gi: 'GiB',
-  },
-}));
-
-// Mock the field requirements translations
-jest.mock('@odf/shared/constants', () => ({
-  fieldRequirementsTranslations: {
-    maxChars: (_t: any, max: number) => `No more than ${max} characters`,
-    minChars: (_t: any, min: number) => `No less than ${min} characters`,
-    startAndEndName: (_t: any) =>
-      'Starts and ends with a lowercase letter or number',
-    alphaNumericPeriodAdnHyphen: (_t: any) =>
-      'Only lowercase letters, numbers, non-consecutive periods, or hyphens',
-    cannotBeEmpty: (_t: any) => 'Cannot be empty',
-  },
-}));
-
-// Mock validation regex
-jest.mock('@odf/shared/utils/validation', () => ({
-  startAndEndsWithAlphanumerics: /^[a-z0-9](.*[a-z0-9])?$/,
-  alphaNumericsPeriodsHyphensNonConsecutive:
-    /(^[a-z0-9]|^([-.](?![-.])))+([a-z0-9]|([-.](?![-.])))*[a-z0-9]*$/,
-}));
-
 describe('useScaleSystemFormValidation', () => {
   const getHookResult = () => {
     const { result } = renderHook(() =>
@@ -93,6 +57,7 @@ describe('useScaleSystemFormValidation', () => {
 
       expectedFieldTypes.forEach((fieldType) => {
         expect(result.fieldRequirements).toHaveProperty(fieldType);
+        // SAFETY: The keyof typeof result.fieldRequirements test value defines the members exercised by this test.
         expect(
           Array.isArray(
             result.fieldRequirements[
@@ -643,7 +608,7 @@ describe('useScaleSystemFormValidation', () => {
       Object.values(fieldRequirements).forEach((requirements) => {
         expect(Array.isArray(requirements)).toBe(true);
         requirements.forEach((requirement) => {
-          expect(typeof requirement).toBe('string');
+          expect(requirement).toEqual(expect.any(String));
           expect(requirement.length).toBeGreaterThan(0);
         });
       });

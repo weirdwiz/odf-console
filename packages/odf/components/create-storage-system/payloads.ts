@@ -166,6 +166,7 @@ export const createStorageCluster = async (
     enableArbiter
   );
 
+  // SAFETY: ( isNoProvisioner ? DefaultRequestSize.BAREMETAL : capacity ) comes from the owner of the string contract used at this boundary.
   const storage = (
     isNoProvisioner ? DefaultRequestSize.BAREMETAL : capacity
   ) as string;
@@ -297,6 +298,7 @@ export const taintNodes = async (nodes: WizardNodeState[]) => {
 
 export const createExternalSubSystem = async (subSystemPayloads: Payload[]) => {
   try {
+    // SAFETY: payload.model comes from the owner of the K8sKind contract used at this boundary.
     await Promise.all(
       subSystemPayloads.map(async (payload) =>
         k8sCreate({ model: payload.model as K8sKind, data: payload.payload })

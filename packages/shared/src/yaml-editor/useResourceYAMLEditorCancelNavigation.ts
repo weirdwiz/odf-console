@@ -10,6 +10,7 @@ export const useResourceYAMLEditorCancelNavigation = (): void => {
 
   React.useEffect(() => {
     const handleClick = (event: MouseEvent) => {
+      // SAFETY: React invokes this handler from the rendered HTMLElement control.
       const target = event.target as HTMLElement;
       if (target.closest('#cancel')) {
         event.preventDefault();

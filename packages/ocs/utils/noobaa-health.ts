@@ -44,6 +44,8 @@ export const getNooBaaState: PrometheusHealthHandler = (
   const { response, error } = responses[0];
   const noobaaLoaded = noobaa?.loaded;
   const noobaaLoadError = noobaa?.loadError;
+  // SAFETY: FirehoseResult.data unions single/list; NooBaa is fetched with
+  // isList:true so data is K8sResourceCommon[] at runtime.
   const noobaaData = noobaa?.data as K8sResourceCommon[];
   const statusIndex: string = getGaugeValue(response);
 

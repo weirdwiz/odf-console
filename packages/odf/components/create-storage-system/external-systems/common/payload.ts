@@ -18,6 +18,7 @@ import {
 import { k8sPatchByName } from '@odf/shared/utils';
 import {
   K8sKind,
+  K8sResourceCommon,
   Patch,
   k8sCreate,
   k8sPatch,
@@ -190,7 +191,7 @@ export const createScaleLocalClusterPayload = (
   return () => k8sCreate({ model: ClusterModel, data: payload });
 };
 
-const labelUserWorkloadMonitoringNamespace = (): Promise<unknown> => {
+const labelUserWorkloadMonitoringNamespace = (): Promise<K8sResourceCommon> => {
   const patch: Patch[] = [
     {
       op: 'add',
@@ -209,7 +210,7 @@ const labelUserWorkloadMonitoringNamespace = (): Promise<unknown> => {
   });
 };
 
-const removeClusterMonitoringLabel = (): Promise<unknown> => {
+const removeClusterMonitoringLabel = (): Promise<K8sResourceCommon> => {
   const patch: Patch[] = [
     {
       op: 'remove',

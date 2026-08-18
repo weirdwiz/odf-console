@@ -57,6 +57,11 @@ import {
 } from './utils/types';
 import './style.scss';
 
+export const managePolicyViewDependencies = {
+  formatTime,
+  useK8sWatchResource,
+};
+
 const displayUnknown = (t: TFunction) => (
   <StatusIconAndText
     icon={<UnknownIcon />}
@@ -70,7 +75,7 @@ const replicationStatus = (label: string, time: string, t: TFunction) => (
     <div className="pf-v6-l-flex">
       {label}{' '}
       {time ? (
-        t('Last synced on {{syncTime}}', { syncTime: formatTime(time) })
+        t('Last synced on {{syncTime}}', { syncTime: managePolicyViewDependencies.formatTime(time) })
       ) : (
         <>
           &nbsp;
@@ -164,7 +169,7 @@ const getAggregatedDRInfo = (
         acc.lastGroupSyncTime,
         drpc?.lastGroupSyncTime,
       ]),
-      assignedOn: formatTime(
+      assignedOn: managePolicyViewDependencies.formatTime(
         getLatestDate([acc.assignedOn, drpc?.metadata?.creationTimestamp])
       ),
       lastKubeObjectProtectionTime:
@@ -220,7 +225,8 @@ const ManagePolicyEmptyPage: React.FC<ManagePolicyEmptyPageProps> = ({
   appType,
 }) => {
   const { t } = useCustomTranslation();
-  const [discoveredApps, loaded, loadError] = useK8sWatchResource<
+  const [discoveredApps, loaded, loadError] =
+    managePolicyViewDependencies.useK8sWatchResource<
     DRPlacementControlKind[]
   >(
     getDRPlacementControlResourceObj({

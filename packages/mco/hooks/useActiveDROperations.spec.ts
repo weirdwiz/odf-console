@@ -1,17 +1,18 @@
-import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import { renderHook } from '@testing-library/react';
 import { DRActionType } from '../constants';
 import { DRPlacementControlKind, Phase, Progression } from '../types';
-import { useActiveDROperations } from './useActiveDROperations';
+import {
+  activeDROperationsDependencies,
+  useActiveDROperations,
+} from './useActiveDROperations';
 
-jest.mock('@openshift-console/dynamic-plugin-sdk');
-jest.mock('@odf/shared/hooks/deep-compare-memoize', () => ({
-  useDeepCompareMemoize: jest.fn((value) => value),
-}));
-
-const mockUseK8sWatchResource = useK8sWatchResource as jest.MockedFunction<
-  typeof useK8sWatchResource
->;
+const mockUseK8sWatchResource = jest.spyOn(
+  activeDROperationsDependencies,
+  'useK8sWatchResource'
+);
+jest
+  .spyOn(activeDROperationsDependencies, 'useDeepCompareMemoize')
+  .mockImplementation(jest.fn((value) => value));
 
 type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
@@ -61,7 +62,7 @@ const createMockDRPC = (
       ...base.status,
       ...overrides?.status,
     },
-  } as DRPlacementControlKind;
+  } satisfies DRPlacementControlKind;
 };
 
 describe('useActiveDROperations', () => {

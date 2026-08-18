@@ -54,6 +54,7 @@ type DeleteObjectsModalProps = {
   isVersioningEnabledOrSuspended: boolean;
 };
 
+// SAFETY: The receiving library accepts t; its published type does not expose this supported value.
 const getTextInputLabel = (t: TFunction) => (
   <Trans t={t as any} values={{ delete: DELETE }}>
     <b>
@@ -137,7 +138,14 @@ const getHeaderColumns = (showVersioning: boolean, t: TFunction) => {
   ];
 };
 
-const DeleteObjectsTableRow: React.FC<RowComponentType<ObjectCrFormat>> = ({
+type DeleteObjectsRowExtraProps = Pick<
+  DeleteObjectsModalProps,
+  'foldersPath' | 'showVersioning'
+>;
+
+const DeleteObjectsTableRow: React.FC<
+  RowComponentType<ObjectCrFormat, DeleteObjectsRowExtraProps>
+> = ({
   row: object,
   extraProps,
 }) => {
@@ -250,6 +258,7 @@ const DeleteObjectsModal: React.FC<
         }
 
         deleteResponse.Deleted = successfullyDeletedObjectVersions;
+        // SAFETY: This empty DeleteObjectsCommandOutput accumulator receives only entries created by the reducer below.
         setDeleteResponse({
           selectedObjects: data,
           deleteResponse: deleteResponse || ({} as DeleteObjectsCommandOutput),
@@ -265,6 +274,7 @@ const DeleteObjectsModal: React.FC<
           Delete: { Objects: deleteObjectKeys },
         });
 
+        // SAFETY: This empty DeleteObjectsCommandOutput accumulator receives only entries created by the reducer below.
         setDeleteResponse({
           selectedObjects: data,
           deleteResponse: deleteResponse || ({} as DeleteObjectsCommandOutput),
@@ -282,6 +292,7 @@ const DeleteObjectsModal: React.FC<
     }
   };
 
+  // SAFETY: data contains only entries produced for the [] contract.
   return (
     <Modal
       title={getTitle(data, showVersioning, t)}

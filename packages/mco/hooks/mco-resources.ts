@@ -23,71 +23,77 @@ import {
   SUBMARINER_CLUSTER_KIND,
 } from '../constants';
 
-export const getDRClusterResourceObj = (props?: ClusterScopeObjectType) => ({
-  cluster: HUB_CLUSTER_NAME,
-  ...(!!props?.name ? { name: props?.name } : {}),
-  kind: referenceForModel(DRClusterModel),
-  ...(!props?.name ? { isList: true } : {}),
-  namespaced: false,
-  optional: true,
-});
+export const getDRClusterResourceObj = (props?: ClusterScopeObjectType) =>
+  (() => {
+    const value = {
+      cluster: HUB_CLUSTER_NAME,
+      kind: referenceForModel(DRClusterModel),
+      namespaced: false,
+      optional: true,
+    };
+    if (!!props?.name) Object.assign(value, { name: props?.name });
+    if (!props?.name) Object.assign(value, { isList: true });
+    return value;
+  })();
 
-export const getDRPolicyResourceObj = (props?: ClusterScopeObjectType) => ({
-  cluster: HUB_CLUSTER_NAME,
-  ...(!!props?.name ? { name: props?.name } : {}),
-  kind: referenceForModel(DRPolicyModel),
-  ...(!props?.name ? { isList: true } : {}),
-  namespaced: false,
-  optional: true,
-});
+export const getDRPolicyResourceObj = (props?: ClusterScopeObjectType) =>
+  (() => {
+    const value = {
+      cluster: HUB_CLUSTER_NAME,
+      kind: referenceForModel(DRPolicyModel),
+      namespaced: false,
+      optional: true,
+    };
+    if (!!props?.name) Object.assign(value, { name: props?.name });
+    if (!props?.name) Object.assign(value, { isList: true });
+    return value;
+  })();
 
-export const getMirrorPeerResourceObj = (props?: ClusterScopeObjectType) => ({
-  cluster: HUB_CLUSTER_NAME,
-  ...(!!props?.name ? { name: props?.name } : {}),
-  kind: referenceForModel(MirrorPeerModel),
-  ...(!props?.name ? { isList: true } : {}),
-  namespaced: false,
-  optional: true,
-});
+export const getMirrorPeerResourceObj = (props?: ClusterScopeObjectType) =>
+  (() => {
+    const value = {
+      cluster: HUB_CLUSTER_NAME,
+      kind: referenceForModel(MirrorPeerModel),
+      namespaced: false,
+      optional: true,
+    };
+    if (!!props?.name) Object.assign(value, { name: props?.name });
+    if (!props?.name) Object.assign(value, { isList: true });
+    return value;
+  })();
 
-export const getManagedClusterResourceObj = (
-  props?: ClusterScopeObjectType
-) => ({
-  cluster: HUB_CLUSTER_NAME,
-  ...(!!props?.name ? { name: props?.name } : {}),
-  kind: referenceForModel(ACMManagedClusterModel),
-  ...(!props?.name ? { isList: true } : {}),
-  namespaced: false,
-  optional: true,
-});
+export const getManagedClusterResourceObj = (props?: ClusterScopeObjectType) =>
+  (() => {
+    const value = {
+      cluster: HUB_CLUSTER_NAME,
+      kind: referenceForModel(ACMManagedClusterModel),
+      namespaced: false,
+      optional: true,
+    };
+    if (!!props?.name) Object.assign(value, { name: props?.name });
+    if (!props?.name) Object.assign(value, { isList: true });
+    return value;
+  })();
 
 export const getDRPlacementControlResourceObj = (
   props?: NamespacedObjectType
-) => ({
-  cluster: HUB_CLUSTER_NAME,
-  ...(!!props?.name ? { name: props?.name } : {}),
-  ...(!!props?.namespace ? { namespace: props?.namespace } : {}),
-  kind: referenceForModel(DRPlacementControlModel),
-  ...(!props?.name ? { isList: true } : {}),
-  namespaced: !!props?.namespace ? false : true,
-  ...(!!props?.selector ? { selector: props?.selector } : {}),
-  optional: true,
-});
+) =>
+  (() => {
+    const value = {
+      cluster: HUB_CLUSTER_NAME,
+      kind: referenceForModel(DRPlacementControlModel),
+      namespaced: !!props?.namespace ? false : true,
+      optional: true,
+    };
+    if (!!props?.name) Object.assign(value, { name: props?.name });
+    if (!!props?.namespace)
+      Object.assign(value, { namespace: props?.namespace });
+    if (!props?.name) Object.assign(value, { isList: true });
+    if (!!props?.selector) Object.assign(value, { selector: props?.selector });
+    return value;
+  })();
 
-export const getProtectedApplicationViewResourceObj = (
-  namespace?: string
-): {
-  cluster: string;
-  kind: string;
-  namespaced: boolean;
-  isList: boolean;
-  namespace?: string;
-  groupVersionKind: {
-    group: string;
-    version: string;
-    kind: string;
-  };
-} => ({
+export const getProtectedApplicationViewResourceObj = (namespace?: string) => ({
   cluster: HUB_CLUSTER_NAME,
   kind: ProtectedApplicationViewModel.kind,
   namespaced: true,
@@ -100,68 +106,98 @@ export const getProtectedApplicationViewResourceObj = (
   ...(namespace && { namespace }),
 });
 
-export const getApplicationSetResourceObj = (props?: NamespacedObjectType) => ({
-  cluster: HUB_CLUSTER_NAME,
-  ...(!!props?.name ? { name: props?.name } : {}),
-  ...(!!props?.namespace ? { namespace: props?.namespace } : {}),
-  kind: referenceForModel(ArgoApplicationSetModel),
-  ...(!props?.name ? { isList: true } : {}),
-  namespaced: !!props?.namespace ? true : false,
-  optional: true,
-});
+export const getApplicationSetResourceObj = (props?: NamespacedObjectType) =>
+  (() => {
+    const value = {
+      cluster: HUB_CLUSTER_NAME,
+      kind: referenceForModel(ArgoApplicationSetModel),
+      namespaced: !!props?.namespace ? true : false,
+      optional: true,
+    };
+    if (!!props?.name) Object.assign(value, { name: props?.name });
+    if (!!props?.namespace)
+      Object.assign(value, { namespace: props?.namespace });
+    if (!props?.name) Object.assign(value, { isList: true });
+    return value;
+  })();
 
-export const getPlacementResourceObj = (props?: NamespacedObjectType) => ({
-  cluster: HUB_CLUSTER_NAME,
-  ...(!!props?.name ? { name: props?.name } : {}),
-  ...(!!props?.namespace ? { namespace: props?.namespace } : {}),
-  kind: referenceForModel(ACMPlacementModel),
-  ...(!props?.name ? { isList: true } : {}),
-  namespaced: !!props?.namespace ? true : false,
-  optional: true,
-});
+export const getPlacementResourceObj = (props?: NamespacedObjectType) =>
+  (() => {
+    const value = {
+      cluster: HUB_CLUSTER_NAME,
+      kind: referenceForModel(ACMPlacementModel),
+      namespaced: !!props?.namespace ? true : false,
+      optional: true,
+    };
+    if (!!props?.name) Object.assign(value, { name: props?.name });
+    if (!!props?.namespace)
+      Object.assign(value, { namespace: props?.namespace });
+    if (!props?.name) Object.assign(value, { isList: true });
+    return value;
+  })();
 
 export const getPlacementDecisionsResourceObj = (
   props?: NamespacedObjectType
-) => ({
-  cluster: HUB_CLUSTER_NAME,
-  ...(!!props?.name ? { name: props?.name } : {}),
-  ...(!!props?.namespace ? { namespace: props?.namespace } : {}),
-  kind: referenceForModel(ACMPlacementDecisionModel),
-  ...(!props?.name ? { isList: true } : {}),
-  namespaced: !!props?.namespace ? true : false,
-  ...(!!props?.selector ? { selector: props?.selector } : {}),
-  optional: true,
-});
+) =>
+  (() => {
+    const value = {
+      cluster: HUB_CLUSTER_NAME,
+      kind: referenceForModel(ACMPlacementDecisionModel),
+      namespaced: !!props?.namespace ? true : false,
+      optional: true,
+    };
+    if (!!props?.name) Object.assign(value, { name: props?.name });
+    if (!!props?.namespace)
+      Object.assign(value, { namespace: props?.namespace });
+    if (!props?.name) Object.assign(value, { isList: true });
+    if (!!props?.selector) Object.assign(value, { selector: props?.selector });
+    return value;
+  })();
 
-export const getPlacementRuleResourceObj = (props?: NamespacedObjectType) => ({
-  cluster: HUB_CLUSTER_NAME,
-  ...(!!props?.name ? { name: props?.name } : {}),
-  ...(!!props?.namespace ? { namespace: props?.namespace } : {}),
-  kind: referenceForModel(ACMPlacementRuleModel),
-  ...(!props?.name ? { isList: true } : {}),
-  namespaced: !!props?.namespace ? true : false,
-  optional: true,
-});
+export const getPlacementRuleResourceObj = (props?: NamespacedObjectType) =>
+  (() => {
+    const value = {
+      cluster: HUB_CLUSTER_NAME,
+      kind: referenceForModel(ACMPlacementRuleModel),
+      namespaced: !!props?.namespace ? true : false,
+      optional: true,
+    };
+    if (!!props?.name) Object.assign(value, { name: props?.name });
+    if (!!props?.namespace)
+      Object.assign(value, { namespace: props?.namespace });
+    if (!props?.name) Object.assign(value, { isList: true });
+    return value;
+  })();
 
-export const getSubscriptionResourceObj = (props?: NamespacedObjectType) => ({
-  cluster: HUB_CLUSTER_NAME,
-  ...(!!props?.name ? { name: props?.name } : {}),
-  ...(!!props?.namespace ? { namespace: props?.namespace } : {}),
-  kind: referenceForModel(ACMSubscriptionModel),
-  ...(!props?.name ? { isList: true } : {}),
-  namespaced: !!props?.namespace ? true : false,
-  optional: true,
-});
+export const getSubscriptionResourceObj = (props?: NamespacedObjectType) =>
+  (() => {
+    const value = {
+      cluster: HUB_CLUSTER_NAME,
+      kind: referenceForModel(ACMSubscriptionModel),
+      namespaced: !!props?.namespace ? true : false,
+      optional: true,
+    };
+    if (!!props?.name) Object.assign(value, { name: props?.name });
+    if (!!props?.namespace)
+      Object.assign(value, { namespace: props?.namespace });
+    if (!props?.name) Object.assign(value, { isList: true });
+    return value;
+  })();
 
-export const getApplicationResourceObj = (props?: NamespacedObjectType) => ({
-  cluster: HUB_CLUSTER_NAME,
-  ...(!!props?.name ? { name: props?.name } : {}),
-  ...(!!props?.namespace ? { namespace: props?.namespace } : {}),
-  kind: referenceForModel(ApplicationModel),
-  ...(!props?.name ? { isList: true } : {}),
-  namespaced: !!props?.namespace ? true : false,
-  optional: true,
-});
+export const getApplicationResourceObj = (props?: NamespacedObjectType) =>
+  (() => {
+    const value = {
+      cluster: HUB_CLUSTER_NAME,
+      kind: referenceForModel(ApplicationModel),
+      namespaced: !!props?.namespace ? true : false,
+      optional: true,
+    };
+    if (!!props?.name) Object.assign(value, { name: props?.name });
+    if (!!props?.namespace)
+      Object.assign(value, { namespace: props?.namespace });
+    if (!props?.name) Object.assign(value, { isList: true });
+    return value;
+  })();
 
 const getSubmarinerHubListResourceObj = (kind: string) => ({
   cluster: HUB_CLUSTER_NAME,

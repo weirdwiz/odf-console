@@ -99,9 +99,12 @@ export const createSteps = (
   },
 ];
 
+export const enrollDiscoveredApplicationDependencies = { useNavigate };
+
 const EnrollDiscoveredApplication: React.FC<{}> = () => {
   const { t } = useCustomTranslation();
-  const navigate = useNavigate();
+  const navigate =
+    enrollDiscoveredApplicationDependencies.useNavigate();
   const [isValidationEnabled, setIsValidationEnabled] = React.useState(false);
   const [onSaveError, setOnSaveError] = React.useState('');
 

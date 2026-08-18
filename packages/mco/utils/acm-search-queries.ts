@@ -91,9 +91,13 @@ export const queryStorageClassesUsingClusterNames = (
   query: searchFilterQuery,
 });
 
+type SearchResultResource = K8sResourceCommon & {
+  status: { cluster: string; resourceName: string };
+};
+
 export const convertSearchResult = (
   result: SearchResultItemType
-): K8sResourceCommon => {
+): SearchResultResource => {
   const resourceName = result.name;
   // example labels: "key1:value1;key2=value2"
   const labelList: string[] = result.label?.split(LABELS_SPLIT_CHAR) || [];
@@ -118,7 +122,7 @@ export const convertSearchResult = (
       cluster: result.cluster,
       resourceName,
     },
-  } as K8sResourceCommon;
+  };
 };
 
 // Only some metadata information are coverted

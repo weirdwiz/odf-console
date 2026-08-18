@@ -1,68 +1,18 @@
 import * as React from 'react';
 import { StorageConsumerKind } from '@odf/shared';
+import * as TestDependency1 from '@odf/shared';
+import * as TestDependency2 from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ResourceDistributionModal from './ResourceDistributionModal';
 
-jest.mock('@odf/shared', () => ({
-  ...jest.requireActual('@odf/shared'),
-  useCustomTranslation: jest.fn().mockReturnValue({ t: (key: string) => key }),
-}));
-
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
-  return {
-    ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-    useK8sWatchResources: jest.fn().mockReturnValue({
-      storageClasses: {
-        data: [
-          {
-            apiVersion: 'v1',
-            kind: 'StorageClass',
-            metadata: {
-              name: 'test-storage-class',
-              namespace: 'test-namespace',
-            },
-            provisioner: 'test-provisioner.rbd.csi.ceph.com',
-          },
-        ],
-        loaded: true,
-        error: null,
-      },
-      volumeSnapshotClasses: {
-        data: [
-          {
-            apiVersion: 'v1',
-            kind: 'VolumeSnapshotClass',
-            metadata: {
-              name: 'test-snapshot-class',
-              namespace: 'test-namespace',
-            },
-            driver: 'test-provisioner.rbd.csi.ceph.com',
-          },
-        ],
-        loaded: true,
-        error: null,
-      },
-      volumeGroupSnapshotClasses: {
-        data: [
-          {
-            apiVersion: 'v1beta1',
-            kind: 'VolumeGroupSnapshotClass',
-            metadata: {
-              name: 'test-snapshot-class',
-              namespace: 'test-namespace',
-            },
-            driver: 'test-provisioner.rbd.csi.ceph.com',
-          },
-        ],
-        loaded: true,
-        error: null,
-      },
-    }),
-    k8sPatch: jest.fn(),
-    useListPageFilter: jest.fn().mockReturnValue([
-      [],
-      [
+jest
+  .spyOn(TestDependency1, 'useCustomTranslation')
+  .mockImplementation(jest.fn().mockReturnValue({ t: (key: string) => key }));
+jest.spyOn(TestDependency2, 'useK8sWatchResources').mockImplementation(
+  jest.fn().mockReturnValue({
+    storageClasses: {
+      data: [
         {
           apiVersion: 'v1',
           kind: 'StorageClass',
@@ -73,10 +23,59 @@ jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
           provisioner: 'test-provisioner.rbd.csi.ceph.com',
         },
       ],
-      jest.fn(),
-    ]),
-  };
-});
+      loaded: true,
+      error: null,
+    },
+    volumeSnapshotClasses: {
+      data: [
+        {
+          apiVersion: 'v1',
+          kind: 'VolumeSnapshotClass',
+          metadata: {
+            name: 'test-snapshot-class',
+            namespace: 'test-namespace',
+          },
+          driver: 'test-provisioner.rbd.csi.ceph.com',
+        },
+      ],
+      loaded: true,
+      error: null,
+    },
+    volumeGroupSnapshotClasses: {
+      data: [
+        {
+          apiVersion: 'v1beta1',
+          kind: 'VolumeGroupSnapshotClass',
+          metadata: {
+            name: 'test-snapshot-class',
+            namespace: 'test-namespace',
+          },
+          driver: 'test-provisioner.rbd.csi.ceph.com',
+        },
+      ],
+      loaded: true,
+      error: null,
+    },
+  })
+);
+jest.spyOn(TestDependency2, 'k8sPatch').mockImplementation(jest.fn());
+jest.spyOn(TestDependency2, 'useListPageFilter').mockImplementation(
+  jest.fn().mockReturnValue([
+    [],
+    [
+      {
+        apiVersion: 'v1',
+        kind: 'StorageClass',
+        metadata: {
+          name: 'test-storage-class',
+          namespace: 'test-namespace',
+        },
+        provisioner: 'test-provisioner.rbd.csi.ceph.com',
+      },
+    ],
+    jest.fn(),
+  ])
+);
 
 const storageConsumerResource: StorageConsumerKind = {
   apiVersion: 'v1',

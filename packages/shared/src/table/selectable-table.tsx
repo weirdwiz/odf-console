@@ -42,13 +42,14 @@ const isRowSelected = <T extends K8sResourceCommon>(
   selectedRows: T[]
 ) => selectedRows.some((row) => getUID(row) === rowId);
 
-const canApplyInitialSort = (
-  columns: TableColumnProps[],
+const canApplyInitialSort = <T, >(
+  columns: TableColumnProps<T>[],
   initialSortIndex: number
 ): boolean => !!columns[initialSortIndex]?.sortFunction;
 
 export const SelectableTable: SelectableTableProps = <
   T extends K8sResourceCommon,
+  ExtraProps,
 >({
   selectedRows,
   setSelectedRows,
@@ -66,7 +67,7 @@ export const SelectableTable: SelectableTableProps = <
   isRowSelectable,
   variant,
   selectionType = SelectionType.CHECKBOX,
-}: TableProps<T>) => {
+}: TableProps<T, ExtraProps>) => {
   const { t } = useCustomTranslation();
 
   const {
@@ -113,6 +114,7 @@ export const SelectableTable: SelectableTableProps = <
     columnIndex,
   });
 
+  // SAFETY: col?.columnName comes from the owner of the string contract used at this boundary.
   return (
     <StatusBox
       loadError={loadError}
@@ -190,16 +192,16 @@ export enum SelectionType {
 
 type IsRowSelectable = <T extends K8sResourceCommon>(row: T) => boolean;
 
-type TableProps<T extends K8sResourceCommon> = {
+type TableProps<T extends K8sResourceCommon, ExtraProps = undefined> = {
   rows: T[];
-  columns: TableColumnProps[];
-  RowComponent: React.ComponentType<RowComponentType<T>>;
+  columns: TableColumnProps<T>[];
+  RowComponent: React.ComponentType<RowComponentType<T, ExtraProps>>;
   selectedRows: T[];
   setSelectedRows: (selectedRows: T[]) => void;
-  extraProps?: any;
+  extraProps?: ExtraProps;
   isColumnSelectableHidden?: boolean;
   loaded: boolean;
-  loadError?: any;
+  loadError?: unknown;
   emptyRowMessage?: React.FC;
   initialSortColumnIndex?: number;
   /** Render borders */
@@ -211,6 +213,9 @@ type TableProps<T extends K8sResourceCommon> = {
   selectionType?: SelectionType;
 };
 
-type SelectableTableProps = <T extends K8sResourceCommon>(
-  props: React.PropsWithoutRef<TableProps<T>>
+type SelectableTableProps = <
+  T extends K8sResourceCommon,
+  ExtraProps = undefined,
+>(
+  props: React.PropsWithoutRef<TableProps<T, ExtraProps>>
 ) => ReturnType<React.FC>;

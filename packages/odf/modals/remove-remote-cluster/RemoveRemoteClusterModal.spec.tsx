@@ -1,35 +1,35 @@
 import * as React from 'react';
 import useIsRemoteClusterDeletable from '@odf/core/hooks/useIsRemoteClusterDeletable';
+import * as TestDependency1 from '@odf/core/hooks/useIsRemoteClusterDeletable';
 import { ClusterKind, RemoteClusterKind } from '@odf/core/types/scale';
 import {
   k8sDelete,
   k8sGet,
   k8sList,
 } from '@openshift-console/dynamic-plugin-sdk';
+import * as TestDependency3 from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import * as TestDependency2 from 'react-router';
 import RemoveRemoteClusterModal from './RemoveRemoteClusterModal';
 
 const mockNavigate = jest.fn();
+jest.spyOn(TestDependency1, 'default').mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency2, 'useNavigate')
+  .mockImplementation(() => mockNavigate);
+jest.spyOn(TestDependency3, 'k8sDelete').mockImplementation(jest.fn());
+jest.spyOn(TestDependency3, 'k8sGet').mockImplementation(jest.fn());
+jest.spyOn(TestDependency3, 'k8sList').mockImplementation(jest.fn());
 
-jest.mock('@odf/core/hooks/useIsRemoteClusterDeletable', () => jest.fn());
-
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useNavigate: () => mockNavigate,
-}));
-
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  k8sDelete: jest.fn(),
-  k8sGet: jest.fn(),
-  k8sList: jest.fn(),
-}));
-
+// SAFETY: The jest.Mock test value defines the members exercised by this test.
 const mockIsRemoteClusterDeletable = useIsRemoteClusterDeletable as jest.Mock;
+// SAFETY: The jest.Mock test value defines the members exercised by this test.
 const mockK8sDelete = k8sDelete as jest.Mock;
+// SAFETY: The jest.Mock test value defines the members exercised by this test.
 const mockK8sGet = k8sGet as jest.Mock;
+// SAFETY: The jest.Mock test value defines the members exercised by this test.
 const mockK8sList = k8sList as jest.Mock;
 
 const remoteCluster: RemoteClusterKind = {

@@ -108,6 +108,8 @@ const DeleteStoragePoolModal: React.FC<DeleteStoragePoolModalProps> = (
   newProps.extraProps['systemFlags'] = systemFlags;
 
   if (areFlagsLoaded && !flagsLoadError) {
+    // SAFETY: newProps starts as DeleteStoragePoolModalProps; systemFlags was
+    // assigned to extraProps above, so extraProps now matches the wider shape.
     return props?.extraProps?.resource?.type === PoolType.FILESYSTEM ? (
       <DeleteFsPoolModal {...(newProps as DeleteFsPoolModalProps)} />
     ) : (

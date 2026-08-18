@@ -1,18 +1,20 @@
 import * as React from 'react';
 import { NetworkType } from '@odf/core/types';
+import * as TestDependency1 from '@odf/shared';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NICSelectComponent } from './nic';
 
-jest.mock('@odf/shared', () => ({
-  useCustomTranslation: () => ({ t: (key: string) => key }),
-}));
+jest
+  .spyOn(TestDependency1, 'useCustomTranslation')
+  .mockImplementation(() => ({ t: (key: string) => key }));
 
 describe('NICSelectComponent', () => {
   const setCephCIDR = jest.fn();
   const setNetworkType = jest.fn();
   const setUseClusterNetwork = jest.fn();
 
+  // SAFETY: The NetworkType test value defines the members exercised by this test.
   const defaultProps = {
     cephClusterCIDR: '192.168.100.0/24',
     setCephCIDR,

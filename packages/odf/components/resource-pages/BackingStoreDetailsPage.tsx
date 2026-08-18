@@ -76,6 +76,7 @@ const BackingStoreDetailsPage: React.FC<{}> = () => {
     );
   }, [memoizedResource]);
 
+  // SAFETY: The receiving library accepts BSDetails; its published type does not expose this supported value.
   return (
     <DetailsPage
       loaded={loaded && isODFNsLoaded}

@@ -41,6 +41,7 @@ export const ThalesConfigure: React.FC<KMSConfigureProps> = ({
 }) => {
   const { t } = useCustomTranslation();
 
+  // SAFETY: useDeepCompareMemoize( state.kms.providerState, true ) comes from the owner of the ThalesConfig contract used at this boundary.
   const thalesState = useDeepCompareMemoize(
     state.kms.providerState,
     true

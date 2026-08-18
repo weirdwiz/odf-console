@@ -5,6 +5,7 @@ import { secretResource } from '@odf/core/resources';
 import { getResourceInNs } from '@odf/core/utils';
 import { decodeRGWPrefix, getDataResiliencyState } from '@odf/ocs/utils';
 import { CephObjectStoreModel, NooBaaSystemModel } from '@odf/shared';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,
@@ -69,6 +70,8 @@ const ObjectStorageAlerts = () => {
         filteredAlerts.map((alert) => (
           <AlertItem
             key={alertURL(alert, alert?.rule?.id)}
+            // SAFETY: AlertStates enum from dynamic-plugin-sdk vs -internal
+            // are structurally identical but TS treats them as incompatible.
             alert={alert as any}
           />
         ))}
@@ -110,17 +113,17 @@ const StatusCard: React.FC<{}> = () => {
 
   const [healthStatusResult, healthStatusError] = useCustomPrometheusPoll({
     query: StatusCardQueries.HEALTH_QUERY,
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [progressResult, progressError] = useCustomPrometheusPoll({
     query: StatusCardQueries.MCG_REBUILD_PROGRESS_QUERY,
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [rgwResiliencyResult, rgwResiliencyError] = useCustomPrometheusPoll({
     query: rgwResiliencyQuery,
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 

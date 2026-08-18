@@ -15,7 +15,6 @@ import { RowComponentType } from '@odf/shared/table';
 import { useCustomTranslation } from '@odf/shared/useCustomTranslationHook';
 import { fuzzyCaseInsensitive } from '@odf/shared/utils';
 import {
-  K8sResourceCommon,
   useK8sWatchResource,
   useListPageFilter,
 } from '@openshift-console/dynamic-plugin-sdk';
@@ -68,6 +67,28 @@ import {
   getHeaderColumns,
   getRowActions,
 } from './utils';
+
+const useListPageFilterDependency: typeof useListPageFilter = (...args) =>
+  useListPageFilter(...args);
+
+export const protectedApplicationsListDependencies = {
+  DRStatusPopover,
+  EmptyRowMessage,
+  Link: (props: React.ComponentProps<typeof Link>) => <Link {...props} />,
+  NamespacesDetails,
+  NoDataMessage,
+  getApplicationName,
+  getDRPCKey,
+  getMCVName,
+  getPAVDRPolicyName,
+  getPrimaryCluster,
+  useDROperationAlert,
+  useK8sWatchResource,
+  useListPageFilter: useListPageFilterDependency,
+  useModalWrapper,
+  useNavigate,
+  useProtectedAppsSelection,
+};
 
 const getFailureMessage = (
   t: TFunction<string>,
@@ -135,18 +156,23 @@ const getDetailsColumnNames = (t: TFunction<string>) => ({
   description: t('Description'),
 });
 
-const BatchFailureRow: React.FC<RowComponentType<FailedDRPCItem>> = ({
-  row: item,
-  extraProps,
-}) => {
+type BatchFailureRowExtraProps = {
+  columnNames: ReturnType<typeof getDetailsColumnNames>;
+};
+
+const BatchFailureRow: React.FC<
+  RowComponentType<FailedDRPCItem, BatchFailureRowExtraProps>
+> = ({ row: item, extraProps }) => {
   const { t } = useCustomTranslation();
   const columnNames = extraProps.columnNames;
   return (
     <Tr>
       <Td dataLabel={columnNames.name}>
-        <Link to={drpcDetailsPageRoute(item.drpc)}>
+        <protectedApplicationsListDependencies.Link
+          to={drpcDetailsPageRoute(item.drpc)}
+        >
           {getName(item.drpc) || DASH}
-        </Link>
+        </protectedApplicationsListDependencies.Link>
       </Td>
       <Td dataLabel={columnNames.severity}>
         <YellowExclamationTriangleIcon className="co-icon-space-r" />{' '}
@@ -230,9 +256,7 @@ const BatchFailureDetailsView: React.FC<BatchFailureDetailsViewProps> = ({
         }
         composableTableProps={{
           columns: detailsColumns,
-          RowComponent: BatchFailureRow as unknown as React.ComponentType<
-            RowComponentType<K8sResourceCommon>
-          >,
+          RowComponent: BatchFailureRow,
           extraProps: { columnNames },
           loaded: true,
           emptyRowMessage: NoFailedAppsMessage,
@@ -303,21 +327,24 @@ type RowExtraProps = {
 };
 
 const ProtectedAppsTableRow: React.FC<
-  RowComponentType<ProtectedApplicationViewKind>
+  RowComponentType<ProtectedApplicationViewKind, RowExtraProps>
 > = ({ row: pav, rowIndex, extraProps }) => {
   const { t } = useCustomTranslation();
-  const { launcher, navigate, drpcMap, selectProps }: RowExtraProps =
-    extraProps;
+  const { launcher, navigate, drpcMap, selectProps } = extraProps;
 
-  const drpc = drpcMap.get(getDRPCKey(pav));
+  const drpc = drpcMap.get(
+    protectedApplicationsListDependencies.getDRPCKey(pav)
+  );
 
   const [expandableComponentType, setExpandableComponentType] = React.useState(
     ExpandableComponentType.DEFAULT
   );
 
   const columnNames = getColumnNames(t);
-  const appName = getApplicationName(pav);
-  const drPolicyName = getPAVDRPolicyName(pav);
+  const appName =
+    protectedApplicationsListDependencies.getApplicationName(pav);
+  const drPolicyName =
+    protectedApplicationsListDependencies.getPAVDRPolicyName(pav);
 
   const isExpanded: boolean =
     expandableComponentType === ExpandableComponentType.NS;
@@ -371,7 +398,9 @@ const ProtectedAppsTableRow: React.FC<
           />
         </Td>
         <Td dataLabel={columnNames[2]}>
-          <DRStatusPopover application={drpc} />
+          <protectedApplicationsListDependencies.DRStatusPopover
+            application={drpc}
+          />
         </Td>
         <Td dataLabel={columnNames[3]}>
           <Link
@@ -381,7 +410,10 @@ const ProtectedAppsTableRow: React.FC<
             {drPolicyName}
           </Link>
         </Td>
-        <Td dataLabel={columnNames[4]}>{getPrimaryCluster(pav) || DASH}</Td>
+        <Td dataLabel={columnNames[4]}>
+          {protectedApplicationsListDependencies.getPrimaryCluster(pav) ||
+            DASH}
+        </Td>
         <Td isActionCell>
           <ActionsColumn
             items={getRowActions(t, launcher, navigate, drpc, pav)}
@@ -391,7 +423,10 @@ const ProtectedAppsTableRow: React.FC<
       {isExpanded && (
         <Tr>
           <Td colSpan={totalColSpan}>
-            <NamespacesDetails view={pav} mcvName={getMCVName(drpc)} />
+            <protectedApplicationsListDependencies.NamespacesDetails
+              view={pav}
+              mcvName={protectedApplicationsListDependencies.getMCVName(drpc)}
+            />
           </Td>
         </Tr>
       )}
@@ -401,18 +436,21 @@ const ProtectedAppsTableRow: React.FC<
 
 export const ProtectedApplicationsListPage: React.FC = () => {
   const { t } = useCustomTranslation();
-  const launcher: LaunchModal = useModalWrapper();
-  const navigate = useNavigate();
+  const launcher: LaunchModal =
+    protectedApplicationsListDependencies.useModalWrapper();
+  const navigate = protectedApplicationsListDependencies.useNavigate();
 
-  const [pavs, pavsLoaded, pavsError] = useK8sWatchResource<
-    ProtectedApplicationViewKind[]
-  >(getProtectedApplicationViewResourceObj());
+  const [pavs, pavsLoaded, pavsError] =
+    protectedApplicationsListDependencies.useK8sWatchResource<
+      ProtectedApplicationViewKind[]
+    >(getProtectedApplicationViewResourceObj());
 
-  const [drpcs, drpcsLoaded, drpcsError] = useK8sWatchResource<
-    DRPlacementControlKind[]
-  >(getDRPlacementControlResourceObj({}));
+  const [drpcs, drpcsLoaded, drpcsError] =
+    protectedApplicationsListDependencies.useK8sWatchResource<
+      DRPlacementControlKind[]
+    >(getDRPlacementControlResourceObj({}));
 
-  useDROperationAlert(drpcs || []);
+  protectedApplicationsListDependencies.useDROperationAlert(drpcs || []);
 
   const drpcMap = React.useMemo(() => {
     const map = new Map<string, DRPlacementControlKind>();
@@ -428,24 +466,26 @@ export const ProtectedApplicationsListPage: React.FC = () => {
   const isAllLoadedWOAnyError =
     pavsLoaded && drpcsLoaded && !pavsError && !drpcsError;
 
-  const [data, filteredData, onFilterChange] = useListPageFilter(pavs || []);
+  const [data, filteredData, onFilterChange] =
+    protectedApplicationsListDependencies.useListPageFilter(pavs || []);
 
   const [pagePavs, setPagePavs] = React.useState<
     ProtectedApplicationViewKind[]
   >([]);
 
   const onPaginatedDataChange = React.useCallback(
-    (paginatedData: K8sResourceCommon[]) => {
-      setPagePavs(paginatedData as ProtectedApplicationViewKind[]);
+    (paginatedData: ProtectedApplicationViewKind[]) => {
+      setPagePavs(paginatedData);
     },
     []
   );
 
-  const selection = useProtectedAppsSelection(
-    filteredData as ProtectedApplicationViewKind[],
-    pagePavs,
-    drpcMap
-  );
+  const selection =
+    protectedApplicationsListDependencies.useProtectedAppsSelection(
+      filteredData,
+      pagePavs,
+      drpcMap
+    );
 
   const [batchFailure, setBatchFailure] =
     React.useState<BatchFailureResult | null>(null);
@@ -467,10 +507,12 @@ export const ProtectedApplicationsListPage: React.FC = () => {
 
   const onBatchAction = React.useCallback(() => {
     const selectedDRPCs = (
-      filteredData as ProtectedApplicationViewKind[]
+      filteredData
     ).reduce<DRPlacementControlKind[]>((acc, pav) => {
       if (selection.isSelected(pav)) {
-        const drpc = drpcMap.get(getDRPCKey(pav));
+        const drpc = drpcMap.get(
+          protectedApplicationsListDependencies.getDRPCKey(pav)
+        );
         if (drpc) acc.push(drpc);
       }
       return acc;
@@ -557,9 +599,10 @@ export const ProtectedApplicationsListPage: React.FC = () => {
             drpcMap,
             selectProps: rowSelectProps,
           },
-          emptyRowMessage: EmptyRowMessage,
-          unfilteredData: data as [],
-          noDataMsg: NoDataMessage,
+          emptyRowMessage:
+            protectedApplicationsListDependencies.EmptyRowMessage,
+          unfilteredData: data,
+          noDataMsg: protectedApplicationsListDependencies.NoDataMessage,
           loaded: pavsLoaded && drpcsLoaded,
           loadError: pavsError || drpcsError,
           selectProps: {

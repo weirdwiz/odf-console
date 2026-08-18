@@ -202,6 +202,7 @@ const TableActions: React.FC<PaginationProps & TableActionsProps> = ({
   ) => setListAllVersions(checked);
 
   const anySelection = !!selectedRows.length;
+  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
   const providerType = s3Client.providerType as S3ProviderType;
 
   return (
@@ -407,6 +408,7 @@ export const ObjectsList: React.FC<ObjectsListProps> = ({
   // used for multi-select bulk operations
   const [selectedRows, setSelectedRows] = React.useState<ObjectCrFormat[]>([]);
   // used for storing API's response on performing delete operation on objects
+  // SAFETY: [] contains only entries produced for the ObjectCrFormat[] contract.
   const [deleteResponse, setDeleteResponse] =
     React.useState<ObjectsDeleteResponse>({
       selectedObjects: [] as ObjectCrFormat[],

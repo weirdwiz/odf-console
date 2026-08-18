@@ -59,8 +59,8 @@ export const getCurrentActivity = (
   t: TFunction,
   isCleanupPending?: boolean,
   replicationType?: ReplicationType
-): { description: string; status: string; icon: JSX.Element } => {
-  const status = currentStatus as Phase;
+) => {
+  const status = currentStatus;
 
   switch (status) {
     case Phase.Relocating:

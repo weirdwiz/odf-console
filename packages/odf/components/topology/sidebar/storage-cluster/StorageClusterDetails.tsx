@@ -73,6 +73,7 @@ export const StorageClusterDetails: React.FC<StorageClusterDetailsProps> = ({
       ? getInfrastructurePlatform(infrastructure)
       : DASH;
 
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [resiliencyProgress, resiliencyProgressError] = useCustomPrometheusPoll(
     {
       query: resiliencyProgressQuery(ocsName),
@@ -107,6 +108,7 @@ export const StorageClusterDetails: React.FC<StorageClusterDetailsProps> = ({
   const storageLabel = cephStorageLabel(odfNamespace);
   const ocsNodesHref = `/search?kind=${NodeModel.kind}&q=${storageLabel}`;
 
+  // SAFETY: The receiving library accepts NodeModel; its published type does not expose this supported value.
   return (
     <div className="odf-m-pane__body">
       <SectionHeading text={t('Cluster details')} />

@@ -214,8 +214,10 @@ export const getNamespaceStoreType = (
   ns: NamespaceStoreKind
 ): StoreProviders => {
   let type: StoreProviders = null;
+  // SAFETY: v comes from the owner of the string contract used at this boundary.
   Object.entries(NS_PROVIDERS_NOOBAA_MAP).forEach(([k, v]) => {
     if (ns?.spec?.[v as string]) {
+      // SAFETY: k comes from the owner of the StoreProviders contract used at this boundary.
       type = k as StoreProviders;
     }
   });
@@ -252,6 +254,7 @@ export const getMCGStoreType = (
   let type: StoreProviders = null;
   _.forEach(PROVIDERS_NOOBAA_MAP, (v, k) => {
     if (bs?.spec?.[v]) {
+      // SAFETY: k comes from the owner of the StoreProviders contract used at this boundary.
       type = k as StoreProviders;
     }
   });
@@ -260,7 +263,9 @@ export const getMCGStoreType = (
 
 export const getBucketName = (bs: BackingStoreKind): string => {
   const type = getMCGStoreType(bs);
-  return bs.spec?.[PROVIDERS_NOOBAA_MAP[type]]?.[BUCKET_LABEL_NOOBAA_MAP[type]];
+  const bucketName =
+    bs.spec?.[PROVIDERS_NOOBAA_MAP[type]]?.[BUCKET_LABEL_NOOBAA_MAP[type]];
+  return _.isString(bucketName) ? bucketName : '';
 };
 
 export const getRegion = (

@@ -55,7 +55,8 @@ const ProtectionNameInput: React.FC<ProtectionNameInputProps> = ({
   dispatch,
 }) => {
   const { t } = useCustomTranslation();
-  const [drpcs, drpcsLoaded, drpcsLoadError] = useK8sWatchResource<
+  const [drpcs, drpcsLoaded, drpcsLoadError] =
+    protectionTypeWizardDependencies.useK8sWatchResource<
     DRPlacementControlKind[]
   >(
     getDRPlacementControlResourceObj({
@@ -158,12 +159,18 @@ const ProtectionTypeSelection: React.FC<ProtectionTypeSelectionProps> = ({
 
   const isDiscoveredApp = appType === DRApplication.DISCOVERED;
 
-  const setProtectionMethod = (event: React.ChangeEvent<HTMLInputElement>) =>
-    dispatch({
-      type: ManagePolicyStateType.SET_VM_PROTECTION_METHOD,
-      context: ModalViewContext.ASSIGN_POLICY_VIEW,
-      payload: event.target.value as VMProtectionType,
-    });
+  const setProtectionMethod = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const protectionMethod = Object.values(VMProtectionType).find(
+      (method) => method === event.target.value
+    );
+    if (protectionMethod) {
+      dispatch({
+        type: ManagePolicyStateType.SET_VM_PROTECTION_METHOD,
+        context: ModalViewContext.ASSIGN_POLICY_VIEW,
+        payload: protectionMethod,
+      });
+    }
+  };
 
   const radioOptions = React.useMemo(
     () =>
@@ -229,6 +236,8 @@ const ProtectionTypeSelection: React.FC<ProtectionTypeSelectionProps> = ({
     </Form>
   );
 };
+
+export const protectionTypeWizardDependencies = { useK8sWatchResource };
 
 export const ProtectionTypeWizardContent: React.FC<
   ProtectionTypeWizardContentProps

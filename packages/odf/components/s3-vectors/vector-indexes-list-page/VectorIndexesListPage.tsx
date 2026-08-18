@@ -100,6 +100,7 @@ const VectorIndexesListPage: React.FC<VectorIndexListType> = ({ obj }) => {
   const [allVectorIndexes, filteredVectorIndexes, onFilterChange] =
     useListPageFilter(rows);
 
+  // SAFETY: providerType comes from the owner of the S3ProviderType contract used at this boundary.
   return (
     <>
       {!!deleteResponse.deletedIndexName && (

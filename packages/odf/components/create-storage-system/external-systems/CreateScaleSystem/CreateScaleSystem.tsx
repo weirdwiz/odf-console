@@ -115,6 +115,7 @@ const CreateScaleSystemForm: React.FC<CreateScaleSystemFormProps> = ({
       setGeneralCAFileName(file.name);
       const reader = new FileReader();
       reader.onload = (e) => {
+        // SAFETY: e.target?.result comes from the owner of the string contract used at this boundary.
         const result = e.target?.result as string;
         // Convert the file content to base64
         const base64Content = btoa(result);

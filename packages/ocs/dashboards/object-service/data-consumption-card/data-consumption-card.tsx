@@ -11,7 +11,7 @@ import {
 } from '@odf/ocs/constants';
 import { DATA_CONSUMPTION_QUERIES } from '@odf/ocs/queries';
 import { getRangeVectorStats } from '@odf/shared/charts';
-import { OCS_OPERATOR } from '@odf/shared/constants';
+import { OCS_OPERATOR, PrometheusEndpoint } from '@odf/shared/constants';
 import { FieldLevelHelp } from '@odf/shared/generic/FieldLevelHelp';
 import {
   useCustomPrometheusPoll,
@@ -57,22 +57,22 @@ const MCGCommonComponent: React.FC<ServiceTypeProps> = ({
 }) => {
   const [queryA, queryAError, queryALoading] = useCustomPrometheusPoll({
     query: queries?.[0],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [queryB, queryBError, queryBLoading] = useCustomPrometheusPoll({
     query: queries?.[1],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [queryC, queryCError, queryCLoading] = useCustomPrometheusPoll({
     query: queries?.[2],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [queryD, queryDError, queryDLoading] = useCustomPrometheusPoll({
     query: queries?.[3],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 
@@ -85,6 +85,8 @@ const MCGCommonComponent: React.FC<ServiceTypeProps> = ({
     return !loading && !error && data ? [queryA, queryB, queryC, queryD] : [];
   }, [queryA, queryB, queryC, queryD, loading, error, data]);
 
+  // SAFETY: All entries are useCustomPrometheusPoll results (PrometheusResponse);
+  // the Response union includes DataPoint<Date>[] but that branch is unused here.
   return (
     <DataConsumptionGraph
       prometheusResponse={response as PrometheusResponse[]}
@@ -103,13 +105,13 @@ const AccountsLogical: React.FC<ServiceTypeProps> = ({
 }) => {
   const [usage, usageError, usageLoading] = useCustomPrometheusPoll({
     query: queries?.[0],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [totalUsage, totalUsageError, totalUsageLoading] =
     useCustomPrometheusPoll({
       query: queries?.[1],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 
@@ -120,6 +122,8 @@ const AccountsLogical: React.FC<ServiceTypeProps> = ({
     return !loading && !error && data ? [usage, totalUsage] : [];
   }, [usage, totalUsage, loading, error, data]);
 
+  // SAFETY: All entries are useCustomPrometheusPoll results (PrometheusResponse);
+  // the Response union includes DataPoint<Date>[] but that branch is unused here.
   return (
     <DataConsumptionGraph
       prometheusResponse={response as PrometheusResponse[]}
@@ -138,7 +142,7 @@ const ProvidersEgress: React.FC<ServiceTypeProps> = ({
 }) => {
   const [egress, egressError, egressLoading] = useCustomPrometheusPoll({
     query: queries?.[0],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 
@@ -146,6 +150,8 @@ const ProvidersEgress: React.FC<ServiceTypeProps> = ({
     return !egressLoading && !egressError && egress ? [egress] : [];
   }, [egress, egressError, egressLoading]);
 
+  // SAFETY: All entries are useCustomPrometheusPoll results (PrometheusResponse);
+  // the Response union includes DataPoint<Date>[] but that branch is unused here.
   return (
     <DataConsumptionGraph
       prometheusResponse={response as PrometheusResponse[]}
@@ -204,13 +210,13 @@ const MCGBreakdownMetricMap = (queries: string[]) => {
 const ServiceTypeRGW: React.FC<ServiceTypeProps> = ({ queries, metric }) => {
   const [get, getError, getLoading] = useCustomPrometheusPoll({
     query: queries?.[0],
-    endpoint: 'api/v1/query_range' as any,
+    endpoint: PrometheusEndpoint.QUERY_RANGE,
     timespan: timeSpan[ServiceType.RGW],
     basePath: usePrometheusBasePath(),
   });
   const [put, putError, putLoading] = useCustomPrometheusPoll({
     query: queries?.[1],
-    endpoint: 'api/v1/query_range' as any,
+    endpoint: PrometheusEndpoint.QUERY_RANGE,
     timespan: timeSpan[ServiceType.RGW],
     basePath: usePrometheusBasePath(),
   });

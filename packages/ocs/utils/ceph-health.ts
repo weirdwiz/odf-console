@@ -50,16 +50,15 @@ export const getCephHealthChecks = (
   const cephDetails = cephCluster?.status?.ceph?.details;
   for (const key in cephDetails) {
     if (pattern.test(key)) {
-      const healthCheckObject: CephHealthCheckType = {
-        id: key,
-        details: cephDetails[key].message,
-        ...(!!DOC_VERSION
-          ? {
-              troubleshootLink:
-                whitelistedHealthChecksRef(DOC_VERSION)[key] ?? null,
-            }
-          : {}),
-      };
+      const healthCheckObject: CephHealthCheckType = (() => {
+        const value = { id: key, details: cephDetails[key].message };
+        if (!!DOC_VERSION)
+          Object.assign(value, {
+            troubleshootLink:
+              whitelistedHealthChecksRef(DOC_VERSION)[key] ?? null,
+          });
+        return value;
+      })();
       healthChecks.push(healthCheckObject);
     }
   }

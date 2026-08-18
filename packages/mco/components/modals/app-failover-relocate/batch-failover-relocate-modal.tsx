@@ -27,6 +27,8 @@ import { DRActionType } from '../../../constants';
 import { DRPlacementControlKind } from '../../../types';
 import { getPrimaryClusterName } from '../../../utils';
 
+export const batchFailoverRelocateDependencies = { k8sPatch };
+
 const BATCH_SIZE = 6;
 
 export type FailedDRPCItem = {
@@ -97,7 +99,7 @@ export const BatchFailoverRelocateModal: React.FC<
       // eslint-disable-next-line no-await-in-loop
       await Promise.all(
         batch.map((drpc) =>
-          k8sPatch({
+          batchFailoverRelocateDependencies.k8sPatch({
             model: DRPlacementControlModel,
             resource: {
               metadata: {

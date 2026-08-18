@@ -1,6 +1,8 @@
 import { SCALE_DAEMON_NODE_LABEL } from '@odf/core/constants';
 import { NodeModel } from '@odf/shared';
+import * as TestDependency1 from '@odf/shared/utils';
 import { Patch } from '@openshift-console/dynamic-plugin-sdk';
+import * as TestDependency2 from '@openshift-console/dynamic-plugin-sdk';
 import { WizardNodeState } from '../../reducer';
 import {
   labelNodes,
@@ -11,11 +13,13 @@ import {
 const LABEL_PATH = '/metadata/labels/scale.spectrum.ibm.com~1daemon-selector';
 const NODE_ROLE_LABEL_PATH = '/metadata/labels/node-role';
 
+// SAFETY: The Patch[] test value defines the members exercised by this test.
 const getDaemonPatchCalls = () =>
   mockK8sPatchByName.mock.calls.filter((call) =>
     (call[3] as Patch[]).some((op) => op.path === LABEL_PATH)
   );
 
+// SAFETY: The Patch[] test value defines the members exercised by this test.
 const getNodeRolePatchCalls = () =>
   mockK8sPatchByName.mock.calls.filter((call) =>
     (call[3] as Patch[]).some((op) => op.path === NODE_ROLE_LABEL_PATH)
@@ -23,16 +27,12 @@ const getNodeRolePatchCalls = () =>
 
 const mockK8sPatchByName = jest.fn().mockResolvedValue({});
 const mockK8sCreate = jest.fn().mockResolvedValue({});
-
-jest.mock('@odf/shared/utils', () => ({
-  ...jest.requireActual('@odf/shared/utils'),
-  k8sPatchByName: (...args: unknown[]) => mockK8sPatchByName(...args),
-}));
-
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  k8sCreate: (...args: unknown[]) => mockK8sCreate(...args),
-}));
+jest
+  .spyOn(TestDependency1, 'k8sPatchByName')
+  .mockImplementation((...args: unknown[]) => mockK8sPatchByName(...args));
+jest
+  .spyOn(TestDependency2, 'k8sCreate')
+  .mockImplementation((...args: unknown[]) => mockK8sCreate(...args));
 
 describe('payload', () => {
   beforeEach(() => {
@@ -67,6 +67,7 @@ describe('payload', () => {
       await execute();
 
       getDaemonPatchCalls().forEach((call) => {
+        // SAFETY: The Patch[] test value defines the members exercised by this test.
         (call[3] as Patch[]).forEach((op) => {
           expect(op.op).toBe('add');
         });

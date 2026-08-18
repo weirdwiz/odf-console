@@ -15,7 +15,6 @@ import {
   ACMManagedClusterKind,
   DRClusterAppsMap,
   DRClusterKind,
-  Phase,
 } from '@odf/mco/types';
 import {
   findDeploymentClusters,
@@ -25,6 +24,11 @@ import {
 } from '@odf/mco/utils';
 import { getName, getNamespace } from '@odf/shared/selectors';
 import * as _ from 'lodash-es';
+
+export const applicationSetParserDependencies = {
+  useArgoApplicationSetResourceWatch,
+  useDisasterRecoveryResourceWatch,
+};
 
 const getApplicationSetResources = (
   namespace: string,
@@ -68,12 +72,13 @@ export const useApplicationSetParser: UseApplicationSetParser = (
   managedClusterLoadError
 ) => {
   // Watch only DRPC from openshift-gitops namespace
-  const [drResources, drLoaded, drLoadError] = useDisasterRecoveryResourceWatch(
+  const [drResources, drLoaded, drLoadError] =
+    applicationSetParserDependencies.useDisasterRecoveryResourceWatch(
     getDRResources(GITOPS_OPERATOR_NAMESPACE)
   );
 
   const [argoApplicationSetResources, loaded, loadError] =
-    useArgoApplicationSetResourceWatch(
+    applicationSetParserDependencies.useArgoApplicationSetResourceWatch(
       getApplicationSetResources(
         GITOPS_OPERATOR_NAMESPACE,
         managedClusters,
@@ -91,7 +96,7 @@ export const useApplicationSetParser: UseApplicationSetParser = (
 
   const drClusterAppsMap: DRClusterAppsMap = React.useMemo(() => {
     if (loaded && !loadError) {
-      const drClusterAppsMap: DRClusterAppsMap = drClusters.reduce(
+      const drClusterAppsMap: DRClusterAppsMap = drClusters.reduce<DRClusterAppsMap>(
         (acc, drCluster) => {
           const clusterName = getName(drCluster);
           acc[clusterName] = {
@@ -103,7 +108,7 @@ export const useApplicationSetParser: UseApplicationSetParser = (
           };
           return acc;
         },
-        {} as DRClusterAppsMap
+        {}
       );
 
       // DRCluster to its ApplicationSets (total and protected) mapping
@@ -142,7 +147,7 @@ export const useApplicationSetParser: UseApplicationSetParser = (
                       drPlacementControl?.spec?.preferredCluster,
                     lastVolumeGroupSyncTime:
                       drPlacementControl?.status?.lastGroupSyncTime,
-                    status: drPlacementControl?.status?.phase as Phase,
+                    status: drPlacementControl?.status?.phase,
                   },
                 ],
               });

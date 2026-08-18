@@ -29,21 +29,24 @@ type AllClusters = {
   daemons?: DaemonKind[];
 };
 
-const resources = (isFDF: boolean): WatchK8sResources<AllClusters> => ({
-  storageClusters: {
-    kind: referenceForModel(StorageClusterModel),
-    isList: true,
-  },
-  flashSystemClusters: {
-    groupVersionKind: {
-      group: IBMFlashSystemModel.apiGroup,
-      version: IBMFlashSystemModel.apiVersion,
-      kind: IBMFlashSystemModel.kind,
-    },
-    isList: true,
-  },
-  ...(isFDF
-    ? {
+const resources = (isFDF: boolean): WatchK8sResources<AllClusters> =>
+  (() => {
+    const value = {
+      storageClusters: {
+        kind: referenceForModel(StorageClusterModel),
+        isList: true,
+      },
+      flashSystemClusters: {
+        groupVersionKind: {
+          group: IBMFlashSystemModel.apiGroup,
+          version: IBMFlashSystemModel.apiVersion,
+          kind: IBMFlashSystemModel.kind,
+        },
+        isList: true,
+      },
+    };
+    if (isFDF)
+      Object.assign(value, {
         remoteClusters: {
           groupVersionKind: {
             group: RemoteClusterModel.apiGroup,
@@ -71,9 +74,9 @@ const resources = (isFDF: boolean): WatchK8sResources<AllClusters> => ({
           isList: true,
           namespace: IBM_SCALE_NAMESPACE,
         },
-      }
-    : {}),
-});
+      });
+    return value;
+  })();
 
 export const useWatchStorageClusters = () => {
   const isFDF = useFlag(FDF_FLAG);

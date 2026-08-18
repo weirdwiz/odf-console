@@ -1,11 +1,12 @@
 import * as React from 'react';
+import { isFunction, isString } from 'lodash-es';
 
 // Default ODF user settings storage path
 const DEFAULT_ODF_CONSOLE_USER_SETTINGS_KEY = 'odf-console-user-settings';
 const STORAGE_EVENT = 'storage';
 
 export const deserializeData = (data: string | null) => {
-  if (typeof data !== 'string') {
+  if (!isString(data)) {
     return data;
   }
   try {
@@ -16,7 +17,7 @@ export const deserializeData = (data: string | null) => {
 };
 
 export const serializeData = <T>(data: T) => {
-  if (typeof data === 'string') {
+  if (isString(data)) {
     return data;
   }
   try {
@@ -169,10 +170,10 @@ export const useUserSettingsLocalStorage = <T>(
   const updateData = React.useCallback<React.Dispatch<React.SetStateAction<T>>>(
     (action: React.SetStateAction<T>) => {
       const previousData = dataRef.current;
-      const newState =
-        typeof action === 'function'
-          ? (action as (prevState: T) => T)(previousData)
-          : action;
+      // SAFETY: action comes from the owner of the (prevState: T) => T contract used at this boundary.
+      const newState = isFunction(action)
+        ? (action as (prevState: T) => T)(previousData)
+        : action;
       const localData = getDataFromLocalStorage(storageKey);
       if (
         newState !== undefined &&

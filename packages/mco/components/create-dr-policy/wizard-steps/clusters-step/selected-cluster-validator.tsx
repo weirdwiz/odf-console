@@ -40,6 +40,10 @@ import { DRPolicyAction, DRPolicyActionType } from '../../utils/reducer';
 import '../../create-dr-policy.scss';
 import '../../../../style.scss';
 
+export const selectedClusterValidatorDependencies = {
+  useK8sWatchResource,
+};
+
 const PROVISIONER = 'provisioner';
 const EXTERNAL_DEPLOYMENT_TYPE = 'external';
 
@@ -119,7 +123,12 @@ const validateClusterSelection = (
         clustersWithUnsuccessfullODF: [],
         clustersWithMultipleStorageInstances: [],
       },
-    } as ValidationType
+      peeringValidation: {
+        unSupportedPeering: false,
+        invalidPolicyCreation: false,
+        unSupportedStorageClasses: false,
+      },
+    }
   );
 
   validation.peeringValidation = {
@@ -458,7 +467,8 @@ export const SelectedClusterValidation: React.FC<
   const { t } = useCustomTranslation();
 
   // Fetch policies and storage class validation in parallel
-  const [drPolicies, policyLoaded, policyLoadError] = useK8sWatchResource<
+  const [drPolicies, policyLoaded, policyLoadError] =
+    selectedClusterValidatorDependencies.useK8sWatchResource<
     DRPolicyKind[]
   >(getDRPolicyResourceObj());
   const [isValidStorageClasses, scLoaded, scLoadError] =

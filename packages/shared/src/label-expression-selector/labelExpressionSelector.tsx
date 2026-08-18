@@ -45,8 +45,11 @@ export const LazyLabelExpressionSelector = (
   />
 );
 
+// SAFETY: operator comes from the owner of the Operator contract used at this boundary.
 export const isLabelOnlyOperator = (operator: string) =>
-  [Operator.Exists, Operator.DoesNotExist].includes(operator as Operator);
+  [Operator.Exists, Operator.DoesNotExist].includes(
+    /* SAFETY: The value is supplied by the Operator owner and follows that contract. */ operator as Operator
+  );
 
 const matchExpressionSummaryError = (
   expandString: string,

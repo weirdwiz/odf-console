@@ -22,10 +22,7 @@ type S3ClientMapProps = {
   providerType: S3ProviderType;
 };
 
-const S3_CLIENT_MAP: Record<
-  ClientType,
-  (props: S3ClientMapProps) => ClientCommandType
-> = {
+const S3_CLIENT_MAP = {
   [ClientType.IAM]: (props) => {
     const { s3Url, accessKeyId, secretAccessKey } = props;
     return new IamCommands(s3Url.toString(), accessKeyId, secretAccessKey);
@@ -59,7 +56,7 @@ const S3_CLIENT_MAP: Record<
       providerType
     );
   },
-};
+} satisfies Record<ClientType, (props: S3ClientMapProps) => ClientCommandType>;
 
 type CreateClientParams = {
   s3Url: URL | undefined;
@@ -73,9 +70,7 @@ type CreateClientParams = {
   providerType: S3ProviderType;
 };
 
-const createClientFromEndpointConfig = (
-  params: CreateClientParams
-): { client: ClientCommandType | null; error: unknown } => {
+const createClientFromEndpointConfig = (params: CreateClientParams) => {
   const {
     s3Url,
     s3ConsolePath,
@@ -137,10 +132,12 @@ const createClientFromEndpointConfig = (
     };
     const client = S3_CLIENT_MAP[type](mapProps);
     if (!skipSignatureCalculation) {
+      // SAFETY: client.middlewareStack comes from the owner of the S3Commands['middlewareStack'] contract used at this boundary.
       (client.middlewareStack as S3Commands['middlewareStack']).add(
         buildMiddleware,
         { step: 'build' }
       );
+      // SAFETY: client.middlewareStack comes from the owner of the S3Commands['middlewareStack'] contract used at this boundary.
       (client.middlewareStack as S3Commands['middlewareStack']).add(
         finalizeMiddleware,
         { step: 'finalizeRequest' }

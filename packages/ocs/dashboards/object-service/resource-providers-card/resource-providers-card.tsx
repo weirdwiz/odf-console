@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useODFSystemFlagsSelector } from '@odf/core/redux';
 import { useGetClusterDetails } from '@odf/core/redux/utils';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import { DataUnavailableError } from '@odf/shared/generic';
 import { FieldLevelHelp } from '@odf/shared/generic/FieldLevelHelp';
 import {
@@ -46,7 +47,7 @@ const MCGResourceProvidersBody: React.FC = () => {
   const [providersTypesQueryResult, providersTypesQueryResultError] =
     useCustomPrometheusPoll({
       query: RESOURCE_PROVIDERS_QUERY.PROVIDERS_TYPES,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
   const [
@@ -54,7 +55,7 @@ const MCGResourceProvidersBody: React.FC = () => {
     unhealthyProvidersTypesQueryResultError,
   ] = useCustomPrometheusPoll({
     query: RESOURCE_PROVIDERS_QUERY.UNHEALTHY_PROVIDERS_TYPES,
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 
@@ -117,7 +118,7 @@ const ResourceProviders: React.FC<{}> = () => {
 };
 
 type ProviderPrometheusData = {
-  metric: { [key: string]: any };
+  metric: Record<string, string>;
   value?: [number, string | number];
 };
 

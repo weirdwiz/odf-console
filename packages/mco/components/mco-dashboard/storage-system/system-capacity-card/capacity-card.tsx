@@ -5,6 +5,7 @@ import {
 } from '@odf/mco/components/mco-dashboard/queries';
 import { ACMManagedClusterKind } from '@odf/mco/types';
 import { ACMManagedClusterModel } from '@odf/shared';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import { DataUnavailableError } from '@odf/shared/generic/Error';
 import { useCustomPrometheusPoll } from '@odf/shared/hooks/custom-prometheus-poll';
 import { ODFStorageSystem } from '@odf/shared/models';
@@ -58,17 +59,13 @@ type CapacityMetricDatum = {
   clusterName: string;
   totalValue: HumanizeResult;
   usedValue: HumanizeResult;
-  clusterURL: string;
+  clusterURL?: string;
 };
 
 type GetRow = (
   args: CapacityMetricDatum,
   index: number
 ) => [React.ReactNode, React.ReactNode, React.ReactNode, React.ReactNode];
-
-type CapacityMetricDatumMap = { string: CapacityMetricDatum };
-
-type ManagedClusterLinkMap = { string: string };
 
 type ClusterClaimObject = { name: string; value: string };
 
@@ -257,63 +254,52 @@ const SystemCapacityCard: React.FC = () => {
 
   const [usedCapacity, errorUsedCapacity, loadingUsedCapacity] =
     useCustomPrometheusPoll({
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       query: CAPACITY_QUERIES[StorageDashboard.USED_CAPACITY_FILE_BLOCK],
       basePath: ACM_ENDPOINT,
       cluster: HUB_CLUSTER_NAME,
     });
   const [totalCapacity, errorTotalCapacity, loadingTotalCapacity] =
     useCustomPrometheusPoll({
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       query: CAPACITY_QUERIES[StorageDashboard.TOTAL_CAPACITY_FILE_BLOCK],
       basePath: ACM_ENDPOINT,
       cluster: HUB_CLUSTER_NAME,
     });
 
   React.useEffect(() => {
-    const ManagedClusterLink: ManagedClusterLinkMap =
-      managedClustersLoaded && !managedClustersError
-        ? managedClusters?.reduce(
-            (acc: ManagedClusterLinkMap, cluster: ACMManagedClusterKind) => {
-              acc[cluster?.metadata?.name] = getClusterURL(
-                cluster?.status?.clusterClaims
-              );
-              return acc;
-            },
-            {} as ManagedClusterLinkMap
-          )
-        : ({} as ManagedClusterLinkMap);
+    const managedClusterLinks = new Map<string, string | undefined>();
+    if (managedClustersLoaded && !managedClustersError) {
+      managedClusters?.forEach((cluster) => {
+        managedClusterLinks.set(
+          cluster?.metadata?.name,
+          getClusterURL(cluster?.status?.clusterClaims)
+        );
+      });
+    }
 
-    const dataMap: CapacityMetricDatumMap =
-      !loadingUsedCapacity && !errorUsedCapacity
-        ? usedCapacity?.data?.result?.reduce(
-            (acc: CapacityMetricDatumMap, usedMetric: PrometheusResult) => {
-              // ToDo (epic 4422): Assuming "namespace" in "odf_system.*"" metrics (except "odf_system_map" which is pushed by ODF opr and already has "target_namespace")
-              // is where system is deployed (update query if needed).
-              const systemName = usedMetric?.metric?.storage_system;
-              const namespace = usedMetric?.metric?.target_namespace;
-              const targetKind = usedMetric?.metric?.target_kind;
-              const clusterName = usedMetric?.metric?.cluster;
-              const clusterURL = ManagedClusterLink.hasOwnProperty(clusterName)
-                ? ManagedClusterLink[clusterName]
-                : undefined;
-              acc[getUniqueKey(systemName, namespace, clusterName)] = {
-                systemName,
-                namespace,
-                targetKind,
-                clusterName,
-                usedValue: humanizeBinaryBytes(usedMetric?.value?.[1]),
-                totalValue: undefined,
-                clusterURL,
-              };
-              return acc;
-            },
-            {} as CapacityMetricDatumMap
-          )
-        : ({} as CapacityMetricDatumMap);
+    const dataMap = new Map<string, CapacityMetricDatum>();
+    if (!loadingUsedCapacity && !errorUsedCapacity) {
+      usedCapacity?.data?.result?.forEach((usedMetric: PrometheusResult) => {
+        // ToDo (epic 4422): Assuming "namespace" in "odf_system.*"" metrics (except "odf_system_map" which is pushed by ODF opr and already has "target_namespace")
+        // is where system is deployed (update query if needed).
+        const systemName = usedMetric?.metric?.storage_system;
+        const namespace = usedMetric?.metric?.target_namespace;
+        const targetKind = usedMetric?.metric?.target_kind;
+        const clusterName = usedMetric?.metric?.cluster;
+        dataMap.set(getUniqueKey(systemName, namespace, clusterName), {
+          systemName,
+          namespace,
+          targetKind,
+          clusterName,
+          usedValue: humanizeBinaryBytes(usedMetric?.value?.[1]),
+          totalValue: undefined,
+          clusterURL: managedClusterLinks.get(clusterName),
+        });
+      });
+    }
 
-    !loadingTotalCapacity &&
-      !errorTotalCapacity &&
+    if (!loadingTotalCapacity && !errorTotalCapacity) {
       totalCapacity?.data?.result?.forEach((totalMetric: PrometheusResult) => {
         // ToDo (epic 4422): Assuming "namespace" in "odf_system.*"" metrics (except "odf_system_map" which is pushed by ODF opr and already has "target_namespace")
         // is where system is deployed (update query if needed).
@@ -322,16 +308,16 @@ const SystemCapacityCard: React.FC = () => {
           totalMetric?.metric?.target_namespace,
           totalMetric?.metric?.cluster
         );
-        dataMap.hasOwnProperty(dataMapKey) &&
-          (dataMap[dataMapKey].totalValue = !!totalMetric?.value?.[1]
-            ? humanizeBinaryBytes(totalMetric?.value?.[1])
-            : undefined);
+        const metricDatum = dataMap.get(dataMapKey);
+        if (metricDatum) {
+          metricDatum.totalValue = totalMetric?.value?.[1]
+            ? humanizeBinaryBytes(totalMetric.value[1])
+            : undefined;
+        }
       });
+    }
 
-    const data: CapacityMetricDatum[] = _.map(
-      dataMap,
-      (metricDatumMap: CapacityMetricDatum) => metricDatumMap
-    );
+    const data = Array.from(dataMap.values());
     setUnfilteredData(data);
     updatefilteredData && setFilteredData(data);
   }, [
@@ -403,8 +389,8 @@ const SystemCapacityCard: React.FC = () => {
         {!error && !isLoading && (
           <Table
             columns={headerColumns(t)}
-            rawData={filteredData as []}
-            rowRenderer={getRow as any}
+            rawData={filteredData}
+            rowRenderer={getRow}
             ariaLabel={t('Capacity Card')}
           />
         )}

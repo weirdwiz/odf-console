@@ -14,9 +14,9 @@ import { State } from './state';
 
 export type UseObcBaseSchema = {
   obcFormSchema: Yup.ObjectSchema<{
-    obcName: Yup.StringSchema;
-    'sc-dropdown': Yup.StringSchema;
-    bucketclass: Yup.StringSchema;
+    obcName?: string;
+    'sc-dropdown': string;
+    bucketclass?: string;
   }>;
   fieldRequirements: string[];
 };
@@ -74,8 +74,7 @@ const useObcFormSchema = (
     }).concat(obcNameSchema);
 
     return {
-      obcFormSchema:
-        obcFormSchema as unknown as UseObcBaseSchema['obcFormSchema'],
+      obcFormSchema,
       fieldRequirements,
     };
   }, [data, loadError, loaded, state.scProvisioner, t]);

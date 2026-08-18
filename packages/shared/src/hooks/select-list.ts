@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk-internal/lib/extensions/console-types';
-import { OnSelect } from '@patternfly/react-table';
 
 const handleCheckboxSelect = (
   isSelected,
@@ -34,11 +33,7 @@ export const useSelectList = <R extends K8sResourceCommon>(
   selectionType: 'radio' | 'checkbox' = 'checkbox',
   /** When provided (controlled mode), use this as current selection for toggles instead of internal state */
   selectedRowIds?: Set<string>
-): {
-  onSelect: OnSelect;
-  selectedRows: Set<string>;
-  updateSelectedRows: (rows: R[]) => void;
-} => {
+) => {
   const [selectedRows, setSelectedRows] = React.useState<Set<string>>(
     preSelectAll && visibleRows
   );

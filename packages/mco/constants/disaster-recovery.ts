@@ -73,16 +73,12 @@ export enum TimeUnits {
 export const MIN_VALUE = 0;
 
 // Display texts
-export const REPLICATION_DISPLAY_TEXT = (
-  t: TFunction
-): { [key in ReplicationType]: string } => ({
+export const REPLICATION_DISPLAY_TEXT = (t: TFunction) => ({
   async: t('Asynchronous'),
   sync: t('Synchronous'),
 });
 
-export const SYNC_SCHEDULE_DISPLAY_TEXT = (
-  t: TFunction
-): { [key in TimeUnits]: string } => ({
+export const SYNC_SCHEDULE_DISPLAY_TEXT = (t: TFunction) => ({
   [TimeUnits.Minutes]: t('minutes'),
   [TimeUnits.Hours]: t('hours'),
   [TimeUnits.Days]: t('days'),

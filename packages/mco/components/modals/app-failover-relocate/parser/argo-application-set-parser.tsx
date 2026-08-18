@@ -33,6 +33,11 @@ import {
 import { FailoverRelocateModal } from '../failover-relocate-modal';
 import { PlacementControlProps } from '../failover-relocate-modal-body';
 
+export const argoApplicationSetParserDependencies = {
+  useArgoApplicationSetResourceWatch,
+  useDisasterRecoveryResourceWatch,
+};
+
 const getDRResources = (namespace: string) => ({
   resources: {
     drClusters: getDRClusterResourceObj(),
@@ -86,12 +91,13 @@ export const ArogoApplicationSetParser = (
 ) => {
   const { application, action, isOpen, close } = props;
 
-  const [drResources, drLoaded, drLoadError] = useDisasterRecoveryResourceWatch(
+  const [drResources, drLoaded, drLoadError] =
+    argoApplicationSetParserDependencies.useDisasterRecoveryResourceWatch(
     getDRResources(getNamespace(application))
   );
 
   const [aroAppSetResources, loaded, loadError] =
-    useArgoApplicationSetResourceWatch(
+    argoApplicationSetParserDependencies.useArgoApplicationSetResourceWatch(
       getApplicationSetResources(
         getNamespace(application),
         getName(application),

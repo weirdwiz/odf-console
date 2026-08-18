@@ -9,13 +9,16 @@ import '../../style.scss';
 import './create-dr-policy.scss';
 import { CreateDRPolicyWizard } from './create-dr-policy-wizard';
 
+export const createDRPolicyPageDependencies = { useLocation, useNavigate };
+
 const getDRPolicyListPageLink = (url: string) =>
   url.replace(`/${referenceForModel(DRPolicyModel)}/~new`, '');
 
 const CreateDRPolicy: React.FC = () => {
   const { t } = useCustomTranslation();
-  const { pathname: url, search } = useLocation();
-  const navigate = useNavigate();
+  const { pathname: url, search } =
+    createDRPolicyPageDependencies.useLocation();
+  const navigate = createDRPolicyPageDependencies.useNavigate();
 
   // Extract pre-selected clusters from URL params (e.g., ?cluster1=X&cluster2=Y)
   const preSelectedClusters = React.useMemo(() => {

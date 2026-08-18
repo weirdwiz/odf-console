@@ -2,7 +2,7 @@ import { IBM_SCALE_NAMESPACE } from '@odf/core/constants';
 import { DASH, RouteModel } from '@odf/shared';
 import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 
-export const useScaleGuiLink = (): { url: string } => {
+export const useScaleGuiLink = () => {
   const [route, routeLoaded, routeError] = useK8sWatchResource<any>({
     groupVersionKind: {
       group: RouteModel.apiGroup,

@@ -1,34 +1,30 @@
 import * as React from 'react';
 import { useKernelDevelEligibility } from '@odf/core/components/create-storage-system/external-systems/CreateScaleSystem/hooks/useKernelDevelEligibility';
+import * as TestDependency2 from '@odf/core/components/create-storage-system/external-systems/CreateScaleSystem/hooks/useKernelDevelEligibility';
 import { SCALE_DAEMON_NODE_LABEL } from '@odf/core/constants';
 import { useNodesData } from '@odf/core/hooks';
+import * as TestDependency1 from '@odf/core/hooks';
 import { NodeData } from '@odf/core/types';
+import * as TestDependency4 from '@odf/shared/useCustomTranslationHook';
+import * as TestDependency3 from '@odf/shared/utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import AddLocalScaleNodesModal from './AddLocalScaleNodesModal';
 
 const mockPatchNode = jest.fn();
+jest.spyOn(TestDependency1, 'useNodesData').mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency2, 'useKernelDevelEligibility')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency3, 'k8sPatchByName')
+  .mockImplementation((...args) => mockPatchNode(...args));
+jest
+  .spyOn(TestDependency4, 'useCustomTranslation')
+  .mockImplementation(() => ({ t: (key: string) => key }));
 
-jest.mock('@odf/core/hooks', () => ({
-  ...jest.requireActual('@odf/core/hooks'),
-  useNodesData: jest.fn(),
-}));
-
-jest.mock(
-  '@odf/core/components/create-storage-system/external-systems/CreateScaleSystem/hooks/useKernelDevelEligibility',
-  () => ({ useKernelDevelEligibility: jest.fn() })
-);
-
-jest.mock('@odf/shared/utils', () => ({
-  ...jest.requireActual('@odf/shared/utils'),
-  k8sPatchByName: (...args) => mockPatchNode(...args),
-}));
-
-jest.mock('@odf/shared/useCustomTranslationHook', () => ({
-  useCustomTranslation: () => ({ t: (key: string) => key }),
-}));
-
+// SAFETY: The NodeData test value defines the members exercised by this test.
 const makeNode = (
   name: string,
   labels: Record<string, string> = {
@@ -48,6 +44,7 @@ const makeNode = (
 describe('AddLocalScaleNodesModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useKernelDevelEligibility as jest.Mock).mockReturnValue({
       areSelectedNodesEligible: false,
       isLoading: false,
@@ -73,6 +70,7 @@ describe('AddLocalScaleNodesModal', () => {
       { key: 'dedicated', value: 'other', effect: 'NoSchedule' },
     ];
 
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValue([
       [
         makeNode('worker-candidate'),
@@ -104,11 +102,13 @@ describe('AddLocalScaleNodesModal', () => {
   });
 
   it('assigns an eligible expansion candidate', async () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValue([
       [makeNode('worker-candidate')],
       true,
       null,
     ]);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useKernelDevelEligibility as jest.Mock).mockImplementation(
       (selectedNodes) => ({
         areSelectedNodesEligible: selectedNodes.length > 0,
@@ -143,11 +143,13 @@ describe('AddLocalScaleNodesModal', () => {
   });
 
   it('keeps the modal open and shows the patch error', async () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValue([
       [makeNode('worker-one'), makeNode('worker-two')],
       true,
       null,
     ]);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useKernelDevelEligibility as jest.Mock).mockImplementation(
       (selectedNodes) => ({
         areSelectedNodesEligible: selectedNodes.length > 0,

@@ -48,6 +48,7 @@ const getNextMarkers = (
       }
     : null;
 
+// SAFETY: response comes from the owner of the ListVectorBucketsCommandOutput contract used at this boundary.
 const getNextContinuationToken = (
   response: ListCommandOutput,
   containsNextContinuation = true,
@@ -74,6 +75,7 @@ const continuationTokensSetter = <T extends ListCommandOutput>(
   setContinuationTokens((oldTokens) => {
     const newTokens = _.cloneDeep(oldTokens);
     if (isNext) {
+      // SAFETY: The receiving library accepts newTokens.current; its published type does not expose this supported value.
       newTokens.previous.push(newTokens.current as any);
       newTokens.current = newTokens.next;
     } else {
@@ -136,6 +138,7 @@ export const continuationTokensRefresher = async <T extends ListCommandOutput>(
 ) => {
   try {
     const response: T = await trigger();
+    // SAFETY: { previous: [''], current: '', next: getNextContinuationToken( respons comes from the owner of the ContinuationTokens contract used at this boundary.
     containsNextPageToken
       ? setContinuationTokens({
           previous: [''],

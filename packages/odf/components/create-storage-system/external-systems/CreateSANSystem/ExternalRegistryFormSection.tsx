@@ -9,8 +9,9 @@ import {
 } from '@odf/shared';
 import { SecretKind } from '@odf/shared/types';
 import { useCustomTranslation } from '@odf/shared/useCustomTranslationHook';
-import { Control, FieldValues } from 'react-hook-form';
+import { Control } from 'react-hook-form';
 import { Grid, GridItem } from '@patternfly/react-core';
+import { SANSystemFormData } from './useFormValidation';
 
 type ExternalRegistryFieldRequirements = {
   imageRegistryUrl: string[];
@@ -18,7 +19,7 @@ type ExternalRegistryFieldRequirements = {
 };
 
 type ExternalRegistryFormSectionProps = {
-  control: Control<FieldValues>;
+  control: Control<SANSystemFormData>;
   fieldRequirements: ExternalRegistryFieldRequirements;
   /** When true (OpenShift registry present), show Image registry URL and Image repository name. When false, hide them. */
   showImageRegistryFields: boolean;

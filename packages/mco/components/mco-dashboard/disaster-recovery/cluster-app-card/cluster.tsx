@@ -154,7 +154,7 @@ export const HealthSection: React.FC<HealthSectionProps> = ({
   const { t } = useCustomTranslation();
 
   const clusterOperatorStatus = React.useMemo(() => {
-    const operatorStatus = {};
+    const operatorStatus: ClusterOperatorStatus = {};
     csvData?.data?.result?.forEach((item: PrometheusResult) => {
       if (item?.metric.cluster === clusterName) {
         item?.metric.name.startsWith(ODR_CLUSTER_OPERATOR) &&
@@ -167,7 +167,7 @@ export const HealthSection: React.FC<HealthSectionProps> = ({
           (operatorStatus[VOL_SYNC] = item?.value[1]);
       }
     });
-    return operatorStatus as ClusterOperatorStatus;
+    return operatorStatus;
   }, [csvData, clusterName, podData]);
 
   return (
@@ -434,8 +434,8 @@ export const UtilizationCard: React.FC<UtilizationCardProps> = ({
 };
 
 type ClusterOperatorStatus = {
-  [ODR_CLUSTER_OPERATOR]: string;
-  [VOL_SYNC]: string;
+  [ODR_CLUSTER_OPERATOR]?: string;
+  [VOL_SYNC]?: string;
 };
 
 type OperatorsHealthPopUpProps = {

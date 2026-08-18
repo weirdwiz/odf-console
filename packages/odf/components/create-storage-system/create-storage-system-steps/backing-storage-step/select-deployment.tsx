@@ -43,6 +43,7 @@ export const SelectDeployment: React.FC<SelectDeploymentProps> = ({
   const [isSelectOpen, setIsSelectOpen] = React.useState(false);
 
   const handleSelection: SelectProps['onSelect'] = (_, value) => {
+    // SAFETY: value comes from the owner of the DeploymentType contract used at this boundary.
     dispatch({
       type: 'backingStorage/setDeployment',
       // 'value' on SelectProps['onSelect'] is string hence does not match with payload of type "DeploymentType"

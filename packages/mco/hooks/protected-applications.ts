@@ -54,7 +54,7 @@ const countDRPolicyToAppSets = (
   loadedWOError: boolean,
   appSets: ArgoApplicationSetKind[],
   protectedPlacementMap: ProtectedPlacementMap
-): DRPolicyToAppCount => {
+) => {
   const drPolicyToAppsetCount: DRPolicyToAppCount = {};
   if (loadedWOError) {
     appSets?.forEach((appSet) => {
@@ -80,7 +80,7 @@ const countDRPolicyToAppSets = (
 const mapSubscriptionsToPlacements = (
   loadedWOError: boolean,
   subscriptions: ACMSubscriptionKind[]
-): SubscriptionsToPlacementsMap => {
+) => {
   const subsMap: SubscriptionsToPlacementsMap = {};
   if (loadedWOError) {
     subscriptions?.forEach((subscription) => {
@@ -110,7 +110,7 @@ const mapSubscriptionsToPlacements = (
 const countDRPolicyToSubscriptions = (
   subsMap: SubscriptionsToPlacementsMap,
   protectedPlacementMap: ProtectedPlacementMap
-): DRPolicyToAppCount => {
+) => {
   const drPolicyToSubsAppCount: DRPolicyToAppCount = {};
   Object.values(subsMap).forEach((placementUniqueNames) => {
     const drPolicyNames = new Set<string>();
@@ -136,7 +136,7 @@ const aggregateDRPolicyCounts = ({
   drPolicyToDiscoveredAppsCount,
   drPolicyToAppsetCount,
   drPolicyToSubsAppCount,
-}): DRPolicyToAppCount => {
+}) => {
   const allDRPolicyNames = new Set([
     ...Object.keys(drPolicyToDiscoveredAppsCount),
     ...Object.keys(drPolicyToAppsetCount),

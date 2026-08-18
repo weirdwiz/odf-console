@@ -104,27 +104,24 @@ const AllNodesLabel: React.FC<{ count: number }> = ({ count }) => {
 };
 
 const getDiskTypeValidationError = (state: State, t: TFunction) => {
-  let validationError: {
-    title: string;
-    variant?: AlertVariant;
-  };
-
-  if (state.diskType === DiskType.All)
-    validationError = {
+  if (state.diskType === DiskType.All) {
+    return {
       title: t(
         'All disk type may include HDD disks. Data Foundation does not support HDD disks as local devices. Select SSD if you plan to use Data Foundation.'
       ),
       variant: AlertVariant.info,
     };
-  if (state.diskType === DiskType.HDD)
-    validationError = {
+  }
+  if (state.diskType === DiskType.HDD) {
+    return {
       title: t(
         'Data Foundation does not support HDD disks as local devices. Select SSD if you plan to use Data Foundation.'
       ),
       variant: AlertVariant.info,
     };
+  }
 
-  return validationError;
+  return undefined;
 };
 
 export const LocalVolumeSetBody: React.FC<LocalVolumeSetBodyProps> = ({
@@ -153,9 +150,10 @@ export const LocalVolumeSetBody: React.FC<LocalVolumeSetBodyProps> = ({
 
   const onRowSelected = React.useCallback(
     (selectedNodes: NodeData[]) => {
+      // SAFETY: selectedNodes as unknown contains only entries produced for the NodeKind[] contract.
       dispatch({
         type: 'setLvsSelectNodes',
-        value: selectedNodes as unknown as NodeKind[],
+        value: selectedNodes as NodeKind[],
       });
     },
     [dispatch]
@@ -163,6 +161,7 @@ export const LocalVolumeSetBody: React.FC<LocalVolumeSetBodyProps> = ({
 
   const diskTypeValidationError = getDiskTypeValidationError(state, t);
 
+  // SAFETY: state.lvsAllNodes as unknown contains only entries produced for the NodeData[] contract.
   return (
     <>
       <FormGroup
@@ -229,9 +228,7 @@ export const LocalVolumeSetBody: React.FC<LocalVolumeSetBodyProps> = ({
       </FormGroup>
       {state.lvsIsSelectNodes && (
         <SelectNodesTable
-          nodes={createWizardNodeState(
-            state.lvsAllNodes as unknown as NodeData[]
-          )}
+          nodes={createWizardNodeState(state.lvsAllNodes as NodeData[])}
           onRowSelected={onRowSelected}
           systemNamespace={''}
         />

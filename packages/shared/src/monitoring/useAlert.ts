@@ -1,10 +1,11 @@
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,
 } from '@odf/shared/hooks/custom-prometheus-poll';
 import {
   Alert,
-  PrometheusEndpoint,
+  PrometheusResponse,
   PrometheusRule,
   Rule,
 } from '@openshift-console/dynamic-plugin-sdk';
@@ -24,19 +25,24 @@ type PrometheusRulesResponse = {
   status: string;
 };
 
+const isPrometheusRulesResponse = (
+  value: PrometheusResponse | PrometheusRulesResponse
+): value is PrometheusRulesResponse =>
+  Array.isArray(_.get(value, 'data.groups'));
+
 const useAlerts = (basePath = '', cluster = ''): [Alert[], boolean, any] => {
   const defaultBasePath = usePrometheusBasePath();
 
   const [data, error, loading] = useCustomPrometheusPoll({
-    endpoint: PrometheusEndpoint.RULES as any,
+    endpoint: PrometheusEndpoint.RULES,
     query: PrometheusEndpoint.RULES,
     basePath: basePath || defaultBasePath,
-    ...(!!cluster ? { cluster } : {}),
+    ...(cluster && { cluster }),
   });
 
   // Flatten the rules data to make it easier to work with, discard non-alerting rules since those
   // are the only ones we will be using and add a unique ID to each rule.
-  const groups = (data as unknown as PrometheusRulesResponse)?.data?.groups;
+  const groups = isPrometheusRulesResponse(data) ? data.data.groups : [];
   const rules = _.flatMap(groups, (g) => {
     const addID = (r: PrometheusRule): Rule => {
       const key = [

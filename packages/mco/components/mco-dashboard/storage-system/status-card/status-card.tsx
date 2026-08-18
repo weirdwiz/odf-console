@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import HealthItem from '@odf/shared/dashboards/status-card/HealthItem';
 import {
   healthStateMap,
@@ -31,7 +32,14 @@ import {
 } from './storage-system-popup';
 import './status-card.scss';
 
-const HealthBody = HealthBodyBase as React.FC<React.PropsWithChildren<{}>>;
+export const statusCardDependencies = {
+  HealthBody: ({ children }: React.PropsWithChildren) =>
+    React.createElement(HealthBodyBase, null, children),
+  useCustomPrometheusPoll,
+};
+
+const HealthBody: React.FC<React.PropsWithChildren> = ({ children }) =>
+  React.createElement(statusCardDependencies.HealthBody, null, children);
 
 type SubSystemMap = {
   [key: string]: string;
@@ -102,15 +110,15 @@ const StorageSystemHealthItem: React.FC = () => {
 
   const [worstHealth, setWorstHealth] = React.useState<string>('');
   const [sysHealthData, sysHealthError, sysHealthLoading] =
-    useCustomPrometheusPoll({
-      endpoint: 'api/v1/query' as any,
+    statusCardDependencies.useCustomPrometheusPoll({
+      endpoint: PrometheusEndpoint.QUERY,
       query: STATUS_QUERIES[StorageDashboard.SYSTEM_HEALTH],
       basePath: ACM_ENDPOINT,
       cluster: HUB_CLUSTER_NAME,
     });
   const [subSysHealthData, subSysHealthError, subSysHealthLoading] =
-    useCustomPrometheusPoll({
-      endpoint: 'api/v1/query' as any,
+    statusCardDependencies.useCustomPrometheusPoll({
+      endpoint: PrometheusEndpoint.QUERY,
       query: STATUS_QUERIES[StorageDashboard.HEALTH],
       basePath: ACM_ENDPOINT,
       cluster: HUB_CLUSTER_NAME,
@@ -170,8 +178,8 @@ const CSVStatusHealthItem: React.FC = () => {
   const { t } = useCustomTranslation();
 
   const [worstStatus, setWorstStatus] = React.useState<string>('');
-  const [csvData, csvError, csvLoading] = useCustomPrometheusPoll({
-    endpoint: 'api/v1/query' as any,
+  const [csvData, csvError, csvLoading] = statusCardDependencies.useCustomPrometheusPoll({
+    endpoint: PrometheusEndpoint.QUERY,
     query: STATUS_QUERIES[StorageDashboard.CSV_STATUS],
     basePath: ACM_ENDPOINT,
     cluster: HUB_CLUSTER_NAME,

@@ -7,6 +7,7 @@ import {
   NooBaaObjectBucketModel,
 } from '@odf/shared';
 import { FieldLevelHelp } from '@odf/shared/generic/FieldLevelHelp';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,
@@ -92,20 +93,20 @@ const MCGObjectInventoryItem: React.FC = () => {
 
   const [noobaaCount, noobaaCountError] = useCustomPrometheusPoll({
     query: BucketsCardQueries.BUCKETS_COUNT,
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [noobaaObjectsCount, noobaaObjectsCountError] = useCustomPrometheusPoll(
     {
       query: BucketsCardQueries.BUCKET_OBJECTS_COUNT,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     }
   );
   const [unhealthyNoobaaBuckets, unhealthyNoobaaBucketsError] =
     useCustomPrometheusPoll({
       query: BucketsCardQueries.UNHEALTHY_BUCKETS,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 
@@ -164,7 +165,7 @@ const ObjectDashboardBucketsCard: React.FC<{}> = () => {
         <ResourceInventoryItem
           isLoading={!obLoaded}
           error={!!obLoadError}
-          kind={NooBaaObjectBucketModel as any}
+          kind={NooBaaObjectBucketModel}
           resources={obData}
           mapper={getObStatusGroups}
         />
@@ -172,7 +173,7 @@ const ObjectDashboardBucketsCard: React.FC<{}> = () => {
           dataTest="resource-inventory-item-obc"
           isLoading={!obcLoaded}
           error={!!obcLoadError}
-          kind={NooBaaObjectBucketClaimModel as any}
+          kind={NooBaaObjectBucketClaimModel}
           resources={obcData}
           mapper={getObcStatusGroups}
         />

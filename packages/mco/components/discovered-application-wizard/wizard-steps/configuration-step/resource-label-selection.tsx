@@ -27,6 +27,8 @@ import {
 } from '../../utils/reducer';
 import './configuration-step.scss';
 
+export const resourceLabelSelectionDependencies = { useACMSafeFetch };
+
 const getLabelOptions = (
   searchResultItem: SearchResultItemType[]
 ): LabelOptionsType =>
@@ -72,7 +74,7 @@ export const ResourceLabelSelection: React.FC<ResourceLabelSelectionProps> = ({
 
   // ACM search proxy API call
   const [searchResult, searchError, searchLoaded] =
-    useACMSafeFetch(searchQuery);
+    resourceLabelSelectionDependencies.useACMSafeFetch(searchQuery);
 
   const labelOptions = React.useMemo(() => {
     if (searchLoaded && !searchError) {

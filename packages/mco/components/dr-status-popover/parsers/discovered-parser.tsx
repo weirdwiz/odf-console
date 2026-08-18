@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { getDRPolicyResourceObj } from '@odf/mco/hooks';
-import { DRPlacementControlKind, DRPolicyKind, Phase } from '@odf/mco/types';
+import { DRPlacementControlKind, DRPolicyKind } from '@odf/mco/types';
 import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import {
   getReplicationHealth,
@@ -69,7 +69,7 @@ export const DRPlacementControlParser: React.FC<
       lastKubeObjectProtectionTime: lastKubeObjectProtectionTime,
       volumeReplicationHealth,
       kubeObjectReplicationHealth,
-      phase: drPlacementControl?.status?.phase as Phase,
+      phase: drPlacementControl?.status?.phase,
       isCleanupRequired: isCleanupPending(drPlacementControl),
       isLoadedWOError: loaded && !loadError,
       ...getProgressionFields(drPlacementControl),

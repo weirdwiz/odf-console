@@ -17,7 +17,13 @@ import {
   mockManagedClusterWest2Down,
 } from '../../__mocks__/managedcluster';
 import { ACMManagedClusterKind, ACMManagedClusterViewKind } from '../../types';
-import CreateDRPolicy from './create-dr-policy';
+import CreateDRPolicy, {
+  createDRPolicyPageDependencies,
+} from './create-dr-policy';
+import { createDRPolicyWizardDependencies } from './create-dr-policy-wizard';
+import { drPolicyK8sDependencies } from './utils/k8s-utils';
+import { selectClusterListDependencies } from './wizard-steps/clusters-step/select-cluster-list';
+import { selectedClusterValidatorDependencies } from './wizard-steps/clusters-step/selected-cluster-validator';
 
 let drPolicyObj = {};
 let mirrorPeerObj = {};
@@ -45,7 +51,7 @@ const managedClusterViews: ACMManagedClusterViewKind[][] = [
             name: 'odf-info',
             namespace: 'openshift-storage',
           },
-        } as ConfigMapKind,
+        } satisfies ConfigMapKind,
       },
     },
     {
@@ -67,7 +73,7 @@ const managedClusterViews: ACMManagedClusterViewKind[][] = [
             name: 'odf-info',
             namespace: 'openshift-storage',
           },
-        } as ConfigMapKind,
+        } satisfies ConfigMapKind,
       },
     },
     {
@@ -89,7 +95,7 @@ const managedClusterViews: ACMManagedClusterViewKind[][] = [
             name: 'odf-info',
             namespace: 'openshift-storage',
           },
-        } as ConfigMapKind,
+        } satisfies ConfigMapKind,
       },
     },
   ],
@@ -113,7 +119,7 @@ const managedClusterViews: ACMManagedClusterViewKind[][] = [
             name: 'odf-info',
             namespace: 'openshift-storage',
           },
-        } as ConfigMapKind,
+        } satisfies ConfigMapKind,
       },
     },
     {
@@ -135,7 +141,7 @@ const managedClusterViews: ACMManagedClusterViewKind[][] = [
             name: 'odf-info',
             namespace: 'openshift-storage',
           },
-        } as ConfigMapKind,
+        } satisfies ConfigMapKind,
       },
     },
     {
@@ -157,7 +163,7 @@ const managedClusterViews: ACMManagedClusterViewKind[][] = [
             name: 'odf-info',
             namespace: 'openshift-storage',
           },
-        } as ConfigMapKind,
+        } satisfies ConfigMapKind,
       },
     },
   ],
@@ -177,16 +183,13 @@ const csv = {
     version: '4.18.0',
   },
 };
-
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useNavigate: () => null,
-  useLocation: () => ({ pathname: '/' }),
-}));
-
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  useK8sWatchResource: jest.fn(({ kind }) => {
+jest
+  .spyOn(createDRPolicyPageDependencies, 'useNavigate')
+  .mockImplementation(() => jest.fn());
+jest
+  .spyOn(createDRPolicyPageDependencies, 'useLocation')
+  .mockImplementation(() => ({ pathname: '/', search: '' }));
+const watchResourceImplementation = jest.fn(({ kind }) => {
     if (
       kind ===
       `${ACMManagedClusterModel.apiGroup}~${ACMManagedClusterModel.apiVersion}~${ACMManagedClusterModel.kind}`
@@ -211,22 +214,32 @@ jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
     } else {
       return [[], true, ''];
     }
-  }),
-  k8sCreate: jest.fn(({ model, data }) => {
+  });
+jest
+  .spyOn(createDRPolicyWizardDependencies, 'useK8sWatchResource')
+  .mockImplementation(watchResourceImplementation);
+jest
+  .spyOn(selectClusterListDependencies, 'useK8sWatchResource')
+  .mockImplementation(watchResourceImplementation);
+jest
+  .spyOn(selectedClusterValidatorDependencies, 'useK8sWatchResource')
+  .mockImplementation(watchResourceImplementation);
+jest.spyOn(drPolicyK8sDependencies, 'k8sCreate').mockImplementation(
+  jest.fn(({ model, data }) => {
     if (model.kind === DRPolicyModel.kind) {
       drPolicyObj = data;
     } else if (model.kind === MirrorPeerModel.kind) {
       mirrorPeerObj = data;
     }
-    return [Promise.resolve({ data: {} })];
-  }),
-  useListPageFilter: jest.fn((clusters) => [clusters, clusters, jest.fn()]),
-  ListPageFilter: jest.fn(() => null),
-}));
-
-jest.mock('@odf/shared/hooks/use-fetch-csv', () => ({
-  useFetchCsv: jest.fn(() => [csv]),
-}));
+    return Promise.resolve({ data: {} });
+  })
+);
+jest
+  .spyOn(selectClusterListDependencies, 'useListPageFilter')
+  .mockImplementation(jest.fn((clusters) => [clusters, clusters, jest.fn()]));
+jest
+  .spyOn(createDRPolicyWizardDependencies, 'useFetchCsv')
+  .mockImplementation(jest.fn(() => [csv]));
 
 // eslint-disable-next-line jest/no-disabled-tests
 describe.skip('Test drpolicy list page', () => {

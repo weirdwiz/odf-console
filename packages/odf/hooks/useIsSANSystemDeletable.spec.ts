@@ -1,12 +1,12 @@
 import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
+import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
 import { renderHook } from '@testing-library/react';
 import { FileSystemKind } from '../types/scale';
 import useIsSANSystemDeletable from './useIsSANSystemDeletable';
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  useK8sWatchResource: jest.fn(),
-}));
+jest
+  .spyOn(TestDependency1, 'useK8sWatchResource')
+  .mockImplementation(jest.fn());
 
 const sanFileSystem = (name: string): FileSystemKind => ({
   apiVersion: 'scale.spectrum.ibm.com/v1beta1',
@@ -35,6 +35,7 @@ const remoteFileSystem = (name: string): FileSystemKind => ({
 
 describe('useIsSANSystemDeletable', () => {
   it('returns false while filesystems are loading', () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useK8sWatchResource as jest.Mock).mockReturnValue([
       undefined,
       false,
@@ -46,6 +47,7 @@ describe('useIsSANSystemDeletable', () => {
   });
 
   it('returns false when the filesystem watch errors', () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useK8sWatchResource as jest.Mock).mockReturnValue([
       [],
       true,
@@ -57,6 +59,7 @@ describe('useIsSANSystemDeletable', () => {
   });
 
   it('returns false when SAN LUN groups exist', () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useK8sWatchResource as jest.Mock).mockReturnValue([
       [sanFileSystem('lun-group-1')],
       true,
@@ -68,6 +71,7 @@ describe('useIsSANSystemDeletable', () => {
   });
 
   it('returns true when there are no SAN LUN groups', () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useK8sWatchResource as jest.Mock).mockReturnValue([
       [remoteFileSystem('remote-fs')],
       true,
@@ -79,6 +83,7 @@ describe('useIsSANSystemDeletable', () => {
   });
 
   it('returns true when the filesystem list is empty', () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useK8sWatchResource as jest.Mock).mockReturnValue([[], true, null]);
 
     const { result } = renderHook(() => useIsSANSystemDeletable());
@@ -86,6 +91,7 @@ describe('useIsSANSystemDeletable', () => {
   });
 
   it('does not throw when filesystems are undefined after load', () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useK8sWatchResource as jest.Mock).mockReturnValue([undefined, true, null]);
 
     const { result } = renderHook(() => useIsSANSystemDeletable());

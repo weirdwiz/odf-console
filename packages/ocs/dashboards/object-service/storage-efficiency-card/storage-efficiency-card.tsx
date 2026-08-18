@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useODFSystemFlagsSelector } from '@odf/core/redux';
 import { useGetClusterDetails } from '@odf/core/redux/utils';
 import { ObjectStorageEfficiencyQueries } from '@odf/ocs/queries';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import { EfficiencyItemBody } from '@odf/shared/dashboards/storage-efficiency/storage-efficiency-card-item';
 import { DataUnavailableError } from '@odf/shared/generic';
 import {
@@ -19,20 +20,20 @@ const ObjectStorageEfficiencyItemBody: React.FC = () => {
   const [compressionQueryResult, compressionQueryResultError] =
     useCustomPrometheusPoll({
       query: ObjectStorageEfficiencyQueries.COMPRESSION_RATIO,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
   const [savingsQueryResult, savingsQueryResultError] = useCustomPrometheusPoll(
     {
       query: ObjectStorageEfficiencyQueries.SAVINGS_QUERY,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     }
   );
   const [logicalSavingsQueryResult, logicalSavingsQueryResultError] =
     useCustomPrometheusPoll({
       query: ObjectStorageEfficiencyQueries.LOGICAL_SAVINGS_QUERY,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 

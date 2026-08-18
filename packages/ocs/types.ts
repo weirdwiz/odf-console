@@ -53,7 +53,7 @@ export type CephFilesystemKind = K8sResourceCommon & {
     dataPools: DataPool[];
   };
   status?: {
-    phase?: string;
+    phase?: PoolState;
   };
 };
 

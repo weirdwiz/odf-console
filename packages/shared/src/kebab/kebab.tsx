@@ -1,7 +1,10 @@
 import * as React from 'react';
 import { useCallback, useEffect } from 'react';
 import { getName, getNamespace } from '@odf/shared/selectors';
-import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  AccessReviewResourceAttributes,
+  K8sResourceCommon,
+} from '@openshift-console/dynamic-plugin-sdk';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk/lib/api/common-types';
 import { TFunction } from 'i18next';
 import * as _ from 'lodash-es';
@@ -27,6 +30,7 @@ const useClickOutside = (
   callback: () => void
 ) => {
   useEffect(() => {
+    // SAFETY: event.target comes from the owner of the Node contract used at this boundary.
     const handleClickOutside = (event: MouseEvent) => {
       // Dropdown and its toggle button are 2 separate elements at the same
       // nesting level, so we check that we're interacting outside both.
@@ -68,13 +72,15 @@ type CustomKebabItemsMap = {
   [key in string]: CustomKebabItem;
 };
 
-type KebabProps = {
-  extraProps: {
-    resource: K8sResourceCommon;
-    resourceModel: K8sModel;
-    [key: string]: any;
-    forceDeletion?: boolean;
-  };
+type KebabExtraProps = {
+  resource: K8sResourceCommon;
+  resourceModel: K8sModel;
+  cluster?: string;
+  forceDeletion?: boolean;
+};
+
+type KebabProps<ExtraProps extends KebabExtraProps> = {
+  extraProps: ExtraProps;
   customKebabItems?: CustomKebabItem[];
   toggleType?: 'Kebab' | 'Dropdown';
   isDisabled?: boolean;
@@ -134,7 +140,7 @@ const defaultKebabItems = (t: TFunction, resourceLabel: string) => ({
   ),
 });
 
-export const Kebab: React.FC<KebabProps> & KebabStaticProperties = ({
+const KebabComponent = <ExtraProps extends KebabExtraProps>({
   extraProps,
   customKebabItems,
   toggleType = 'Kebab',
@@ -143,7 +149,7 @@ export const Kebab: React.FC<KebabProps> & KebabStaticProperties = ({
   hideItems,
   customLabel,
   'data-test': dataTestId,
-}) => {
+}: KebabProps<ExtraProps>): JSX.Element => {
   const { t } = useCustomTranslation();
   const launchModal = useModalWrapper();
   const eventRef = React.useRef(undefined);
@@ -161,15 +167,19 @@ export const Kebab: React.FC<KebabProps> & KebabStaticProperties = ({
   const resourceLabel = customLabel ?? resourceModel.label;
   const navigate = useNavigate();
 
-  const [canCreate, createLoading] = useAccessReview({
-    group: resourceModel?.apiGroup,
-    resource: resourceModel?.plural,
-    name: getName(resource),
-    ...(!!resourceModel?.namespaced
-      ? { namespace: getNamespace(resource) }
-      : {}),
-    verb: 'create',
-  });
+  const [canCreate, createLoading] = useAccessReview(
+    (() => {
+      const value: AccessReviewResourceAttributes = {
+        group: resourceModel?.apiGroup,
+        resource: resourceModel?.plural,
+        name: getName(resource),
+        verb: 'create',
+      };
+      if (!!resourceModel?.namespaced)
+        Object.assign(value, { namespace: getNamespace(resource) });
+      return value;
+    })()
+  );
 
   const showPermissionTooltip = !canCreate && !createLoading;
 
@@ -204,6 +214,7 @@ export const Kebab: React.FC<KebabProps> & KebabStaticProperties = ({
   ) => {
     setOpen(false);
     const modalComponentProps = { extraProps, isOpen: true };
+    // SAFETY: value comes from the owner of the string contract used at this boundary.
     const actionKey = value as string;
     const modalComponent =
       customKebabItemsMap[actionKey]?.component || defaultModalMap[actionKey];
@@ -229,6 +240,7 @@ export const Kebab: React.FC<KebabProps> & KebabStaticProperties = ({
 
   const dropdownItems = React.useMemo(() => {
     const defaultResolved = defaultKebabItems(t, resourceLabel);
+    // SAFETY: key comes from the owner of the ModalKeys contract used at this boundary.
     const filteredDefaultItems = hideItems
       ? Object.keys(defaultResolved)
           .filter((key) => !hideItems.includes(key as ModalKeys))
@@ -240,6 +252,7 @@ export const Kebab: React.FC<KebabProps> & KebabStaticProperties = ({
     const customResolved: CustomKebabItemsMap = customKebabItemsMap
       ? customKebabItemsMap
       : {};
+    // SAFETY: k comes from the owner of the ModalKeys contract used at this boundary.
     const { overrides, custom } = Object.entries(customResolved).reduce(
       (acc, [k, obj]) => {
         if (hideItems?.includes(k as ModalKeys)) {
@@ -345,4 +358,6 @@ export const Kebab: React.FC<KebabProps> & KebabStaticProperties = ({
   );
 };
 
-Kebab.columnClass = 'dropdown-kebab-pf pf-v6-c-table__action pf-v6-u-min-width';
+export const Kebab = Object.assign(KebabComponent, {
+  columnClass: 'dropdown-kebab-pf pf-v6-c-table__action pf-v6-u-min-width',
+}) satisfies KebabStaticProperties & typeof KebabComponent;

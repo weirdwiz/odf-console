@@ -7,12 +7,12 @@ import {
 } from '@odf/mco/hooks';
 import {
   ACMManagedClusterKind,
-  ACMPlacementDecisionKind,
+  ACMPlacementRuleKind,
+  ACMPlacementType,
   DRClusterAppsMap,
   DRClusterKind,
   PlacementControlInfo,
   ProtectedAppsMap,
-  Phase,
 } from '@odf/mco/types';
 import {
   getProtectedPVCsFromDRPC,
@@ -23,6 +23,11 @@ import { ACMPlacementModel } from '@odf/shared';
 import { ApplicationKind } from '@odf/shared';
 import { getName, getNamespace } from '@odf/shared/selectors';
 import * as _ from 'lodash-es';
+
+export const subscriptionParserDependencies = {
+  useDisasterRecoveryResourceWatch,
+  useSubscriptionResourceWatch,
+};
 
 const createPlacementControlInfoList = (
   subscriptionGroupsList: SubscriptionGroupType[],
@@ -46,7 +51,7 @@ const createPlacementControlInfoList = (
         failoverCluster: drPlacementControl?.spec?.failoverCluster,
         preferredCluster: drPlacementControl?.spec?.preferredCluster,
         lastVolumeGroupSyncTime: drPlacementControl?.status?.lastGroupSyncTime,
-        status: drPlacementControl?.status?.phase as Phase,
+        status: drPlacementControl?.status?.phase,
         subscriptions: subscriptionGroup?.subscriptions?.map((subs) =>
           getName(subs)
         ),
@@ -81,17 +86,20 @@ const createProtectedAppMap = (
   return protectedApp;
 };
 
+const isPlacementRule = (
+  placement: ACMPlacementType
+): placement is ACMPlacementRuleKind =>
+  !!placement && placement.kind !== ACMPlacementModel.kind;
+
 const createClusterWiseSubscriptionGroupsMap = (
   subscriptionGroupInfo: SubscriptionGroupType[]
-): ClusterWiseSubscriptionGroupsMap => {
+) => {
   const clusterWiseSubscriptionGroups: ClusterWiseSubscriptionGroupsMap = {};
 
   subscriptionGroupInfo?.forEach((subscriptionGroup) => {
-    const appPlacement = (
-      subscriptionGroup?.placement?.kind === ACMPlacementModel.kind
-        ? subscriptionGroup?.placementDecision
-        : subscriptionGroup?.placement
-    ) as ACMPlacementDecisionKind;
+    const appPlacement = isPlacementRule(subscriptionGroup?.placement)
+      ? subscriptionGroup.placement
+      : subscriptionGroup?.placementDecision;
     const deploymentClusters: string[] = findDeploymentClusters(
       appPlacement,
       subscriptionGroup?.drInfo?.drPlacementControl
@@ -113,10 +121,10 @@ export const useSubscriptionParser: UseSubscriptionParser = (
   managedClusterLoadError
 ) => {
   const [drResources, drLoaded, drLoadError] =
-    useDisasterRecoveryResourceWatch();
+    subscriptionParserDependencies.useDisasterRecoveryResourceWatch();
 
   const [subscriptionResources, subsResourceLoaded, subsResourceLoadError] =
-    useSubscriptionResourceWatch({
+    subscriptionParserDependencies.useSubscriptionResourceWatch({
       drResources: {
         data: drResources,
         loaded: drLoaded,
@@ -129,7 +137,7 @@ export const useSubscriptionParser: UseSubscriptionParser = (
   const drClusters: DRClusterKind[] = drResources?.drClusters;
   const drClusterAppsMap: DRClusterAppsMap = React.useMemo(() => {
     if (loaded && !loadError) {
-      const drClusterAppsMap: DRClusterAppsMap = drClusters.reduce(
+      const drClusterAppsMap: DRClusterAppsMap = drClusters.reduce<DRClusterAppsMap>(
         (acc, drCluster) => {
           const clusterName = getName(drCluster);
           acc[clusterName] = {
@@ -141,7 +149,7 @@ export const useSubscriptionParser: UseSubscriptionParser = (
           };
           return acc;
         },
-        {} as DRClusterAppsMap
+        {}
       );
 
       subscriptionResources.forEach((subscriptionResource) => {

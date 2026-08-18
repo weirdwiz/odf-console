@@ -56,11 +56,13 @@ export const NodeResources: React.FC<NodeResourcesProps> = ({
       : [];
 
   const basePath = usePrometheusBasePath();
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [usedCpu, errorUsedCpu, loadingUsedCpu] = useCustomPrometheusPoll({
     endpoint: 'api/v1/query' as any,
     query: POD_QUERIES(odfNamespace)[PodMetrics.CPU],
     basePath: basePath,
   });
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [usedMemory, errorUsedMemory, loadingUsedMemory] =
     useCustomPrometheusPoll({
       endpoint: 'api/v1/query' as any,

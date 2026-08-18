@@ -92,7 +92,7 @@ const DetailsCard: React.FC = () => {
           <DetailItem
             key="cluster_name"
             title={t('Cluster name')}
-            error={ocsError as any}
+            error={ocsError}
             isLoading={!ocsLoaded}
           >
             {ocsName}

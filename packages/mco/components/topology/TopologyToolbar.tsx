@@ -44,10 +44,12 @@ const TopologyToolbar: React.FC<TopologyToolbarProps> = ({
       _event: React.MouseEvent<Element, MouseEvent> | undefined,
       value: string | number | undefined
     ) => {
-      if (value) {
-        const filterValue = value as unknown as FilterType;
+      const filterValue = Object.values(FilterType).find(
+        (filter) => filter === value
+      );
+      if (filterValue) {
         const newFilters = selectedFilters.includes(filterValue)
-          ? selectedFilters.filter((f) => f !== filterValue)
+          ? selectedFilters.filter((filter) => filter !== filterValue)
           : [filterValue];
         onFilterChange(newFilters);
       }

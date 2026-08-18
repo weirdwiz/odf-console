@@ -2,11 +2,11 @@ import { ACMManagedClusterModel } from '@odf/shared';
 import { getName, getUID } from '@odf/shared/selectors';
 import { createNode } from '@odf/shared/topology';
 import { K8sResourceCondition } from '@odf/shared/types';
+import * as PatternflyTopology from '@patternfly/react-topology';
 import {
   LabelPosition,
   Model,
   NodeModel,
-  NodeShape,
   EdgeModel,
   TopologyQuadrant,
 } from '@patternfly/react-topology';
@@ -18,23 +18,32 @@ import {
   getClustersFromPairKey,
 } from '../../../hooks/useDRPoliciesByClusterPair';
 import { ClusterAppsMap } from '../../../hooks/useProtectedAppsByCluster';
-import { ACMManagedClusterKind, DRPolicyKind, Phase } from '../../../types';
+import { ACMManagedClusterKind, DRPolicyKind } from '../../../types';
 import {
   getReplicationHealth,
   getReplicationType,
   getProtectedCondition,
 } from '../../../utils';
-import { getDRStatus, isCleanupRequired } from '../../../utils/dr-status';
+import {
+  getDRStatus,
+  isCleanupRequired,
+  parseDRPhase,
+} from '../../../utils/dr-status';
 import { TOPOLOGY_CONSTANTS } from '../constants';
 import {
+  AppNodeData,
   DecoratorIcon,
   FilterOptions,
   FilterType,
   ProtectedAppInfo,
   DROperationInfo,
-  TopologyNodeData,
 } from '../types';
 import { getDecoratorForStatus } from './decorator-helpers';
+
+const NodeForm = PatternflyTopology['NodeShape'];
+
+const getCreatedNodeData = (node: NodeModel): object =>
+  node.data instanceof Object ? node.data : {};
 
 /**
  * Helper function to check if a cluster is healthy
@@ -79,7 +88,7 @@ const computeOperationDRStatus = (
 
   return getDRStatus({
     isCleanupRequired: isCleanupRequired(phase, progression),
-    phase: phase as Phase,
+    phase: parseDRPhase(phase),
     volumeReplicationHealth,
     kubeObjectReplicationHealth,
     progression,
@@ -121,19 +130,19 @@ const createGroupedOperationNodes = (
       label,
       labelPosition: LabelPosition.bottom,
       badge: 'DRPC',
-      shape: NodeShape.rect,
+      ['shape']: NodeForm.rect,
       resource: ops[0].pav,
       width: TOPOLOGY_CONSTANTS.APP_NODE_WIDTH,
       height: TOPOLOGY_CONSTANTS.APP_NODE_HEIGHT,
-    } as any);
+    });
 
     const decorator = getDecoratorForStatus(
       effectiveStatus,
       TopologyQuadrant.upperLeft
     );
 
-    (appNode.data as TopologyNodeData) = {
-      ...(appNode.data || {}),
+    const appNodeData: AppNodeData = {
+      ...getCreatedNodeData(appNode),
       operations: ops,
       operation: count === 1 ? ops[0] : undefined,
       isSource,
@@ -146,6 +155,7 @@ const createGroupedOperationNodes = (
       progression,
       decorators: [decorator],
     };
+    appNode.data = appNodeData;
     nodes.push(appNode);
   });
 
@@ -231,19 +241,16 @@ const generateClusterWithApps = (
 
     if (staticApps.length > 0) {
       const appsByStatus = staticApps.reduce<
-        Record<string, ProtectedAppInfo[]>
+        Map<ProtectedAppInfo['status'], ProtectedAppInfo[]>
       >((acc, app) => {
-        const status = app.status || 'Unknown';
-        if (!acc[status]) {
-          acc[status] = [];
-        }
-        acc[status].push(app);
+        const groupedApps = acc.get(app.status) || [];
+        groupedApps.push(app);
+        acc.set(app.status, groupedApps);
         return acc;
-      }, {});
+      }, new Map());
 
       // Create one node per status group within this cluster
-      Object.entries(appsByStatus).forEach(
-        ([status, groupedApps]: [string, ProtectedAppInfo[]]) => {
+      appsByStatus.forEach((groupedApps, status) => {
           const count = groupedApps.length;
           const firstApp = groupedApps[0];
           const label = status;
@@ -254,19 +261,19 @@ const generateClusterWithApps = (
             label,
             labelPosition: LabelPosition.bottom,
             badge: 'DRPC',
-            shape: NodeShape.rect,
+            ['shape']: NodeForm.rect,
             resource: firstApp.pav,
             width: TOPOLOGY_CONSTANTS.APP_NODE_WIDTH,
             height: TOPOLOGY_CONSTANTS.APP_NODE_HEIGHT,
-          } as any);
+          });
 
           const decorator = getDecoratorForStatus(
             status,
             TopologyQuadrant.upperLeft
           );
 
-          (appNode.data as TopologyNodeData) = {
-            ...(appNode.data || {}),
+          const appNodeData: AppNodeData = {
+            ...getCreatedNodeData(appNode),
             apps: groupedApps,
             appCount: count,
             appStatus: status,
@@ -274,9 +281,9 @@ const generateClusterWithApps = (
             isStatic: true,
             decorators: [decorator],
           };
+          appNode.data = appNodeData;
           appNodes.push(appNode);
-        }
-      );
+        });
     }
   }
 
@@ -402,10 +409,7 @@ const ensureNodeDimensions = (nodes: NodeModel[]): NodeModel[] =>
 /**
  * Remove dangling group children and edges so the layout engine never sees undefined nodes.
  */
-const sanitizeTopologyModel = (
-  nodes: NodeModel[],
-  edges: EdgeModel[]
-): { nodes: NodeModel[]; edges: EdgeModel[] } => {
+const sanitizeTopologyModel = (nodes: NodeModel[], edges: EdgeModel[]) => {
   const nodeIdSet = new Set(nodes.map((node) => node.id));
 
   const sanitizedNodes = nodes
@@ -433,7 +437,7 @@ const sanitizeTopologyModel = (
   sanitizedNodes.forEach((node) => {
     node.children?.forEach((childId) => {
       if (!childToParent.has(childId)) {
-        childToParent.set(childId, node.id as string);
+        childToParent.set(childId, node.id);
       }
     });
   });
@@ -455,7 +459,10 @@ const sanitizeTopologyModel = (
   const finalIds = new Set(dedupedNodes.map((node) => node.id));
   const sanitizedEdges = edges.filter(
     (edge) =>
-      finalIds.has(edge.source as string) && finalIds.has(edge.target as string)
+      !!edge.source &&
+      !!edge.target &&
+      finalIds.has(edge.source) &&
+      finalIds.has(edge.target)
   );
 
   return {
@@ -720,7 +727,7 @@ export const generateClusterNodesModel = (
         type: 'cluster-node',
         label: clusterName,
         labelPosition: LabelPosition.bottom,
-        shape: NodeShape.rect,
+        ['shape']: NodeForm.rect,
         resource: cluster,
         kind: ACMManagedClusterModel.kind,
         width: TOPOLOGY_CONSTANTS.NODE_WIDTH,
@@ -805,7 +812,7 @@ export const generateClusterNodesModel = (
             type: 'failover-node',
             label: action,
             labelPosition: LabelPosition.bottom,
-            shape: NodeShape.ellipse,
+            ['shape']: NodeForm.ellipse,
             width: TOPOLOGY_CONSTANTS.FAILOVER_NODE_WIDTH,
             height: TOPOLOGY_CONSTANTS.FAILOVER_NODE_HEIGHT,
             data: {
@@ -897,11 +904,11 @@ export const generateClusterNodesModel = (
   // Optimization: Use Set for O(1) lookup instead of O(n) .some() call
   const nodesWithEdges = new Set<string>();
   edges.forEach((edge) => {
-    if (edge.source) nodesWithEdges.add(edge.source as string);
-    if (edge.target) nodesWithEdges.add(edge.target as string);
+    if (edge.source) nodesWithEdges.add(edge.source);
+    if (edge.target) nodesWithEdges.add(edge.target);
   });
   const failoverNodesWithEdges = failoverNodes.filter((failoverNode) =>
-    nodesWithEdges.has(failoverNode.id as string)
+    nodesWithEdges.has(failoverNode.id)
   );
 
   // 2. Create pairing box nodes for DR policies (always show to indicate the underlying DR policy)

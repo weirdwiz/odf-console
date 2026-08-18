@@ -44,9 +44,7 @@ import './system-connection-details.scss';
 
 const SCRIPT_NAME = 'ceph-external-cluster-details-exporter.py';
 
-export const getValidationKeys = (
-  rawKeys: string
-): { plainKeys: string[]; secretKeys: [] } => {
+export const getValidationKeys = (rawKeys: string) => {
   const { configMaps, secrets, storageClasses } = rawKeys
     ? JSON.parse(rawKeys)
     : { configMaps: [], secrets: [], storageClasses: [] };
@@ -116,6 +114,7 @@ export const ConnectionDetails: React.FC<ExternalComponentProps<RHCSState>> = ({
     setFormState('fileName', fName);
   };
 
+  // SAFETY: The receiving library accepts t; its published type does not expose this supported value.
   return (
     <ErrorHandler
       error={odfNsLoadError || podsLoadError || ocsCSVError || cmLoadError}
@@ -194,7 +193,7 @@ export const rhcsPayload: CreatePayload<RHCSState> = ({
   isDbBackup,
   dbBackup,
 }) => {
-  const storageClusterSpec: Record<string, unknown> = {
+  const baseStorageClusterSpec = {
     network: {
       connections: {
         encryption: {
@@ -213,15 +212,17 @@ export const rhcsPayload: CreatePayload<RHCSState> = ({
     },
   };
 
-  // Add automatic backup configuration if enabled
-  if (isDbBackup) {
-    storageClusterSpec.multiCloudGateway = {
-      dbBackup: {
-        schedule: dbBackup.schedule,
-        volumeSnapshot: dbBackup.volumeSnapshot,
-      },
-    };
-  }
+  const storageClusterSpec = isDbBackup
+    ? {
+        ...baseStorageClusterSpec,
+        multiCloudGateway: {
+          dbBackup: {
+            schedule: dbBackup.schedule,
+            volumeSnapshot: dbBackup.volumeSnapshot,
+          },
+        },
+      }
+    : baseStorageClusterSpec;
 
   return [
     {
@@ -270,9 +271,7 @@ export const EXTERNAL_CEPH_STORAGE: ExternalStorage[] = [
       kind: StorageClusterModel.kind,
       plural: StorageClusterModel.plural,
     },
-    component: ConnectionDetails as unknown as React.FC<
-      ExternalComponentProps<{}>
-    >,
+    component: ConnectionDetails,
     createPayload: rhcsPayload,
     canGoToNextStep: rhcsCanGoToNextStep,
   },

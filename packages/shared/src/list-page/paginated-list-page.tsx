@@ -16,16 +16,19 @@ import { getPageRange, getValidFilteredData } from '../utils';
 const INITIAL_PAGE_NUMBER = 1;
 const COUNT_PER_PAGE_NUMBER = 10;
 
-export type PaginatedListPageProps = {
+export type PaginatedListPageProps<
+  T = K8sResourceCommon,
+  ExtraProps = undefined,
+> = {
   countPerPage?: number;
-  filteredData: K8sResourceCommon[] | unknown[];
+  filteredData: T[];
   CreateButton?: React.FC<unknown>;
   toolbarActions?: React.ReactNode;
   Alerts?: React.FC<unknown>;
   noData?: boolean;
   hideFilter?: boolean;
   listPageFilterProps?: ListPageFilterProps;
-  composableTableProps: Omit<TableProps<K8sResourceCommon>, 'rows'>;
+  composableTableProps: Omit<TableProps<T, ExtraProps>, 'rows'>;
   paginationProps?: Omit<
     PaginationProps,
     | 'itemCount'
@@ -35,10 +38,10 @@ export type PaginatedListPageProps = {
     | 'onSetPage'
     | 'onPerPageSelect'
   >;
-  onPaginatedDataChange?: (paginatedData: K8sResourceCommon[]) => void;
+  onPaginatedDataChange?: (paginatedData: T[]) => void;
 };
 
-export const PaginatedListPage: React.FC<PaginatedListPageProps> = ({
+export const PaginatedListPage = <T, ExtraProps = undefined>({
   countPerPage,
   filteredData,
   CreateButton,
@@ -50,19 +53,19 @@ export const PaginatedListPage: React.FC<PaginatedListPageProps> = ({
   composableTableProps,
   paginationProps,
   onPaginatedDataChange,
-}) => {
+}: PaginatedListPageProps<T, ExtraProps>) => {
   const [page, setPage] = React.useState(INITIAL_PAGE_NUMBER);
   const [perPage, setPerPage] = React.useState(
     countPerPage || COUNT_PER_PAGE_NUMBER
   );
 
-  const paginatedData: K8sResourceCommon[] | unknown[] = React.useMemo(() => {
+  const paginatedData = React.useMemo(() => {
     const [start, end] = getPageRange(page, perPage);
     return filteredData.slice(start, end) || [];
   }, [filteredData, page, perPage]);
 
   React.useEffect(() => {
-    onPaginatedDataChange?.(paginatedData as K8sResourceCommon[]);
+    onPaginatedDataChange?.(paginatedData);
   }, [paginatedData, onPaginatedDataChange]);
 
   return (

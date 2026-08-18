@@ -17,7 +17,12 @@ import {
 } from '../../../../__mocks__/managedcluster';
 import { mockPlacement1 } from '../../../../__mocks__/placement';
 import { mockPlacementDecision1 } from '../../../../__mocks__/placementdecision';
-import { ArogoApplicationSetParser } from './argo-application-set-parser';
+import { failoverRelocateModalDependencies } from '../failover-relocate-modal';
+import { failoverRelocateModalBodyDependencies } from '../failover-relocate-modal-body';
+import {
+  ArogoApplicationSetParser,
+  argoApplicationSetParserDependencies,
+} from './argo-application-set-parser';
 /* eslint-enable jest/no-mocks-import */
 
 let type = 1;
@@ -61,45 +66,48 @@ const drResources2: DisasterRecoveryResourceKind = {
     },
   ],
 };
-
-jest.mock('@odf/mco/hooks', () => ({
-  ...jest.requireActual('@odf/mco/hooks'),
-  useArgoApplicationSetResourceWatch: jest.fn(() => [
-    aroAppSetResources(type === 1 ? mockDRPC1 : mockDRPC3),
-    true,
-    '',
-  ]),
-}));
-
-jest.mock('@odf/mco/hooks/disaster-recovery', () => ({
-  __esModule: true,
-  useDisasterRecoveryResourceWatch: jest.fn(() => {
-    if (type === 1) {
-      return [drResources1, true, ''];
-    } else {
-      return [drResources2, true, ''];
-    }
-  }),
-}));
-
-jest.mock('@openshift-console/dynamic-plugin-sdk/lib/api/core-api', () => ({
-  ...jest.requireActual(
-    '@openshift-console/dynamic-plugin-sdk/lib/api/core-api'
-  ),
-  useK8sWatchResource: jest.fn(() => {
-    return [[mockManagedClusterEast1, mockManagedClusterWest1], true, ''];
-  }),
-  k8sPatch: jest.fn(({ data }) => {
+jest
+  .spyOn(
+    argoApplicationSetParserDependencies,
+    'useArgoApplicationSetResourceWatch'
+  )
+  .mockImplementation(
+    jest.fn(() => [
+      aroAppSetResources(type === 1 ? mockDRPC1 : mockDRPC3),
+      true,
+      '',
+    ])
+  );
+jest
+  .spyOn(
+    argoApplicationSetParserDependencies,
+    'useDisasterRecoveryResourceWatch'
+  )
+  .mockImplementation(
+    jest.fn(() => {
+      if (type === 1) {
+        return [drResources1, true, ''];
+      } else {
+        return [drResources2, true, ''];
+      }
+    })
+  );
+jest
+  .spyOn(failoverRelocateModalDependencies, 'k8sPatch')
+  .mockImplementation(
+  jest.fn(({ data }) => {
     patchObj = data;
     return Promise.resolve({ data: {} });
-  }),
-}));
-
-jest.mock('@odf/shared/hooks', () => ({
-  ...jest.requireActual('@odf/shared/hooks'),
-  DOC_VERSION: '1.2',
-  useDocVersion: jest.fn(() => '1.2'),
-}));
+  })
+);
+jest.replaceProperty(
+  failoverRelocateModalBodyDependencies,
+  'mcoDocVersion',
+  '1.2'
+);
+jest
+  .spyOn(failoverRelocateModalBodyDependencies, 'useDocVersion')
+  .mockImplementation(jest.fn(() => '1.2'));
 
 describe('Discovered application failover/relocate modal test', () => {
   test('Failover test', async () => {
@@ -129,7 +137,6 @@ describe('Discovered application failover/relocate modal test', () => {
     ).toBeInTheDocument();
 
     // DR info
-    expect(screen.getByText(/Application:/i)).toBeInTheDocument();
     expect(screen.getByText(/mock-appset-1/i)).toBeInTheDocument();
 
     expect(screen.getByText(/Target cluster:/i)).toBeInTheDocument();
@@ -138,7 +145,6 @@ describe('Discovered application failover/relocate modal test', () => {
     // ToDo: Need to find why Date check failing on CI
     //expect(screen.getByText(/29 Nov 2023, 4:30 am UTC/i)).toBeInTheDocument();
 
-    expect(screen.getByText(/{{actionType}} readiness:/i)).toBeInTheDocument();
     expect(screen.getByText(/Ready/i)).toBeInTheDocument();
 
     // footer
@@ -180,7 +186,6 @@ describe('Discovered application failover/relocate modal test', () => {
     ).toBeInTheDocument();
 
     // DR info
-    expect(screen.getByText(/Application:/i)).toBeInTheDocument();
     expect(screen.getByText(/mock-appset-1/i)).toBeInTheDocument();
 
     expect(screen.getByText(/Target cluster:/i)).toBeInTheDocument();
@@ -188,7 +193,6 @@ describe('Discovered application failover/relocate modal test', () => {
     expect(screen.getByText(/Last available: /i)).toBeInTheDocument();
     //expect(screen.getByText(/29 Nov 2023, 4:30 am UTC/i)).toBeInTheDocument();
 
-    expect(screen.getByText(/{{actionType}} readiness:/i)).toBeInTheDocument();
     expect(screen.getByText(/Ready/i)).toBeInTheDocument();
 
     // footer

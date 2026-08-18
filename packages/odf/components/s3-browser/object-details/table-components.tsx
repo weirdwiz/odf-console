@@ -1,9 +1,12 @@
 import * as React from 'react';
+import { S3Commands } from '@odf/shared/s3';
 import { RowComponentType } from '@odf/shared/table';
 import { useCustomTranslation } from '@odf/shared/useCustomTranslationHook';
+import { LaunchModal } from '@openshift-console/dynamic-plugin-sdk/lib/app/modal-support/ModalProvider';
 import { TFunction } from 'i18next';
 import { Label } from '@patternfly/react-core';
 import { Tr, Td, ActionsColumn } from '@patternfly/react-table';
+import { SetObjectsDeleteResponse } from '../../../modals/s3-browser/delete-objects/DeleteObjectsModal';
 import { ObjectCrFormat } from '../../../types';
 import { DownloadAndPreviewState } from '../download-and-preview/download-and-preview';
 import { getInlineActionsItems } from '../objects-list/table-components';
@@ -26,8 +29,19 @@ export const getHeaderColumns = (t: TFunction) => {
   ];
 };
 
+type ObjectVersionsRowExtraProps = {
+  launcher: LaunchModal;
+  bucketName: string;
+  s3Client: S3Commands;
+  foldersPath: string;
+  setDeleteResponse: SetObjectsDeleteResponse;
+  refreshTokens: () => Promise<void>;
+  closeObjectSidebar: () => void;
+  blockDataPath?: boolean;
+};
+
 export const ObjectVersionsTableRow: React.FC<
-  RowComponentType<ObjectCrFormat>
+  RowComponentType<ObjectCrFormat, ObjectVersionsRowExtraProps>
 > = ({ row: object, extraProps }) => {
   const { t } = useCustomTranslation();
 

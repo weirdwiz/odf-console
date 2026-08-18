@@ -14,13 +14,13 @@ const GenericResourceEditor: React.FC = () => {
   const [model, inFlight] = useK8sModel(kind);
   const [sourceObj, setSourceObj] = React.useState<K8sResourceCommon>({});
 
-  const [resource, loaded, loadError] = useK8sWatchResource<K8sModel>({
-    kind,
-    name,
-    namespace,
-    namespaced: model?.namespaced,
-    ...(!!cluster ? { cluster } : {}),
-  });
+  const [resource, loaded, loadError] = useK8sWatchResource<K8sModel>(
+    (() => {
+      const value = { kind, name, namespace, namespaced: model?.namespaced };
+      if (!!cluster) Object.assign(value, { cluster });
+      return value;
+    })()
+  );
 
   React.useEffect(() => {
     if (resource && loaded && !loadError) {

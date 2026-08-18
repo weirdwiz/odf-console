@@ -106,6 +106,7 @@ const VectorIndexDetailsPage: React.FC<{}> = () => {
   const { t } = useCustomTranslation();
   const { providerType, vectorBucketName, indexName } = useParams();
 
+  // SAFETY: vectorBucketName comes from the owner of the string contract used at this boundary.
   const breadcrumbs = React.useMemo(
     () => [
       {

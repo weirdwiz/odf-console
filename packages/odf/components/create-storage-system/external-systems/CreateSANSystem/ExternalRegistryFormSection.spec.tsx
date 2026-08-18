@@ -1,16 +1,16 @@
 import React from 'react';
+import * as TestDependency1 from '@odf/shared';
+import * as TestDependency2 from '@odf/shared/useCustomTranslationHook';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { FormProvider, useForm } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import type { Control, FieldValues } from 'react-hook-form';
 import { ExternalRegistryFormSection } from './ExternalRegistryFormSection';
 
-jest.mock('@odf/shared', () => {
-  const actual = jest.requireActual('@odf/shared');
-  const { Controller } = require('react-hook-form');
-  return {
-    ...actual,
-    FormGroupController: ({
+jest
+  .spyOn(TestDependency1, 'FormGroupController')
+  .mockImplementation(
+    ({
       name,
       formGroupProps,
       control,
@@ -40,8 +40,12 @@ jest.mock('@odf/shared', () => {
           }
         />
       </div>
-    ),
-    TextInputWithFieldRequirements: ({
+    )
+  );
+jest
+  .spyOn(TestDependency1, 'TextInputWithFieldRequirements')
+  .mockImplementation(
+    ({
       formGroupProps,
       textInputProps,
       control,
@@ -63,14 +67,14 @@ jest.mock('@odf/shared', () => {
           )}
         />
       </div>
-    ),
-    ResourceDropdown: () => <div data-testid="resource-dropdown" />,
-  };
-});
-
-jest.mock('@odf/shared/useCustomTranslationHook', () => ({
-  useCustomTranslation: () => ({ t: (key: string) => key }),
-}));
+    )
+  );
+jest
+  .spyOn(TestDependency1, 'ResourceDropdown')
+  .mockImplementation(() => <div data-testid="resource-dropdown" />);
+jest
+  .spyOn(TestDependency2, 'useCustomTranslation')
+  .mockImplementation(() => ({ t: (key: string) => key }));
 
 const fieldRequirements = {
   imageRegistryUrl: ['required', 'valid URL'],
@@ -89,10 +93,11 @@ const FormWrapper: React.FC<{
       privateKeySecret: '',
     },
   });
+  // SAFETY: The Control<FieldValues> test value defines the members exercised by this test.
   return (
     <FormProvider {...methods}>
       <ExternalRegistryFormSection
-        control={methods.control as unknown as Control<FieldValues>}
+        control={methods.control as Control<FieldValues>}
         fieldRequirements={fieldRequirements}
         showImageRegistryFields={showImageRegistryFields}
       />
@@ -194,10 +199,11 @@ describe('ExternalRegistryFormSection', () => {
         getValuesRef = methods.getValues;
       });
 
+      // SAFETY: The Control<FieldValues> test value defines the members exercised by this test.
       return (
         <FormProvider {...methods}>
           <ExternalRegistryFormSection
-            control={methods.control as unknown as Control<FieldValues>}
+            control={methods.control as Control<FieldValues>}
             fieldRequirements={fieldRequirements}
             showImageRegistryFields={showImageRegistryFields}
           />

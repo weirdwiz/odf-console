@@ -1,24 +1,18 @@
 import * as React from 'react';
-import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk-internal/lib/extensions/console-types';
 import * as _ from 'lodash-es';
 import { SortByDirection } from '@patternfly/react-table';
 
-export const useSortList = <R extends K8sResourceCommon>(
+type SortableColumn<R> = {
+  sortFunction?: (a: R, b: R, direction: SortByDirection) => number;
+};
+
+export const useSortList = <R>(
   data: R[],
-  columns: any[],
+  columns: SortableColumn<R>[],
   // True indicate the column index is starting from 1
   onSelect: boolean,
   initialSortIndex?: number
-): {
-  onSort: (
-    event: React.MouseEvent,
-    columnIndex: number,
-    sortByDirection: any
-  ) => void;
-  sortIndex: number;
-  sortDirection: SortByDirection;
-  sortedData: R[];
-} => {
+) => {
   const [sortIndex, setSortIndex] = React.useState(
     _.isInteger(initialSortIndex) ? initialSortIndex : -1
   );
@@ -27,7 +21,11 @@ export const useSortList = <R extends K8sResourceCommon>(
   );
 
   const onSort = React.useCallback(
-    (_event: React.MouseEvent, columnIndex: number, sortByDirection: any) => {
+    (
+      _event: React.MouseEvent,
+      columnIndex: number,
+      sortByDirection: SortByDirection
+    ) => {
       setSortIndex(columnIndex);
       setSortDirection(sortByDirection);
     },
@@ -38,7 +36,8 @@ export const useSortList = <R extends K8sResourceCommon>(
     return sortIndex !== -1
       ? data.sort((a, b) => {
           const index = onSelect ? sortIndex - 1 : sortIndex;
-          return columns[index].sortFunction(a, b, sortDirection);
+          const sortFunction = columns[index]?.sortFunction;
+          return sortFunction ? sortFunction(a, b, sortDirection) : 0;
         })
       : data;
     // columns is not a state variable so its value will not change, but its reference might change on every re-render of parent component

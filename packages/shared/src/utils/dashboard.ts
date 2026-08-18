@@ -2,7 +2,6 @@ import {
   healthStateMapping,
   healthStateMessage,
 } from '@odf/shared/dashboards/status-card/states';
-import { HealthState } from '@openshift-console/dynamic-plugin-sdk';
 import { SubsystemHealth } from '@openshift-console/dynamic-plugin-sdk/lib/extensions/dashboard-types';
 import { TFunction } from 'i18next';
 
@@ -18,7 +17,7 @@ export const getDashboardLink = (
 export const getWorstStatus = (
   componentsHealth: SubsystemHealth[],
   t: TFunction
-): { state: HealthState; message: string; count: number } => {
+) => {
   const withPriority = componentsHealth.map((h) => healthStateMapping[h.state]);
   const mostImportantState = Math.max(
     ...withPriority.map(({ priority }) => priority)

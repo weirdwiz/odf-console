@@ -100,7 +100,6 @@ export interface ClusterCondition {
 
 export interface TopologyNodeData {
   decorators?: TopologyDecorator[];
-  [key: string]: any;
 }
 
 export type AppNodeData = {

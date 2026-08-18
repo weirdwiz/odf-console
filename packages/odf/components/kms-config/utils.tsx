@@ -638,15 +638,19 @@ export const createCsiKmsResources = (
 ): Promise<K8sResourceKind>[] => {
   switch (provider) {
     case ProviderNames.VAULT: {
+      // SAFETY: kms comes from the owner of the VaultConfig contract used at this boundary.
       return getCsiVaultResources(kms as VaultConfig, update, odfNamespace);
     }
     case ProviderNames.HPCS: {
+      // SAFETY: kms comes from the owner of the HpcsConfig contract used at this boundary.
       return getCsiHpcsResources(kms as HpcsConfig, update, odfNamespace);
     }
     case ProviderNames.THALES: {
+      // SAFETY: kms comes from the owner of the ThalesConfig contract used at this boundary.
       return getCsiThalesResources(kms as ThalesConfig, update, odfNamespace);
     }
     case ProviderNames.AZURE: {
+      // SAFETY: kms comes from the owner of the AzureConfig contract used at this boundary.
       return getCsiAzureResources(kms as AzureConfig, update, odfNamespace);
     }
   }
@@ -663,6 +667,7 @@ export const createClusterKmsResources = (
 ): Promise<K8sResourceKind>[] => {
   switch (provider) {
     case ProviderNames.VAULT: {
+      // SAFETY: kms comes from the owner of the VaultConfig contract used at this boundary.
       const vaultConfig = kms as VaultConfig;
       const clusterWideSupported: boolean = VaultAuthMethodMapping[
         vaultConfig.authMethod
@@ -671,9 +676,11 @@ export const createClusterKmsResources = (
         vaultConfig.authMethod
       ].supportedEncryptionType.includes(KmsEncryptionLevel.STORAGE_CLASS);
 
+      // SAFETY: kms comes from the owner of the VaultConfig contract used at this boundary.
       const clusterKmsResources = clusterWideSupported
         ? getClusterVaultResources(kms as VaultConfig, storageClusterNs)
         : [];
+      // SAFETY: kms comes from the owner of the VaultConfig contract used at this boundary.
       const csiKmsResources =
         !isMCGStandalone && storageClassSupported
           ? getCsiVaultResources(kms as VaultConfig, false, odfNamespace, true)
@@ -682,10 +689,12 @@ export const createClusterKmsResources = (
       return [...clusterKmsResources, ...csiKmsResources];
     }
     case ProviderNames.HPCS: {
+      // SAFETY: kms comes from the owner of the HpcsConfig contract used at this boundary.
       const clusterKmsResources = getClusterHpcsResources(
         kms as HpcsConfig,
         storageClusterNs
       );
+      // SAFETY: kms comes from the owner of the HpcsConfig contract used at this boundary.
       const csiKmsResources = !isMCGStandalone
         ? getCsiHpcsResources(kms as HpcsConfig, false, odfNamespace)
         : [];
@@ -693,20 +702,24 @@ export const createClusterKmsResources = (
       return [...clusterKmsResources, ...csiKmsResources];
     }
     case ProviderNames.THALES: {
+      // SAFETY: kms comes from the owner of the ThalesConfig contract used at this boundary.
       const clusterKmsResources = getClusterThalesResources(
         kms as ThalesConfig,
         storageClusterNs
       );
+      // SAFETY: kms comes from the owner of the ThalesConfig contract used at this boundary.
       const csiKmsResources = !isMCGStandalone
         ? getCsiThalesResources(kms as ThalesConfig, false, odfNamespace)
         : [];
       return [...clusterKmsResources, ...csiKmsResources];
     }
     case ProviderNames.AZURE: {
+      // SAFETY: kms comes from the owner of the AzureConfig contract used at this boundary.
       const clusterKmsResources = getClusterAzureResources(
         kms as AzureConfig,
         storageClusterNs
       );
+      // SAFETY: kms comes from the owner of the AzureConfig contract used at this boundary.
       const csiKmsResources = !isMCGStandalone
         ? getCsiAzureResources(kms as AzureConfig, false, odfNamespace)
         : [];
@@ -721,6 +734,7 @@ export const kmsConfigValidation = (
 ): boolean => {
   switch (provider) {
     case ProviderNames.VAULT: {
+      // SAFETY: kms comes from the owner of the VaultConfig contract used at this boundary.
       const kmsObj = kms as VaultConfig;
       return (
         kmsObj.name.valid &&
@@ -732,6 +746,7 @@ export const kmsConfigValidation = (
       );
     }
     case ProviderNames.HPCS: {
+      // SAFETY: kms comes from the owner of the HpcsConfig contract used at this boundary.
       const kmsObj = kms as HpcsConfig;
       return (
         kmsObj.name.valid &&
@@ -747,6 +762,7 @@ export const kmsConfigValidation = (
       );
     }
     case ProviderNames.THALES: {
+      // SAFETY: kms comes from the owner of the ThalesConfig contract used at this boundary.
       const kmsObj = kms as ThalesConfig;
       return (
         kmsObj.name.valid &&
@@ -764,6 +780,7 @@ export const kmsConfigValidation = (
       );
     }
     case ProviderNames.AZURE: {
+      // SAFETY: kms comes from the owner of the AzureConfig contract used at this boundary.
       const kmsObj = kms as AzureConfig;
       return (
         kmsObj.name.valid &&

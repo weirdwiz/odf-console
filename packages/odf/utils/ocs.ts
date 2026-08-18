@@ -140,7 +140,7 @@ export const getResourceProfileRequirements = (
   osdAmount: number,
   architecture?: string,
   enableNFS?: boolean
-): { minCpu: number; minMem: number } => {
+) => {
   let { minCpu, minMem, osd } = RESOURCE_PROFILE_REQUIREMENTS_MAP[profile];
 
   if (architecture === ARCHITECTURE_S390X) {

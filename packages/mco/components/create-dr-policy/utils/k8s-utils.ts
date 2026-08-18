@@ -38,7 +38,16 @@ import {
   k8sGet,
   k8sUpdate,
 } from '@openshift-console/dynamic-plugin-sdk';
+import { cloneDeep } from 'lodash-es';
 import type { DRPolicyState } from './reducer';
+
+export const drPolicyK8sDependencies = {
+  createOrUpdate,
+  k8sCreate,
+  k8sDelete,
+  k8sGet,
+  k8sUpdate,
+};
 
 const getODFPeers = (cluster: ManagedClusterInfoType) => {
   const storageClusterInfo = cluster?.odfInfo?.storageClusterInfo;
@@ -100,7 +109,7 @@ const createMirrorPeer = (
       items: getPeerClustersRef(selectedClusters),
     },
   };
-  return k8sCreate({
+  return drPolicyK8sDependencies.k8sCreate({
     model: MirrorPeerModel,
     data: mirrorPeerPayload,
   });
@@ -127,14 +136,15 @@ const createDRPolicy = async (
   const mutationDetails: CreateOrUpdateMutationDetails = {};
   let previousPolicySpec: DRPolicyKind['spec'];
 
-  const policy = await createOrUpdate<DRPolicyKind>({
+  const policy =
+    await drPolicyK8sDependencies.createOrUpdate<DRPolicyKind>({
     model: DRPolicyModel,
     name: policyName,
     mutationDetails,
     mutate: (current) => {
       if (current) {
         previousPolicySpec = current.spec
-          ? (JSON.parse(JSON.stringify(current.spec)) as DRPolicyKind['spec'])
+          ? cloneDeep(current.spec)
           : current.spec;
       }
       const base: DRPolicyKind = current ?? {
@@ -198,7 +208,7 @@ export const createPolicyPromises = async (
       );
     } catch (error) {
       if (createdMirrorPeer) {
-        await k8sDelete({
+        await drPolicyK8sDependencies.k8sDelete({
           model: MirrorPeerModel,
           resource: createdMirrorPeer,
         }).catch((e) =>
@@ -210,20 +220,21 @@ export const createPolicyPromises = async (
     }
 
     const mirrorPeerName = getName(peering.mirrorPeer);
-    return {
-      isNewPolicy: !policyResult.isUpdated,
-      ...(policyResult.previousPolicySpec
-        ? { previousPolicySpec: policyResult.previousPolicySpec }
-        : {}),
-      ...(!!mirrorPeerName
-        ? {
-            mirrorPeerName,
-            isNewMirrorPeer: peering.isNew,
-            skipPairingProgress:
-              !peering.isNew && isMirrorPeerReady(peering.mirrorPeer),
-          }
-        : {}),
-    };
+    return (() => {
+      const value = { isNewPolicy: !policyResult.isUpdated };
+      if (policyResult.previousPolicySpec)
+        Object.assign(value, {
+          previousPolicySpec: policyResult.previousPolicySpec,
+        });
+      if (!!mirrorPeerName)
+        Object.assign(value, {
+          mirrorPeerName,
+          isNewMirrorPeer: peering.isNew,
+          skipPairingProgress:
+            !peering.isNew && isMirrorPeerReady(peering.mirrorPeer),
+        });
+      return value;
+    })();
   } else {
     const allDRClustersExist =
       selectedDRClusters?.length === MAX_ALLOWED_CLUSTERS;
@@ -258,25 +269,27 @@ export const createPolicyPromises = async (
       }
     }
 
-    return {
-      isNewPolicy: !policyResult.isUpdated,
-      ...(policyResult.previousPolicySpec
-        ? { previousPolicySpec: policyResult.previousPolicySpec }
-        : {}),
-    };
+    return (() => {
+      const value = { isNewPolicy: !policyResult.isUpdated };
+      if (policyResult.previousPolicySpec)
+        Object.assign(value, {
+          previousPolicySpec: policyResult.previousPolicySpec,
+        });
+      return value;
+    })();
   }
 };
 
-export const deleteMirrorPeerByName = (name: string): Promise<unknown> =>
-  k8sDelete({
+export const deleteMirrorPeerByName = (name: string) =>
+  drPolicyK8sDependencies.k8sDelete({
     model: MirrorPeerModel,
     resource: {
       metadata: { name },
     },
   });
 
-export const deleteDRPolicyByName = (name: string): Promise<unknown> =>
-  k8sDelete({
+export const deleteDRPolicyByName = (name: string) =>
+  drPolicyK8sDependencies.k8sDelete({
     model: DRPolicyModel,
     resource: {
       metadata: { name },
@@ -287,17 +300,17 @@ export const restoreDRPolicySpec = async (
   name: string,
   previousSpec: DRPolicyKind['spec']
 ): Promise<DRPolicyKind> => {
-  const current = (await k8sGet({
+  const current = await drPolicyK8sDependencies.k8sGet<DRPolicyKind>({
     model: DRPolicyModel,
     name,
-  })) as DRPolicyKind;
-  return k8sUpdate({
+  });
+  return drPolicyK8sDependencies.k8sUpdate<DRPolicyKind>({
     model: DRPolicyModel,
     data: {
       ...current,
       spec: previousSpec,
     },
-  }) as Promise<DRPolicyKind>;
+  });
 };
 
 type OdfPeeringResult = {
@@ -346,12 +359,12 @@ const prepareThirdPartyPeering = async (
   selectedDRClusters: DRClusterKind[] = [],
   created: CreatedResources
 ): Promise<void> => {
-  const detailsByCluster: Record<string, S3Details> = {
+  const detailsByCluster = {
     [state.configure.cluster1S3Details.clusterName]:
       state.configure.cluster1S3Details,
     [state.configure.cluster2S3Details.clusterName]:
       state.configure.cluster2S3Details,
-  };
+  } satisfies Record<string, S3Details>;
 
   // Sequential: avoid ConfigMap update races across clusters.
   for (const cluster of state.clusters.selectedClusters) {
@@ -413,7 +426,7 @@ const rollbackThirdPartyResources = async (
   resources: CreatedResources
 ): Promise<void> => {
   // Best-effort cleanup - settle all, log failures but do not throw.
-  const results = await Promise.allSettled([
+  await Promise.allSettled([
     ...resources.drClusters.map((name) => deleteDRCluster(name)),
     ...resources.profiles.map((profile) =>
       updateRamenHubOperatorConfig({
@@ -423,7 +436,7 @@ const rollbackThirdPartyResources = async (
       })
     ),
     ...resources.secrets.map((secretName) =>
-      k8sDelete({
+      drPolicyK8sDependencies.k8sDelete({
         model: SecretModel,
         resource: {
           metadata: {
@@ -434,14 +447,4 @@ const rollbackThirdPartyResources = async (
       })
     ),
   ]);
-
-  results
-    .filter((r) => r.status === 'rejected')
-    .forEach((r) => {
-      // eslint-disable-next-line no-console
-      console.error(
-        'Rollback: failed to clean up resource',
-        (r as PromiseRejectedResult).reason
-      );
-    });
 };

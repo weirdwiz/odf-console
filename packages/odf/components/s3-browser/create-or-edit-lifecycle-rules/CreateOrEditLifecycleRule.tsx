@@ -50,29 +50,35 @@ const getFilterConfig = (
   const minObjectSize = conditionalFilters.minObjectSize;
   const maxObjectSize = conditionalFilters.maxObjectSize;
 
-  const filtersWOTags = {
-    ...(!!prefix ? { Prefix: prefix } : {}),
-    ...(minObjectSize.isChecked
-      ? { ObjectSizeGreaterThan: minObjectSize.sizeInB }
-      : {}),
-    ...(maxObjectSize.isChecked
-      ? { ObjectSizeLessThan: maxObjectSize.sizeInB }
-      : {}),
-  };
+  const filtersWOTags = (() => {
+    const value = {};
+    if (!!prefix) Object.assign(value, { Prefix: prefix });
+    if (minObjectSize.isChecked)
+      Object.assign(value, { ObjectSizeGreaterThan: minObjectSize.sizeInB });
+    if (maxObjectSize.isChecked)
+      Object.assign(value, { ObjectSizeLessThan: maxObjectSize.sizeInB });
+    return value;
+  })();
 
   let ruleFilters: LifecycleRuleFilter;
   const filtersWOTagsLength = Object.keys(filtersWOTags).length;
   if (filtersWOTagsLength > 1 || tags.length > 1) {
     ruleFilters = {
-      And: { ...filtersWOTags, ...(!!tags.length ? { Tags: tags } : {}) },
+      And: (() => {
+        const value = { ...filtersWOTags };
+        if (!!tags.length) Object.assign(value, { Tags: tags });
+        return value;
+      })(),
     };
   } else if (filtersWOTagsLength === 1 && tags.length === 1) {
     ruleFilters = { And: { ...filtersWOTags, Tags: tags } };
   } else {
-    ruleFilters = {
-      ...filtersWOTags,
-      ...(!!tags.length ? { Tag: tags[0] } : {}),
-    } as LifecycleRuleFilter;
+    // SAFETY: { ...filtersWOTags, ...(!!tags.length ? { Tag: tags[0] } : {}), } comes from the owner of the LifecycleRuleFilter contract used at this boundary.
+    ruleFilters = (() => {
+      const value = { ...filtersWOTags };
+      if (!!tags.length) Object.assign(value, { Tag: tags[0] });
+      return value;
+    })() as LifecycleRuleFilter;
   }
 
   return ruleFilters;
@@ -88,25 +94,32 @@ const getRuleConfig = (state: RuleState): LifecycleRule => {
   const transitionCurrent = state.ruleActions.transitionCurrent;
   const transitionNonCurrent = state.ruleActions.transitionNonCurrent;
 
-  const expirationConfig = {
-    ...(deleteCurrent.isChecked ? { Days: deleteCurrent.days } : {}),
-    ...(deleteExpiredMarkers
-      ? { ExpiredObjectDeleteMarker: deleteExpiredMarkers }
-      : {}),
-  };
-  const nonCurrentConfig = {
-    ...(deleteNonCurrent.isChecked
-      ? { NoncurrentDays: deleteNonCurrent.days }
-      : {}),
-    ...(deleteNonCurrent.isChecked && !!deleteNonCurrent.retention
-      ? { NewerNoncurrentVersions: deleteNonCurrent.retention }
-      : {}),
-  };
-  const multipartConfig = {
-    ...(deleteIncompleteMultiparts.isChecked
-      ? { DaysAfterInitiation: deleteIncompleteMultiparts.days }
-      : {}),
-  };
+  const expirationConfig = (() => {
+    const value = {};
+    if (deleteCurrent.isChecked)
+      Object.assign(value, { Days: deleteCurrent.days });
+    if (deleteExpiredMarkers)
+      Object.assign(value, { ExpiredObjectDeleteMarker: deleteExpiredMarkers });
+    return value;
+  })();
+  const nonCurrentConfig = (() => {
+    const value = {};
+    if (deleteNonCurrent.isChecked)
+      Object.assign(value, { NoncurrentDays: deleteNonCurrent.days });
+    if (deleteNonCurrent.isChecked && !!deleteNonCurrent.retention)
+      Object.assign(value, {
+        NewerNoncurrentVersions: deleteNonCurrent.retention,
+      });
+    return value;
+  })();
+  const multipartConfig = (() => {
+    const value = {};
+    if (deleteIncompleteMultiparts.isChecked)
+      Object.assign(value, {
+        DaysAfterInitiation: deleteIncompleteMultiparts.days,
+      });
+    return value;
+  })();
 
   const transitionsConfig = transitionCurrent.isChecked
     ? [
@@ -119,34 +132,42 @@ const getRuleConfig = (state: RuleState): LifecycleRule => {
 
   const nonCurrentTransitionsConfig = transitionNonCurrent.isChecked
     ? [
-        {
-          NoncurrentDays: transitionNonCurrent.days,
-          StorageClass: TransitionStorageClass.DEEP_ARCHIVE,
-          ...(transitionNonCurrent.retention > 0
-            ? { NewerNoncurrentVersions: transitionNonCurrent.retention }
-            : {}),
-        },
+        (() => {
+          const value = {
+            NoncurrentDays: transitionNonCurrent.days,
+            StorageClass: TransitionStorageClass.DEEP_ARCHIVE,
+          };
+          if (transitionNonCurrent.retention > 0)
+            Object.assign(value, {
+              NewerNoncurrentVersions: transitionNonCurrent.retention,
+            });
+          return value;
+        })(),
       ]
     : [];
 
-  return {
-    ...(!_.isEmpty(expirationConfig) ? { Expiration: expirationConfig } : {}),
-    ID: state.generalConfig.name,
-    ...(state.generalConfig.scope === RuleScope.TARGETED
-      ? { Filter: getFilterConfig(conditionalFilters) }
-      : { Filter: { Prefix: '' } }), // omitting or empty "Filter" results in error, using `{ Prefix: '' }` as a workaround for "global" scope.
-    Status: ExpirationStatus.Enabled,
-    ...(!_.isEmpty(nonCurrentConfig)
-      ? { NoncurrentVersionExpiration: nonCurrentConfig }
-      : {}),
-    ...(!_.isEmpty(multipartConfig)
-      ? { AbortIncompleteMultipartUpload: multipartConfig }
-      : {}),
-    ...(transitionsConfig.length > 0 ? { Transitions: transitionsConfig } : {}),
-    ...(nonCurrentTransitionsConfig.length > 0
-      ? { NoncurrentVersionTransitions: nonCurrentTransitionsConfig }
-      : {}),
-  };
+  return (() => {
+    const value = {
+      ID: state.generalConfig.name,
+      ...(state.generalConfig.scope === RuleScope.TARGETED
+        ? { Filter: getFilterConfig(conditionalFilters) }
+        : { Filter: { Prefix: '' } }),
+      Status: ExpirationStatus.Enabled,
+    };
+    if (!_.isEmpty(expirationConfig))
+      Object.assign(value, { Expiration: expirationConfig });
+    if (!_.isEmpty(nonCurrentConfig))
+      Object.assign(value, { NoncurrentVersionExpiration: nonCurrentConfig });
+    if (!_.isEmpty(multipartConfig))
+      Object.assign(value, { AbortIncompleteMultipartUpload: multipartConfig });
+    if (transitionsConfig.length > 0)
+      Object.assign(value, { Transitions: transitionsConfig });
+    if (nonCurrentTransitionsConfig.length > 0)
+      Object.assign(value, {
+        NoncurrentVersionTransitions: nonCurrentTransitionsConfig,
+      });
+    return value;
+  })();
 };
 
 const createNewRule = (
@@ -233,6 +254,7 @@ const CreateOrEditLifecycleRuleWizard: React.FC<IsEditProp> = ({ isEdit }) => {
       });
     } catch (err) {
       if (isNoLifecycleRuleError(err)) {
+        // SAFETY: { Rules: [], } comes from the owner of the GetBucketLifecycleConfigurationCommandOutput contract used at this boundary.
         latestRules = {
           Rules: [],
         } as GetBucketLifecycleConfigurationCommandOutput;

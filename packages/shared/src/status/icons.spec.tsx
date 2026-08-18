@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { configure, render } from '@testing-library/react';
+import * as TestDependency1 from '@patternfly/react-icons';
 import {
   BlueArrowCircleUpIcon,
   BlueInfoCircleIcon,
@@ -49,18 +50,33 @@ const mockResourcesAlmostFullIcon = jest.fn((props) => (
 const mockArrowCircleUpIcon = jest.fn((props) => (
   <span data-testid="mock-arrow-circle-up-icon" {...props} />
 ));
-
-jest.mock('@patternfly/react-icons', () => ({
-  CheckCircleIcon: (props) => mockCheckCircleIcon(props),
-  ExclamationCircleIcon: (props) => mockExclamationCircleIcon(props),
-  ExclamationTriangleIcon: (props) => mockExclamationTriangleIcon(props),
-  InfoCircleIcon: (props) => mockInfoCircleIcon(props),
-  UnknownIcon: (props) => mockUnknownIcon(props),
-  SyncAltIcon: (props) => mockSyncAltIcon(props),
-  ResourcesFullIcon: (props) => mockResourcesFullIcon(props),
-  ResourcesAlmostFullIcon: (props) => mockResourcesAlmostFullIcon(props),
-  ArrowCircleUpIcon: (props) => mockArrowCircleUpIcon(props),
-}));
+jest
+  .spyOn(TestDependency1, 'CheckCircleIcon')
+  .mockImplementation((props) => mockCheckCircleIcon(props));
+jest
+  .spyOn(TestDependency1, 'ExclamationCircleIcon')
+  .mockImplementation((props) => mockExclamationCircleIcon(props));
+jest
+  .spyOn(TestDependency1, 'ExclamationTriangleIcon')
+  .mockImplementation((props) => mockExclamationTriangleIcon(props));
+jest
+  .spyOn(TestDependency1, 'InfoCircleIcon')
+  .mockImplementation((props) => mockInfoCircleIcon(props));
+jest
+  .spyOn(TestDependency1, 'UnknownIcon')
+  .mockImplementation((props) => mockUnknownIcon(props));
+jest
+  .spyOn(TestDependency1, 'SyncAltIcon')
+  .mockImplementation((props) => mockSyncAltIcon(props));
+jest
+  .spyOn(TestDependency1, 'ResourcesFullIcon')
+  .mockImplementation((props) => mockResourcesFullIcon(props));
+jest
+  .spyOn(TestDependency1, 'ResourcesAlmostFullIcon')
+  .mockImplementation((props) => mockResourcesAlmostFullIcon(props));
+jest
+  .spyOn(TestDependency1, 'ArrowCircleUpIcon')
+  .mockImplementation((props) => mockArrowCircleUpIcon(props));
 
 describe('GreenCheckCircleIcon', () => {
   afterEach(() => {

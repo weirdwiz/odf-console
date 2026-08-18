@@ -32,11 +32,12 @@ export const ListFilter: React.FC<ListFilterProps> = ({
     return (data ?? []).filter(resourceFilter);
   }, [input, data, dataFilter]);
 
+  // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
   const onChange = (
     inputValue: string | React.FormEvent<HTMLInputElement>
   ): void =>
     setInput(
-      typeof inputValue === 'string'
+      _.isString(inputValue)
         ? inputValue
         : (inputValue.target as HTMLInputElement)?.value
     );

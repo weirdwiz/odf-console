@@ -87,6 +87,8 @@ const UpdateStoragePoolModal: React.FC<UpdateStoragePoolModalProps> = (
   newProps.extraProps['systemFlags'] = systemFlags;
 
   if (areFlagsLoaded && !flagsLoadError) {
+    // SAFETY: newProps starts as UpdateStoragePoolModalProps; systemFlags was
+    // assigned to extraProps above, so extraProps now matches the wider shape.
     return props?.extraProps?.resource?.type === PoolType.FILESYSTEM ? (
       <UpdateFsPoolModal {...(newProps as UpdateFsPoolModalProps)} />
     ) : (
@@ -164,7 +166,9 @@ const UpdateStoragePoolModalBase: React.FC<UpdateStoragePoolModalBaseProps> = (
   const [cephClusters, cephClustersLoaded, cephClustersLoadError] =
     useK8sWatchResource<CephClusterKind[]>(cephClusterResource);
 
-  // only single cluster per Namespace
+  // Only single cluster per Namespace.
+  // SAFETY: getResourceInNs returns K8sResourceKind; the watched resource is
+  // CephClusterKind[] so every element is a CephClusterKind.
   const cephCluster = getCephClusterInNs(
     cephClusters,
     poolNamespace

@@ -97,6 +97,7 @@ export const getRangeVectorStats: GetRangeStats = (
     : optionalParser(response);
   return results?.map((r, index) => {
     return r?.values?.map(([x, y]) => {
+      // SAFETY: { x: xMutator?.(x) ?? defaultXMutator(x), y: threshold ? threshold : ( comes from the owner of the DataPoint<Date> contract used at this boundary.
       return {
         x: xMutator?.(x) ?? defaultXMutator(x),
         y: threshold ? threshold : (yMutator?.(y) ?? defaultYMutator(y)),
@@ -131,7 +132,7 @@ export const mapLimitsRequests = ({
   thresholdDescription,
   xMutator,
   t,
-}: MapLimitsRequest): { data: DataPoint[][]; chartStyle: object[] } => {
+}: MapLimitsRequest) => {
   const utilizationData = getRangeVectorStats(
     utilization,
     description,

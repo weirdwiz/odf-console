@@ -12,6 +12,7 @@ export const resolveResourceUntilDeployment = (
     return null;
   }
   if (owner.kind === DeploymentModel.kind) {
+    // SAFETY: owner comes from the owner of the DeploymentKind contract used at this boundary.
     return owner as DeploymentKind;
   } else {
     return resolveResourceUntilDeployment(

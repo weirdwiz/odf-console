@@ -53,6 +53,14 @@ import {
   isRowSelectable,
 } from './cluster-list-columns';
 
+const useListPageFilterDependency: typeof useListPageFilter = (...args) =>
+  useListPageFilter(...args);
+
+export const selectClusterListDependencies = {
+  useK8sWatchResource,
+  useListPageFilter: useListPageFilterDependency,
+};
+
 const ClusterRow: React.FC<RowComponentType<ManagedClusterInfoType>> = ({
   row: cluster,
 }) => {
@@ -153,7 +161,8 @@ const PaginatedClusterTable: React.FC<PaginatedClusterTableProps> = ({
   const { t } = useCustomTranslation();
   const [page, setPage] = React.useState(INITIAL_PAGE_NUMBER);
   const [perPage, setPerPage] = React.useState(COUNT_PER_PAGE_NUMBER);
-  const [data, filteredData, onFilterChange] = useListPageFilter(clusters);
+  const [data, filteredData, onFilterChange] =
+    selectClusterListDependencies.useListPageFilter(clusters);
   const paginatedData: ManagedClusterInfoType[] = React.useMemo(() => {
     const [start, end] = getPageRange(page, perPage);
     return filteredData.slice(start, end) || [];
@@ -235,11 +244,13 @@ export const SelectClusterList: React.FC<SelectClusterListProps> = ({
   showOnlyPreselected = false,
   onSelectedClustersChange,
 }) => {
-  const [managedClusters, loaded, loadError] = useK8sWatchResource<
+  const [managedClusters, loaded, loadError] =
+    selectClusterListDependencies.useK8sWatchResource<
     ACMManagedClusterKind[]
   >(getManagedClusterResourceObj());
 
-  const [mcvs, mcvsLoaded, mcvsLoadError] = useK8sWatchResource<
+  const [mcvs, mcvsLoaded, mcvsLoadError] =
+    selectClusterListDependencies.useK8sWatchResource<
     ACMManagedClusterViewKind[]
   >({
     kind: referenceForModel(ACMManagedClusterViewModel),

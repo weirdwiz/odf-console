@@ -29,10 +29,10 @@ export enum BucketType {
   S3Vector = 's3Vector',
 }
 
-export const BUCKET_TYPE_ROUTES: Record<BucketType, string> = {
+export const BUCKET_TYPE_ROUTES = {
   [BucketType.General]: BUCKETS_BASE_ROUTE,
   [BucketType.S3Vector]: VECTOR_BUCKETS_BASE_ROUTE,
-};
+} satisfies Record<BucketType, string>;
 
 export const getBucketOverviewBaseRoute = (
   bucketName: string,

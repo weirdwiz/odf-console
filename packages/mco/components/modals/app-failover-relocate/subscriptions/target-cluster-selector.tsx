@@ -194,7 +194,7 @@ export const TargetClusterSelector: React.FC<TargetClusterSelectorProps> = ({
           const isClustersUnfenced = drClusterList.every(
             (drCluster) =>
               DRClusterStatus.FENCED !==
-              (drCluster?.status?.phase as DRClusterStatus)
+              drCluster?.status?.phase
           );
           errorMessage =
             !isClustersUnfenced && ErrorMessageType.SOME_CLUSTERS_ARE_FENCED;
@@ -202,13 +202,13 @@ export const TargetClusterSelector: React.FC<TargetClusterSelectorProps> = ({
           // Ensure origin cluster is fenced
           const isClustersFenced =
             DRClusterStatus.FENCED ===
-            (originCluster?.status?.phase as DRClusterStatus);
+            originCluster?.status?.phase;
           const fencedErrorMessage =
             !isClustersFenced && ErrorMessageType.PRIMARY_CLUSTER_IS_NOT_FENCED;
           // Ensure target cluster is unfenced
           const isClusterUnFenced =
             DRClusterStatus.FENCED !==
-            (targetCluster?.status?.phase as DRClusterStatus);
+            targetCluster?.status?.phase;
           const unFencedErrorMessage =
             !isClusterUnFenced && ErrorMessageType.TARGET_CLUSTER_IS_FENCED;
           errorMessage = fencedErrorMessage || unFencedErrorMessage;

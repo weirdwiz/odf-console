@@ -72,6 +72,7 @@ export const getLocalVolumeSetRequestData = (
   toleration?: Toleration
 ): LocalVolumeSetKind => {
   const deviceTypes = getDeviceTypes(state.deviceType);
+  // SAFETY: { apiVersion: getAPIVersionForModel(LocalVolumeSetModel), kind: LocalV comes from the owner of the LocalVolumeSetKind contract used at this boundary.
   const requestData = {
     apiVersion: getAPIVersionForModel(LocalVolumeSetModel),
     kind: LocalVolumeSetModel.kind,

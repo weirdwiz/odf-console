@@ -106,6 +106,7 @@ const SearchBar: React.FC = () => {
     };
   }, [controller, onClear]);
 
+  // SAFETY: The receiving library accepts onChange; its published type does not expose this supported value.
   return (
     <SearchInput
       isNextNavigationButtonDisabled={resultsCount === currentResult + 1}

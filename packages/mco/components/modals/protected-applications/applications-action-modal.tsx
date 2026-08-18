@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { ApplicationType, DRActionType } from '@odf/mco/constants';
 import { useApplicationFromPAV } from '@odf/mco/hooks/use-application-pav';
-import { ArgoApplicationSetKind } from '@odf/mco/types';
 import { ProtectedApplicationViewKind } from '@odf/mco/types/pav';
-import { ApplicationKind, useCustomTranslation } from '@odf/shared';
+import { isACMApplication, isArgoApplicationSet } from '@odf/mco/utils';
+import { useCustomTranslation } from '@odf/shared';
 import { CommonModalProps } from '@odf/shared/modals';
 import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import { Bullseye, Spinner, Alert } from '@patternfly/react-core';
@@ -42,19 +42,26 @@ export const ApplicationActionModal: React.FC<
     );
   }
 
-  return appInfo?.type === ApplicationType.ApplicationSet ? (
-    <ArogoApplicationSetParser
-      action={action}
-      application={application as ArgoApplicationSetKind}
-      isOpen={isOpen}
-      close={closeModal}
-    />
-  ) : (
+  if (
+    appInfo?.type === ApplicationType.ApplicationSet &&
+    isArgoApplicationSet(application)
+  ) {
+    return (
+      <ArogoApplicationSetParser
+        action={action}
+        application={application}
+        isOpen={isOpen}
+        close={closeModal}
+      />
+    );
+  }
+
+  return isACMApplication(application) ? (
     <SubscriptionFailoverRelocateModal
       action={action}
-      resource={application as ApplicationKind}
+      resource={application}
       isOpen={isOpen}
       close={closeModal}
     />
-  );
+  ) : null;
 };

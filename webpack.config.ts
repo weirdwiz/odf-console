@@ -17,6 +17,7 @@ const resolveLocale = (dirName: string, ns: string) =>
     to: `locales/${lang}/${ns}[ext]`,
   }));
 
+// SAFETY: (process.env.NODE_ENV || 'development') comes from the owner of the webpack.Configuration['mode'] contract used at this boundary.
 const NODE_ENV = (process.env.NODE_ENV ||
   'development') as webpack.Configuration['mode'];
 const PLUGIN = process.env.PLUGIN;

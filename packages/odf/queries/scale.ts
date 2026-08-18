@@ -18,11 +18,7 @@ export const modelByTotalQueryMap = {
   [BreakdownCardFields.STORAGE_CLASSES]: ScaleDashboardQuery.TOTAL_USED,
 };
 
-export const breakdownQuery = (
-  storageClassName: string
-): {
-  [key: string]: string;
-} => ({
+export const breakdownQuery = (storageClassName: string) => ({
   [ScaleDashboardQuery.BY_USED]: `
         topk(5,
           sum(

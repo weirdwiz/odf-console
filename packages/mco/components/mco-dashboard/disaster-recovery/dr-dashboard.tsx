@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ACMManagedClusterKind, DRClusterAppsMap } from '@odf/mco/types';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import { useCustomPrometheusPoll } from '@odf/shared/hooks/custom-prometheus-poll';
 import {
   useK8sWatchResource,
@@ -76,14 +77,14 @@ const aggregateAppsMap = (
 
 const MonitoringDashboard: React.FC = () => {
   const [csvData, csvError, csvLoading] = useCustomPrometheusPoll({
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     query: STATUS_QUERIES[StorageDashboard.CSV_STATUS_ALL_WHITELISTED],
     basePath: ACM_ENDPOINT,
     cluster: HUB_CLUSTER_NAME,
   });
 
   const [podData, podError, podLoading] = useCustomPrometheusPoll({
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     query: STATUS_QUERIES[StorageDashboard.POD_STATUS_ALL_WHITELISTED],
     basePath: ACM_ENDPOINT,
     cluster: HUB_CLUSTER_NAME,

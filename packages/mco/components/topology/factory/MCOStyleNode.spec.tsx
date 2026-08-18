@@ -1,12 +1,12 @@
 import * as React from 'react';
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
-import { Node } from '@patternfly/react-topology';
+import { Node, ScaleDetailsLevel } from '@patternfly/react-topology';
 import { ClusterPairOperationsMap } from '../../../hooks/useActiveDROperations';
 import { ClusterAppsMap } from '../../../hooks/useProtectedAppsByCluster';
 import { TopologyDataContext } from '../context/TopologyContext';
 import { TopologyViewLevel } from '../types';
-import { MCOStyleNode } from './MCOStyleNode';
+import { MCOStyleNodeView } from './MCOStyleNode';
 
 // Mock the context
 const mockContextValue = {
@@ -14,42 +14,38 @@ const mockContextValue = {
   selectedElement: null,
   setSelectedElement: jest.fn(),
   visualizationLevel: TopologyViewLevel.CLUSTERS,
-  clusterAppsMap: {} as ClusterAppsMap,
-  clusterPairOperationsMap: {} as ClusterPairOperationsMap,
+  clusterAppsMap: {} satisfies ClusterAppsMap,
+  clusterPairOperationsMap: {} satisfies ClusterPairOperationsMap,
 };
+type MockNode = Pick<Node, 'getData' | 'getDimensions' | 'getId'>;
 
-// Mock useDetailsLevel hook
-jest.mock('@patternfly/react-topology/dist/esm/hooks/useDetailsLevel', () => ({
-  __esModule: true,
-  default: jest.fn(() => 'high'),
-}));
+const TestNode: React.FC<
+  React.PropsWithChildren<{ element: MockNode }>
+> = ({ element, children }) => (
+  <g data-testid="default-node" data-element-id={element.getId()}>
+    {children}
+  </g>
+);
 
-// Mock PatternFly Topology components
-jest.mock('@patternfly/react-topology', () => ({
-  ...jest.requireActual('@patternfly/react-topology'),
-  DefaultNode: ({ element, children }: any) => (
-    <g data-testid="default-node" data-element-id={element.getId()}>
-      {children}
-    </g>
-  ),
-  observer: (component: any) => component,
-}));
+const MCOStyleNode: React.FC<{ element: MockNode }> = ({ element }) => (
+  <MCOStyleNodeView
+    element={element}
+    detailsLevel={ScaleDetailsLevel.high}
+    NodeComponent={TestNode}
+  />
+);
 
-// Mock navigate
 const mockNavigate = jest.fn();
-jest.mock('react-router', () => ({
-  useNavigate: () => mockNavigate,
-}));
 
-// Helper to create mock node - simplified since DefaultNode is mocked
-const createMockNode = (clusterName: string): Partial<Node> => ({
+// Helper to create the narrow node dependency used by MCOStyleNodeView.
+const createMockNode = (clusterName: string): MockNode => ({
   getData: jest.fn(() => ({
     resource: {
       metadata: { name: clusterName, uid: `uid-${clusterName}` },
       kind: 'ManagedCluster',
     },
-  })) as any,
-  getDimensions: jest.fn(() => ({ width: 75, height: 75 })) as any,
+  })),
+  getDimensions: jest.fn(() => ({ width: 75, height: 75 })),
   getId: jest.fn(() => `uid-${clusterName}`),
 });
 
@@ -60,12 +56,12 @@ describe('MCOStyleNode', () => {
 
   describe('Icon Display', () => {
     it('should show ClusterIcon when no apps are protected', () => {
-      const node = createMockNode('cluster1') as Node;
+      const node = createMockNode('cluster1');
       const context = {
         ...mockContextValue,
         clusterAppsMap: {
           cluster1: [],
-        } as any,
+        } satisfies ClusterPairOperationsMap,
       };
 
       render(
@@ -81,7 +77,7 @@ describe('MCOStyleNode', () => {
     });
 
     it('should show CubeIcon when exactly 1 app is protected', () => {
-      const node = createMockNode('cluster1') as Node;
+      const node = createMockNode('cluster1');
       const context = {
         ...mockContextValue,
         clusterAppsMap: {
@@ -93,7 +89,7 @@ describe('MCOStyleNode', () => {
               status: 'Available',
             },
           ],
-        } as any,
+        } satisfies ClusterAppsMap,
       };
 
       render(
@@ -108,7 +104,7 @@ describe('MCOStyleNode', () => {
     });
 
     it('should show LayerGroupIcon when multiple apps are protected', () => {
-      const node = createMockNode('cluster1') as Node;
+      const node = createMockNode('cluster1');
       const context = {
         ...mockContextValue,
         clusterAppsMap: {
@@ -126,7 +122,7 @@ describe('MCOStyleNode', () => {
               status: 'Available',
             },
           ],
-        } as any,
+        } satisfies ClusterAppsMap,
       };
 
       render(
@@ -141,7 +137,7 @@ describe('MCOStyleNode', () => {
     });
 
     it('should render successfully when multiple apps exist', () => {
-      const node = createMockNode('cluster1') as Node;
+      const node = createMockNode('cluster1');
       const context = {
         ...mockContextValue,
         clusterAppsMap: {
@@ -165,7 +161,7 @@ describe('MCOStyleNode', () => {
               status: 'Available',
             },
           ],
-        } as any,
+        } satisfies ClusterAppsMap,
       };
 
       const { container } = render(
@@ -185,7 +181,7 @@ describe('MCOStyleNode', () => {
 
   describe('Moving Apps Filtering', () => {
     it('should exclude apps that are currently moving', () => {
-      const node = createMockNode('cluster1') as Node;
+      const node = createMockNode('cluster1');
       const context = {
         ...mockContextValue,
         clusterAppsMap: {
@@ -203,7 +199,7 @@ describe('MCOStyleNode', () => {
               status: 'Available',
             },
           ],
-        } as any,
+        } satisfies ClusterAppsMap,
         clusterPairOperationsMap: {
           'cluster1::cluster2': [
             {
@@ -216,7 +212,7 @@ describe('MCOStyleNode', () => {
               targetCluster: 'cluster2',
             },
           ],
-        } as any,
+        } satisfies ClusterPairOperationsMap,
       };
 
       const { container } = render(
@@ -233,7 +229,7 @@ describe('MCOStyleNode', () => {
     });
 
     it('should exclude apps moving to this cluster', () => {
-      const node = createMockNode('cluster2') as Node;
+      const node = createMockNode('cluster2');
       const context = {
         ...mockContextValue,
         clusterAppsMap: {
@@ -245,7 +241,7 @@ describe('MCOStyleNode', () => {
               status: 'Available',
             },
           ],
-        } as any,
+        } satisfies ClusterAppsMap,
         clusterPairOperationsMap: {
           'cluster1::cluster2': [
             {
@@ -258,7 +254,7 @@ describe('MCOStyleNode', () => {
               targetCluster: 'cluster2',
             },
           ],
-        } as any,
+        } satisfies ClusterPairOperationsMap,
       };
 
       render(
@@ -274,7 +270,7 @@ describe('MCOStyleNode', () => {
     });
 
     it('should show ClusterIcon when all apps are moving', () => {
-      const node = createMockNode('cluster1') as Node;
+      const node = createMockNode('cluster1');
       const context = {
         ...mockContextValue,
         clusterAppsMap: {
@@ -286,7 +282,7 @@ describe('MCOStyleNode', () => {
               status: 'Available',
             },
           ],
-        } as any,
+        } satisfies ClusterAppsMap,
         clusterPairOperationsMap: {
           'cluster1::cluster2': [
             {
@@ -299,7 +295,7 @@ describe('MCOStyleNode', () => {
               targetCluster: 'cluster2',
             },
           ],
-        } as any,
+        } satisfies ClusterPairOperationsMap,
       };
 
       render(
@@ -317,7 +313,7 @@ describe('MCOStyleNode', () => {
 
   describe('Context Menu', () => {
     it('should open context menu on right click', () => {
-      const node = createMockNode('cluster1') as Node;
+      const node = createMockNode('cluster1');
 
       const { container } = render(
         <TopologyDataContext.Provider value={mockContextValue}>
@@ -333,7 +329,7 @@ describe('MCOStyleNode', () => {
     });
 
     it('should navigate to DR policy creation on "Pair cluster" click', () => {
-      const node = createMockNode('cluster1') as Node;
+      const node = createMockNode('cluster1');
 
       render(
         <TopologyDataContext.Provider value={mockContextValue}>
@@ -351,7 +347,7 @@ describe('MCOStyleNode', () => {
 
   describe('Edge Cases', () => {
     it('should handle missing clusterAppsMap gracefully', () => {
-      const node = createMockNode('cluster1') as Node;
+      const node = createMockNode('cluster1');
       const context = {
         ...mockContextValue,
         clusterAppsMap: undefined,
@@ -369,7 +365,7 @@ describe('MCOStyleNode', () => {
     });
 
     it('should handle missing clusterPairOperationsMap gracefully', () => {
-      const node = createMockNode('cluster1') as Node;
+      const node = createMockNode('cluster1');
       const context = {
         ...mockContextValue,
         clusterAppsMap: {
@@ -381,7 +377,7 @@ describe('MCOStyleNode', () => {
               status: 'Available',
             },
           ],
-        } as any,
+        } satisfies ClusterAppsMap,
         clusterPairOperationsMap: undefined,
       };
 

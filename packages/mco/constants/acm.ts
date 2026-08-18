@@ -26,9 +26,7 @@ export enum DRApplication {
   DISCOVERED = 'Discovered',
 }
 // Display texts
-export const APPLICATION_TYPE_DISPLAY_TEXT = (
-  t: TFunction
-): { [key in DRApplication]: string } => ({
+export const APPLICATION_TYPE_DISPLAY_TEXT = (t: TFunction) => ({
   [DRApplication.APPSET]: t('ApplicationSet'),
   [DRApplication.SUBSCRIPTION]: t('Subscription'),
   [DRApplication.DISCOVERED]: t('Discovered'),

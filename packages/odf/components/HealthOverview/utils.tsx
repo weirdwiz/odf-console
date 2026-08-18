@@ -10,11 +10,11 @@ import {
  * Maps UI severity filter values to Prometheus severity labels
  * Used in FilterableAlertsTable and SilencedAlertsTable for filtering
  */
-export const SEVERITY_MAP: Record<string, string> = {
+export const SEVERITY_MAP = {
   critical: 'critical',
   moderate: 'warning',
   minor: 'info',
-};
+} satisfies Record<string, string>;
 
 export const parseAlertMessage = (
   template: string,
@@ -37,9 +37,7 @@ type RuleGroup = {
   rules?: any[];
 };
 
-export const extractTemplatesFromRules = (
-  groups: RuleGroup[] = []
-): { templates: Map<string, string>; ruleNames: Set<string> } => {
+export const extractTemplatesFromRules = (groups: RuleGroup[] = []) => {
   const templates = new Map<string, string>();
   const ruleNames = new Set<string>();
 

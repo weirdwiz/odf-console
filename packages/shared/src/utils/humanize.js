@@ -103,7 +103,7 @@ const convertBaseValueToUnits = (
 
 const convertValueWithUnitsToBaseValue = (value, unitArray, divisor) => {
   const defaultReturn = { value, unit: '' };
-  if (typeof value !== 'string') {
+  if (!_.isString(value)) {
     return defaultReturn;
   }
 

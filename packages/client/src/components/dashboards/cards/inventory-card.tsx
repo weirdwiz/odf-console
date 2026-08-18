@@ -42,16 +42,20 @@ export const InventoryCard: React.FC = () => {
 
   const pvcsLoaded = resources?.pvcs?.loaded;
   const pvcsLoadError = resources?.pvcs?.loadError;
+  // SAFETY: (resources?.pvcs?.data ?? []) contains only entries produced for the PersistentVolumeClaimKind[] contract.
   const pvcsData = (resources?.pvcs?.data ?? []) as PersistentVolumeClaimKind[];
 
   const pvsLoaded = resources?.pvs?.loaded;
   const pvsLoadError = resources?.pvs?.loadError;
+  // SAFETY: (resources?.pvs?.data ?? []) contains only entries produced for the K8sResourceKind[] contract.
   const pvsData = (resources?.pvs?.data ?? []) as K8sResourceKind[];
 
+  // SAFETY: (resources?.sc?.data ?? []) contains only entries produced for the StorageClassResourceKind[] contract.
   const scData = (resources?.sc?.data ?? []) as StorageClassResourceKind[];
   const filteredCephSC = getCephSC(scData);
   const filteredSCNames = filteredCephSC.map(getName);
 
+  // SAFETY: The receiving library accepts PersistentVolumeClaimModel; its published type does not expose this supported value.
   return (
     <Card>
       <CardHeader>

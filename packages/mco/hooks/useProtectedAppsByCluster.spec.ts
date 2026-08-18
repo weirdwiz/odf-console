@@ -1,16 +1,14 @@
-import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import { renderHook } from '@testing-library/react';
 import { ProtectedApplicationViewKind } from '../types/pav';
-import { useProtectedAppsByCluster } from './useProtectedAppsByCluster';
+import {
+  protectedAppsByClusterDependencies,
+  useProtectedAppsByCluster,
+} from './useProtectedAppsByCluster';
 
-jest.mock('@openshift-console/dynamic-plugin-sdk');
-jest.mock('@odf/shared/hooks/deep-compare-memoize', () => ({
-  useDeepCompareMemoize: jest.fn((value) => value),
-}));
-
-const mockUseK8sWatchResource = useK8sWatchResource as jest.MockedFunction<
-  typeof useK8sWatchResource
->;
+const mockUseK8sWatchResource = jest.spyOn(
+  protectedAppsByClusterDependencies,
+  'useK8sWatchResource'
+);
 
 describe('useProtectedAppsByCluster', () => {
   beforeEach(() => {
@@ -32,14 +30,18 @@ describe('useProtectedAppsByCluster', () => {
     it('should return loaded state when data arrives', () => {
       const mockPAVs: ProtectedApplicationViewKind[] = [
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'pav1', namespace: 'ns1' },
-          spec: {
-            applicationName: 'app1',
-            drPolicyName: 'policy1',
-            selectedClusters: ['cluster1'],
+          spec: { drpcRef: { name: 'drpc1' } },
+          status: {
+            drInfo: { drpolicyRef: { name: 'policy1' } },
+            placementInfo: {
+              placementRef: {},
+              selectedClusters: ['cluster1'],
+            },
           },
-          status: { phase: 'Available' },
-        } as any,
+        },
       ];
 
       mockUseK8sWatchResource.mockReturnValue([mockPAVs, true, null]);
@@ -65,35 +67,39 @@ describe('useProtectedAppsByCluster', () => {
     it('should group apps by cluster name using selectedClusters', () => {
       const mockPAVs: ProtectedApplicationViewKind[] = [
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'pav1', namespace: 'ns1' },
           spec: {
-            drpcRef: { name: 'drpc1' } as any,
+            drpcRef: { name: 'drpc1' },
           },
           status: {
             drInfo: {
-              drpolicyRef: { name: 'policy1' } as any,
+              drpolicyRef: { name: 'policy1' },
             },
             placementInfo: {
-              placementRef: {} as any,
+              placementRef: {},
               selectedClusters: ['cluster1'],
             },
           },
-        } as any,
+        },
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'pav2', namespace: 'ns2' },
           spec: {
-            drpcRef: { name: 'drpc2' } as any,
+            drpcRef: { name: 'drpc2' },
           },
           status: {
             drInfo: {
-              drpolicyRef: { name: 'policy1' } as any,
+              drpolicyRef: { name: 'policy1' },
             },
             placementInfo: {
-              placementRef: {} as any,
+              placementRef: {},
               selectedClusters: ['cluster2'],
             },
           },
-        } as any,
+        },
       ];
 
       mockUseK8sWatchResource.mockReturnValue([mockPAVs, true, null]);
@@ -110,35 +116,39 @@ describe('useProtectedAppsByCluster', () => {
     it('should group multiple apps for same cluster', () => {
       const mockPAVs: ProtectedApplicationViewKind[] = [
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'pav1', namespace: 'ns1' },
           spec: {
-            drpcRef: { name: 'drpc1' } as any,
+            drpcRef: { name: 'drpc1' },
           },
           status: {
             drInfo: {
-              drpolicyRef: { name: 'policy1' } as any,
+              drpolicyRef: { name: 'policy1' },
             },
             placementInfo: {
-              placementRef: {} as any,
+              placementRef: {},
               selectedClusters: ['cluster1'],
             },
           },
-        } as any,
+        },
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'pav2', namespace: 'ns2' },
           spec: {
-            drpcRef: { name: 'drpc2' } as any,
+            drpcRef: { name: 'drpc2' },
           },
           status: {
             drInfo: {
-              drpolicyRef: { name: 'policy1' } as any,
+              drpolicyRef: { name: 'policy1' },
             },
             placementInfo: {
-              placementRef: {} as any,
+              placementRef: {},
               selectedClusters: ['cluster1'],
             },
           },
-        } as any,
+        },
       ];
 
       mockUseK8sWatchResource.mockReturnValue([mockPAVs, true, null]);
@@ -156,22 +166,24 @@ describe('useProtectedAppsByCluster', () => {
     it('should fall back to primaryCluster when selectedClusters is not available', () => {
       const mockPAVs: ProtectedApplicationViewKind[] = [
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'tester', namespace: 'openshift-dr-ops' },
           spec: {
-            drpcRef: { name: 'tester' } as any,
+            drpcRef: { name: 'tester' },
           },
           status: {
             drInfo: {
-              drpolicyRef: { name: 'test' } as any,
+              drpolicyRef: { name: 'test' },
               primaryCluster: 'client-1', // App is running on client-1
               drClusters: ['client-1', 'client-2'], // Both clusters in DR policy
             },
             placementInfo: {
-              placementRef: {} as any,
+              placementRef: {},
               // selectedClusters is missing/undefined
             },
           },
-        } as any,
+        },
       ];
 
       mockUseK8sWatchResource.mockReturnValue([mockPAVs, true, null]);
@@ -188,22 +200,24 @@ describe('useProtectedAppsByCluster', () => {
     it('should fall back to first drCluster when both selectedClusters and primaryCluster are not available', () => {
       const mockPAVs: ProtectedApplicationViewKind[] = [
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'tester', namespace: 'openshift-dr-ops' },
           spec: {
-            drpcRef: { name: 'tester' } as any,
+            drpcRef: { name: 'tester' },
           },
           status: {
             drInfo: {
-              drpolicyRef: { name: 'test' } as any,
+              drpolicyRef: { name: 'test' },
               // primaryCluster is not set (app is initializing)
               drClusters: ['client-1', 'client-2'], // Both clusters in DR policy
             },
             placementInfo: {
-              placementRef: {} as any,
+              placementRef: {},
               // selectedClusters is missing/undefined
             },
           },
-        } as any,
+        },
       ];
 
       mockUseK8sWatchResource.mockReturnValue([mockPAVs, true, null]);
@@ -222,35 +236,39 @@ describe('useProtectedAppsByCluster', () => {
     it('should filter out apps without DR policy', () => {
       const mockPAVs: ProtectedApplicationViewKind[] = [
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'pav1', namespace: 'ns1' },
           spec: {
-            drpcRef: { name: 'drpc1' } as any,
+            drpcRef: { name: 'drpc1' },
           },
           status: {
             drInfo: {
-              drpolicyRef: { name: 'policy1' } as any,
+              drpolicyRef: { name: 'policy1' },
             },
             placementInfo: {
-              placementRef: {} as any,
+              placementRef: {},
               selectedClusters: ['cluster1'],
             },
           },
-        } as any,
+        },
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'pav2', namespace: 'ns2' },
           spec: {
-            drpcRef: { name: 'drpc2' } as any,
+            drpcRef: { name: 'drpc2' },
           },
           status: {
             drInfo: {
               // Missing drpolicyRef - no DR policy
             },
             placementInfo: {
-              placementRef: {} as any,
+              placementRef: {},
               selectedClusters: ['cluster1'],
             },
           },
-        } as any,
+        },
       ];
 
       mockUseK8sWatchResource.mockReturnValue([mockPAVs, true, null]);
@@ -265,20 +283,22 @@ describe('useProtectedAppsByCluster', () => {
     it('should handle apps with multiple selected clusters', () => {
       const mockPAVs: ProtectedApplicationViewKind[] = [
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'pav1', namespace: 'ns1' },
           spec: {
-            drpcRef: { name: 'drpc1' } as any,
+            drpcRef: { name: 'drpc1' },
           },
           status: {
             drInfo: {
-              drpolicyRef: { name: 'policy1' } as any,
+              drpolicyRef: { name: 'policy1' },
             },
             placementInfo: {
-              placementRef: {} as any,
+              placementRef: {},
               selectedClusters: ['cluster1', 'cluster2'], // Multiple clusters
             },
           },
-        } as any,
+        },
       ];
 
       mockUseK8sWatchResource.mockReturnValue([mockPAVs, true, null]);
@@ -307,21 +327,23 @@ describe('useProtectedAppsByCluster', () => {
     it('should handle PAVs with missing selectedClusters and primaryCluster', () => {
       const mockPAVs: ProtectedApplicationViewKind[] = [
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'pav1', namespace: 'ns1' },
           spec: {
-            drpcRef: { name: 'drpc1' } as any,
+            drpcRef: { name: 'drpc1' },
           },
           status: {
             drInfo: {
-              drpolicyRef: { name: 'policy1' } as any,
+              drpolicyRef: { name: 'policy1' },
               // primaryCluster is missing
             },
             placementInfo: {
-              placementRef: {} as any,
+              placementRef: {},
               // selectedClusters is missing
             },
           },
-        } as any,
+        },
       ];
 
       mockUseK8sWatchResource.mockReturnValue([mockPAVs, true, null]);
@@ -335,20 +357,22 @@ describe('useProtectedAppsByCluster', () => {
     it('should handle PAVs with empty selectedClusters array', () => {
       const mockPAVs: ProtectedApplicationViewKind[] = [
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'pav1', namespace: 'ns1' },
           spec: {
-            drpcRef: { name: 'drpc1' } as any,
+            drpcRef: { name: 'drpc1' },
           },
           status: {
             drInfo: {
-              drpolicyRef: { name: 'policy1' } as any,
+              drpolicyRef: { name: 'policy1' },
             },
             placementInfo: {
-              placementRef: {} as any,
+              placementRef: {},
               selectedClusters: [], // Empty
             },
           },
-        } as any,
+        },
       ];
 
       mockUseK8sWatchResource.mockReturnValue([mockPAVs, true, null]);
@@ -364,23 +388,25 @@ describe('useProtectedAppsByCluster', () => {
     it('should include all required app fields', () => {
       const mockPAVs: ProtectedApplicationViewKind[] = [
         {
+          apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+          kind: 'ProtectedApplicationView',
           metadata: { name: 'my-app', namespace: 'app-namespace' },
           spec: {
-            drpcRef: { name: 'my-app-drpc' } as any,
+            drpcRef: { name: 'my-app-drpc' },
           },
           status: {
             drInfo: {
-              drpolicyRef: { name: 'dr-policy-1' } as any,
+              drpolicyRef: { name: 'dr-policy-1' },
               status: {
                 phase: 'FailedOver',
               },
             },
             placementInfo: {
-              placementRef: {} as any,
+              placementRef: {},
               selectedClusters: ['cluster1'],
             },
           },
-        } as any,
+        },
       ];
 
       mockUseK8sWatchResource.mockReturnValue([mockPAVs, true, null]);

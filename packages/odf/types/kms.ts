@@ -245,13 +245,7 @@ export type AzureConfigMap = {
   AZURE_CERT_SECRET_NAME: string;
 };
 
-export const VaultAuthMethodMapping: {
-  [keys in VaultAuthMethods]: {
-    name: string;
-    value: VaultAuthMethods;
-    supportedEncryptionType: KmsEncryptionLevel[];
-  };
-} = {
+export const VaultAuthMethodMapping = {
   [VaultAuthMethods.KUBERNETES]: {
     name: 'Kubernetes',
     value: VaultAuthMethods.KUBERNETES,
@@ -268,6 +262,12 @@ export const VaultAuthMethodMapping: {
       KmsEncryptionLevel.STORAGE_CLASS,
     ],
   },
+} satisfies {
+  [keys in VaultAuthMethods]: {
+    name: string;
+    value: VaultAuthMethods;
+    supportedEncryptionType: KmsEncryptionLevel[];
+  };
 };
 
 export type KMSConfigMap =

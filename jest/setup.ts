@@ -1,11 +1,22 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
 import { configure } from '@testing-library/react';
+import i18n from 'i18next';
+import { isString } from 'lodash-es';
+import { initReactI18next } from 'react-i18next';
 
+// SAFETY: Node's TextEncoder implements the Web TextEncoder API used by the tests.
 global.TextEncoder = TextEncoder as typeof global.TextEncoder;
+// SAFETY: Node's TextDecoder implements the Web TextDecoder API used by the tests.
 global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 
 configure({ testIdAttribute: 'data-test-id' });
+
+i18n.use(initReactI18next).init({
+  lng: 'en',
+  resources: {},
+  showSupportNotice: false,
+});
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -13,55 +24,13 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 window['SERVER_FLAGS'] = {
   basePath: '/tests/',
 };
-
-jest.mock('react-i18next', () => ({
-  // This mock avoids a warning being shown.
-  useTranslation: () => {
-    return {
-      t: (str) => str,
-      i18n: {
-        changeLanguage: () => Promise.resolve(),
-      },
-    };
-  },
-  withTranslation: () => () => null,
-  Trans: ({ children }: any) => children,
-}));
-
-jest.mock('@odf/shared/useCustomTranslationHook', () => ({
-  useCustomTranslation: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
-// @TODO: delete this mock once @swc/jest can handle exported const enums.
-// See: https://github.com/swc-project/swc/issues/940
-enum SilenceStates {
-  Active = 'active',
-  Expired = 'expired',
-  Pending = 'pending',
-}
-enum AlertSeverity {
-  Critical = 'critical',
-  Info = 'info',
-  None = 'none',
-  Warning = 'warning',
-}
-jest.mock('@openshift-console/dynamic-plugin-sdk/lib/api/common-types', () => ({
-  ...jest.requireActual(
-    '@openshift-console/dynamic-plugin-sdk/lib/api/common-types'
-  ),
-  AlertSeverity: AlertSeverity,
-  SilenceStates: SilenceStates,
-}));
-
 // @TODO: delete this warning suppression once @patternfly/react-topology & @patternfly/react-table address this.
 const originalConsole = global.console;
 global.console = {
   ...global.console,
   warn: (...args) => {
     if (
-      typeof args[0] === 'string' &&
+      isString(args[0]) &&
       (args[0].includes(
         '[mobx-react-lite] importing batchingForReactDom is no longer needed'
       ) ||

@@ -3,6 +3,7 @@ import { useODFSystemFlagsSelector } from '@odf/core/redux';
 import { ODFSystemFlagsPayload } from '@odf/core/redux/actions';
 import { useGetClusterDetails } from '@odf/core/redux/utils';
 import { secretResource } from '@odf/core/resources';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,
@@ -73,17 +74,17 @@ const OngoingActivity: React.FC<ActivityProps> = ({
 
   const [progress, progressError] = useCustomPrometheusPoll({
     query: dataResiliencyQueryMap.MCG_REBUILD_PROGRESS_QUERY,
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [eta] = useCustomPrometheusPoll({
     query: dataResiliencyQueryMap.MCG_REBUILD_TIME_QUERY,
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [rgwProgress, rgwProgressError] = useCustomPrometheusPoll({
     query: rgwResiliencyQuery,
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 

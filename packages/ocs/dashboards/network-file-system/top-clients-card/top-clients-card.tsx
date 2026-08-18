@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { GraphEmpty } from '@odf/shared/charts';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import { PrometheusMultilineUtilizationItem } from '@odf/shared/dashboards/utilization-card/prometheus-multi-utilization-item';
 import {
   useCustomPrometheusPoll,
@@ -21,7 +22,7 @@ export const TopClientsCard: React.FC = () => {
   const { t } = useCustomTranslation();
   const [topClients, topClientsError, topClientsLoading] =
     useCustomPrometheusPoll({
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       query:
         NFS_TOPK_CLIENT_THROUGHPUT_TOTAL[NFSDashboardQuery.TOPK_CLIENT_TOTAL],
       basePath: usePrometheusBasePath(),

@@ -97,6 +97,7 @@ export const DiskListModal: React.FC<DiskListModalProps> = ({
     ];
   }, [t]);
 
+  // SAFETY: The receiving library accepts DiskHeader; its published type does not expose this supported value.
   const [columns] = useActiveColumns({
     columns: DiskHeader as any, // Todo(bipuldh): Remove any after SDK update
     showNamespaceOverride: false,

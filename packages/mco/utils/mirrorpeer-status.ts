@@ -23,9 +23,7 @@ export const getMirrorPeerPhase = (
 export const getMirrorPeerMessage = (mirrorPeer?: MirrorPeerKind): string =>
   mirrorPeer?.status?.message || '';
 
-const MIRROR_PEER_FAILURE_REASON_MESSAGES: Readonly<
-  Partial<Record<string, string>>
-> = {
+const MIRROR_PEER_FAILURE_REASON_MESSAGES = {
   [MirrorPeerConditionReason.ValidationFailed]:
     MirrorPeerPhaseMessage.ValidationFailed,
   [MirrorPeerConditionReason.ConfigurationFailed]:
@@ -40,7 +38,7 @@ const MIRROR_PEER_FAILURE_REASON_MESSAGES: Readonly<
     MirrorPeerPhaseMessage.DRClusterConfigurationFailed,
   [MirrorPeerConditionReason.DeletionFailed]:
     MirrorPeerPhaseMessage.DeletionFailed,
-};
+} satisfies Readonly<Partial<Record<string, string>>>;
 
 const conditionMatchesStatusMessage = (
   reason: string | undefined,

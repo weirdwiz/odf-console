@@ -185,6 +185,7 @@ const ObjectVersions: React.FC<ObjectVersionsProps> = ({
   const [inProgress, setInProgress] = React.useState(false);
   const [error, setError] = React.useState(null);
   // used for storing API's response on performing delete operation on object version
+  // SAFETY: [] contains only entries produced for the ObjectCrFormat[] contract.
   const [deleteResponseSideBar, setDeleteResponseSideBar] =
     React.useState<ObjectsDeleteResponse>({
       selectedObjects: [] as ObjectCrFormat[],
@@ -209,6 +210,7 @@ const ObjectVersions: React.FC<ObjectVersionsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deleteResponseSideBar, objectKey]);
 
+  // SAFETY: objectVersions contains only entries produced for the [] contract.
   return (
     <>
       <Content className="pf-v6-u-my-sm">
@@ -425,6 +427,7 @@ const ObjectDetailsSidebarContent: React.FC<
     );
   }
 
+  // SAFETY: tabIndex comes from the owner of the number contract used at this boundary.
   return (
     <>
       <DrawerHead>

@@ -134,6 +134,7 @@ const BucketsListPageContent: React.FC = () => {
   const { s3Client, logout, setSecretRef } = React.useContext(S3Context);
   const launcher = useModalWrapper();
 
+  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
   const providerType = s3Client.providerType as S3ProviderType;
 
   return (
@@ -177,6 +178,7 @@ const StorageEndpoint: React.FC<StorageEndpointProps> = ({
     _event: React.MouseEvent,
     tabIndex: string
   ) => {
+    // SAFETY: tabIndex comes from the owner of the S3ProviderType contract used at this boundary.
     setS3Provider(tabIndex as S3ProviderType);
   };
 

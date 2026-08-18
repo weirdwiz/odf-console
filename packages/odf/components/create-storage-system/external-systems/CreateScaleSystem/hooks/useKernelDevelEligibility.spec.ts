@@ -1,14 +1,15 @@
 import { MachineConfigKind, MachineConfigNodeKind } from '@odf/shared/types';
 import { useK8sWatchResources } from '@openshift-console/dynamic-plugin-sdk';
+import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
 import { renderHook } from '@testing-library/react';
 import { WizardNodeState } from '../../../reducer';
 import { useKernelDevelEligibility } from './useKernelDevelEligibility';
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  useK8sWatchResources: jest.fn(),
-}));
+jest
+  .spyOn(TestDependency1, 'useK8sWatchResources')
+  .mockImplementation(jest.fn());
 
+// SAFETY: The WizardNodeState test value defines the members exercised by this test.
 const makeNode = (name: string): WizardNodeState =>
   ({
     name,
@@ -39,6 +40,7 @@ const mockWatchResources = ({
   machineConfigNodes = {},
   machineConfigs = {},
 }: WatchResourcesMock = {}) => {
+  // SAFETY: The jest.Mock test value defines the members exercised by this test.
   (useK8sWatchResources as jest.Mock).mockReturnValue({
     machineConfigNodes: {
       data: machineConfigNodes.data || [],

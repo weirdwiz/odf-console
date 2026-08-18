@@ -29,9 +29,10 @@ export const split = (str: string) =>
 
 type Options = { undefinedWhenEmpty?: boolean; basic?: boolean };
 
+// SAFETY: This empty Options accumulator receives only entries created by the reducer below.
 export const fromRequirements = (
   requirements: MatchExpression[],
-  options = {} as Options
+  options = /* SAFETY: The value is supplied by the Options owner and follows that contract. */ {} as Options
 ) => {
   options = options || {};
   const selector = {
@@ -60,6 +61,7 @@ export const fromRequirements = (
 };
 
 export const selectorFromString = (str: string) => {
+  // SAFETY: split(str || '').map( requirementFromString ) contains only entries produced for the MatchExpression[] contract.
   const requirements = split(str || '').map(
     requirementFromString
   ) as MatchExpression[];

@@ -156,6 +156,7 @@ export const PopoverBody: React.FC<PopoverBodyProps> = React.memo(
     const [consumerData, consumerLoaded, consumersLoadError] =
       useK8sWatchResource<K8sResourceCommon[]>(k8sResource);
 
+    // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
     const [metrics, metricsError, metricsLoading] = useCustomPrometheusPoll({
       endpoint: isOpen ? ('api/v1/query' as any) : null,
       query: isOpen ? query : null,

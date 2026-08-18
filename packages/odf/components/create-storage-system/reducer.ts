@@ -38,6 +38,7 @@ export type WizardCommonProps = {
 };
 
 /* State of CreateStorageSystem */
+// SAFETY: null comes from the owner of the ErasureCodingScheme | null contract used at this boundary.
 export const initialState: CreateStorageSystemState = {
   stepIdReached: 1,
   storageClass: { name: '', provisioner: '' },
@@ -50,7 +51,8 @@ export const initialState: CreateStorageSystemState = {
   },
   advancedSettings: {
     useErasureCoding: false,
-    erasureCodingScheme: null as ErasureCodingScheme | null,
+    erasureCodingScheme:
+      /* SAFETY: The value is supplied by the ErasureCodingScheme | null owner and follows that contract. */ null as ErasureCodingScheme | null,
     enableForcefulDeployment: false,
     forcefulDeploymentConfirmation: '',
   },

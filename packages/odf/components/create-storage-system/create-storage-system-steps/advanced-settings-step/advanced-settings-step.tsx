@@ -2,6 +2,7 @@ import * as React from 'react';
 import { DeploymentType, type ErasureCodingScheme } from '@odf/core/types';
 import { getErasureCodingNodeValidation } from '@odf/core/utils';
 import { useCustomTranslation } from '@odf/shared/useCustomTranslationHook';
+import { isNumber } from 'lodash-es';
 import {
   Form,
   FormGroup,
@@ -113,9 +114,7 @@ export const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
                 nodeCount={nodeCount}
                 selectedScheme={erasureCodingScheme}
                 onSelectScheme={onSelectScheme}
-                rawCapacityBytes={
-                  typeof capacity === 'number' ? capacity : null
-                }
+                rawCapacityBytes={isNumber(capacity) ? capacity : null}
               />
             </FormGroup>
           )}

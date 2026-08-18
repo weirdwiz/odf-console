@@ -3,7 +3,6 @@ import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import {
   DRPlacementControlKind,
   DRPolicyKind,
-  Phase,
   ProtectedApplicationViewKind,
 } from '../types';
 import {
@@ -12,12 +11,21 @@ import {
   getProtectedCondition,
   getApplicationName,
 } from '../utils';
-import { DRStatus, getDRStatus, isCleanupRequired } from '../utils/dr-status';
+import {
+  DRStatus,
+  getDRStatus,
+  isCleanupRequired,
+  parseDRPhase,
+} from '../utils/dr-status';
 import {
   getDRPlacementControlResourceObj,
   getDRPolicyResourceObj,
   getProtectedApplicationViewResourceObj,
 } from './mco-resources';
+
+export const protectedAppsByClusterDependencies = {
+  useK8sWatchResource,
+};
 
 export type ProtectedAppInfo = {
   name: string;
@@ -40,16 +48,20 @@ export const useProtectedAppsByCluster = (): [
   boolean,
   Error | null,
 ] => {
-  const [pavs, pavsLoaded, pavsLoadError] = useK8sWatchResource<
-    ProtectedApplicationViewKind[]
-  >(getProtectedApplicationViewResourceObj());
+  const [pavs, pavsLoaded, pavsLoadError] =
+    protectedAppsByClusterDependencies.useK8sWatchResource<
+      ProtectedApplicationViewKind[]
+    >(getProtectedApplicationViewResourceObj());
 
-  const [drpcs, drpcsLoaded, drpcsLoadError] = useK8sWatchResource<
-    DRPlacementControlKind[]
-  >(getDRPlacementControlResourceObj());
+  const [drpcs, drpcsLoaded, drpcsLoadError] =
+    protectedAppsByClusterDependencies.useK8sWatchResource<
+      DRPlacementControlKind[]
+    >(getDRPlacementControlResourceObj());
 
   const [drPolicies, drPoliciesLoaded, drPoliciesLoadError] =
-    useK8sWatchResource<DRPolicyKind[]>(getDRPolicyResourceObj());
+    protectedAppsByClusterDependencies.useK8sWatchResource<DRPolicyKind[]>(
+      getDRPolicyResourceObj()
+    );
 
   const loaded = pavsLoaded && drpcsLoaded && drPoliciesLoaded;
   const loadError = pavsLoadError || drpcsLoadError || drPoliciesLoadError;
@@ -79,7 +91,7 @@ export const useProtectedAppsByCluster = (): [
 
         const appName = getApplicationName(pav);
         const appNamespace = pav.metadata?.namespace;
-        const phase = pav.status?.drInfo?.status?.phase as Phase;
+        const phase = parseDRPhase(pav.status?.drInfo?.status?.phase);
 
         const drpcName = pav.spec?.drpcRef?.name;
         const drpc = drpcName ? drpcByName.get(drpcName) : undefined;

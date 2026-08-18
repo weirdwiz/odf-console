@@ -58,7 +58,7 @@ const appFilter = (application: ApplicationKind) =>
 
 const getNamespaceWiseApplications = (
   applications: ApplicationKind[]
-): NamespaceWiseMapping =>
+): NamespaceWiseMapping<ApplicationKind> =>
   applications.reduce(
     (acc, application) =>
       appFilter(application)
@@ -75,7 +75,7 @@ const getNamespaceWiseApplications = (
 
 const getNamespaceWiseSubscriptions = (
   subscriptions: ACMSubscriptionKind[]
-): NamespaceWiseMapping =>
+): NamespaceWiseMapping<ACMSubscriptionKind> =>
   subscriptions.reduce(
     (acc, subscription) =>
       isPlacementModel(subscription)
@@ -92,8 +92,8 @@ const getNamespaceWiseSubscriptions = (
 
 const getNamespaceWisePlacementDecisions = (
   placementDecisions: ACMPlacementDecisionKind[]
-): NamespaceWiseMapping =>
-  placementDecisions.reduce(
+): NamespaceWiseMapping<ACMPlacementDecisionKind> =>
+  placementDecisions.reduce<NamespaceWiseMapping<ACMPlacementDecisionKind>>(
     (acc, placementDecision) => ({
       ...acc,
       [getNamespace(placementDecision)]: [
@@ -101,7 +101,7 @@ const getNamespaceWisePlacementDecisions = (
         placementDecision,
       ],
     }),
-    {} as any
+    {}
   );
 
 const getNamespaceWisePlacements = (
@@ -154,23 +154,25 @@ const generateSubscriptionGroupInfo = (
           placement.kind
         );
         const placementDecision = findPlacementDecisionUsingPlacement(
-          placement as ACMPlacementKind,
+          placement,
           placementDecisions
         );
-        placementToAppDeploymentMap[placementUniqueId] = {
-          subscriptions: [subscription],
-          placement,
-          placementDecision,
-          ...(!_.isEmpty(drResource)
-            ? {
-                drInfo: {
-                  drClusters: drResource.drClusters,
-                  drPolicy: drResource.drPolicy,
-                  drPlacementControl: drResource.drPlacementControls?.[0],
-                },
-              }
-            : {}),
-        };
+        placementToAppDeploymentMap[placementUniqueId] = (() => {
+          const value = {
+            subscriptions: [subscription],
+            placement,
+            placementDecision,
+          };
+          if (!_.isEmpty(drResource))
+            Object.assign(value, {
+              drInfo: {
+                drClusters: drResource.drClusters,
+                drPolicy: drResource.drPolicy,
+                drPlacementControl: drResource.drPlacementControls?.[0],
+              },
+            });
+          return value;
+        })();
       } else {
         placementToAppDeploymentMap[placementUniqueId].subscriptions.push(
           subscription
@@ -263,12 +265,10 @@ export const useSubscriptionResourceWatch: UseSubscriptionResourceWatch = (
         namespaceToApplicationMap[namespace].forEach((application) => {
           const subscriptionGroupInfo = generateSubscriptionGroupInfo(
             application,
-            namespaceToSubscriptionMap?.[namespace] as ACMSubscriptionKind[],
+            namespaceToSubscriptionMap?.[namespace] || [],
             namespaceToPlacementMap?.[namespace] || {},
             namespaceToPlacementRuleMap?.[namespace] || {},
-            namespaceToPlacementDecisionMap?.[
-              namespace
-            ] as ACMPlacementDecisionKind[],
+            namespaceToPlacementDecisionMap?.[namespace] || [],
             drResourceList?.formattedResources
           );
 
@@ -339,11 +339,8 @@ type UseSubscriptionResourceWatch = (
   resource?: WatchResources
 ) => [SubscriptionResourceKind, boolean, any];
 
-type NamespaceWiseMapping = {
-  [namespace in string]:
-    | ApplicationKind[]
-    | ACMSubscriptionKind[]
-    | ACMPlacementDecisionKind[];
+type NamespaceWiseMapping<T> = {
+  [namespace in string]: T[];
 };
 
 type ACMPlacementMap = {

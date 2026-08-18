@@ -16,6 +16,7 @@ export const useSafeK8sList = <R extends K8sResourceCommon = K8sResourceCommon>(
   const { odfNamespace, isNsSafe, isFallbackSafe } = useODFNamespaceSelector();
 
   const canUseFallback = allowFallback && isFallbackSafe;
+  // SAFETY: getValidK8sOptions( isNsSafe || canUseFallback, kind, namespace || odf comes from the owner of the [K8sKind, string] contract used at this boundary.
   const k8sListArgs = getValidK8sOptions(
     isNsSafe || canUseFallback,
     kind,

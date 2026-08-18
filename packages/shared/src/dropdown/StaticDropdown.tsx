@@ -45,6 +45,7 @@ const StaticDropdown: React.FC<StaticDropdownProps> = ({
     _event?: React.MouseEvent<Element, MouseEvent>,
     value?: string | number
   ) => {
+    // SAFETY: value comes from the owner of the string contract used at this boundary.
     const key = value as string;
     if (key) {
       setSelectedItem(key);

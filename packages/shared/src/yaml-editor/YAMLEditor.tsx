@@ -94,13 +94,18 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({
 
   const updateYAML = (obj, k8sModel, newNamespace, newName) => {
     setState({ ...state, success: null, errors: null });
-    k8sUpdate({
-      model: k8sModel,
-      name: newName,
-      ns: newNamespace,
-      data: obj,
-      ...(!!cluster ? { cluster } : {}),
-    })
+    k8sUpdate(
+      (() => {
+        const value = {
+          model: k8sModel,
+          name: newName,
+          ns: newNamespace,
+          data: obj,
+        };
+        if (!!cluster) Object.assign(value, { cluster });
+        return value;
+      })()
+    )
       .then((o) => {
         const success = t(
           '{{newName}} has been updated to version {{version}}',

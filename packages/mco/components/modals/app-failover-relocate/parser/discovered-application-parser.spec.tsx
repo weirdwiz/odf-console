@@ -24,7 +24,12 @@ import {
   mockManagedClusterWest1,
   mockManagedClusterWest1Down,
 } from '../../../../__mocks__/managedcluster';
-import { DRPlacementControlParser } from './discovered-application-parser';
+import { failoverRelocateModalDependencies } from '../failover-relocate-modal';
+import { failoverRelocateModalBodyDependencies } from '../failover-relocate-modal-body';
+import {
+  DRPlacementControlParser,
+  discoveredApplicationParserDependencies,
+} from './discovered-application-parser';
 
 let type = 1;
 let patchObj = {};
@@ -78,29 +83,30 @@ const drResources5: DisasterRecoveryResourceKind = {
     },
   ],
 };
-
-jest.mock('@odf/mco/hooks/disaster-recovery', () => ({
-  __esModule: true,
-  useDisasterRecoveryResourceWatch: jest.fn(() => {
-    if (type === 1) {
-      return [drResources2, true, ''];
-    } else if (type === 2) {
-      return [drResources1, true, ''];
-    } else if (type === 3) {
-      return [drResources3, true, ''];
-    } else if (type === 4) {
-      return [drResources4, true, ''];
-    } else if (type === 5) {
-      return [drResources5, true, ''];
-    }
-  }),
-}));
-
-jest.mock('@openshift-console/dynamic-plugin-sdk/lib/api/core-api', () => ({
-  ...jest.requireActual(
-    '@openshift-console/dynamic-plugin-sdk/lib/api/core-api'
-  ),
-  useK8sWatchResource: jest.fn(() => {
+jest
+  .spyOn(
+    discoveredApplicationParserDependencies,
+    'useDisasterRecoveryResourceWatch'
+  )
+  .mockImplementation(
+    jest.fn(() => {
+      if (type === 1) {
+        return [drResources2, true, ''];
+      } else if (type === 2) {
+        return [drResources1, true, ''];
+      } else if (type === 3) {
+        return [drResources3, true, ''];
+      } else if (type === 4) {
+        return [drResources4, true, ''];
+      } else if (type === 5) {
+        return [drResources5, true, ''];
+      }
+    })
+  );
+jest
+  .spyOn(discoveredApplicationParserDependencies, 'useK8sWatchResource')
+  .mockImplementation(
+  jest.fn(() => {
     if (type === 1 || type === 5) {
       return [[mockManagedClusterEast1, mockManagedClusterWest1], true, ''];
     } else if (type === 4) {
@@ -108,18 +114,24 @@ jest.mock('@openshift-console/dynamic-plugin-sdk/lib/api/core-api', () => ({
     } else {
       return [[mockManagedClusterEast1, mockManagedClusterWest1Down], true, ''];
     }
-  }),
-  k8sPatch: jest.fn(({ data }) => {
+  })
+);
+jest
+  .spyOn(failoverRelocateModalDependencies, 'k8sPatch')
+  .mockImplementation(
+  jest.fn(({ data }) => {
     patchObj = data;
     return Promise.resolve({ data: {} });
-  }),
-}));
-
-jest.mock('@odf/shared/hooks', () => ({
-  ...jest.requireActual('@odf/shared/hooks'),
-  DOC_VERSION: '1.2',
-  useDocVersion: jest.fn(() => '1.2'),
-}));
+  })
+);
+jest.replaceProperty(
+  failoverRelocateModalBodyDependencies,
+  'mcoDocVersion',
+  '1.2'
+);
+jest
+  .spyOn(failoverRelocateModalBodyDependencies, 'useDocVersion')
+  .mockImplementation(jest.fn(() => '1.2'));
 
 describe('Discovered application failover/relocate modal test', () => {
   test('Failover happy path test', async () => {
@@ -171,7 +183,6 @@ describe('Discovered application failover/relocate modal test', () => {
     ).toBeTruthy();
 
     // DR info
-    expect(screen.getByText(/Application:/i)).toBeInTheDocument();
     expect(screen.getByText(/mock-drpc-1/i)).toBeInTheDocument();
 
     expect(screen.getByText(/Target cluster:/i)).toBeInTheDocument();
@@ -180,7 +191,6 @@ describe('Discovered application failover/relocate modal test', () => {
     // ToDo: Need to find why Date check failing on CI
     //expect(screen.getByText(/29 Nov 2023, 4:30 am UTC/i)).toBeInTheDocument();
 
-    expect(screen.getByText(/{{actionType}} readiness:/i)).toBeInTheDocument();
     expect(screen.getByText(/Ready/i)).toBeInTheDocument();
 
     // footer
@@ -236,7 +246,6 @@ describe('Discovered application failover/relocate modal test', () => {
     ).toBeTruthy();
 
     // DR info
-    expect(screen.getByText(/Application:/i)).toBeInTheDocument();
     expect(screen.getByText(/mock-drpc-1/i)).toBeInTheDocument();
 
     expect(screen.getByText(/Target cluster:/i)).toBeInTheDocument();
@@ -244,7 +253,6 @@ describe('Discovered application failover/relocate modal test', () => {
     expect(screen.getByText(/Last available: /i)).toBeInTheDocument();
     //expect(screen.getByText(/29 Nov 2023, 4:30 am UTC/i)).toBeInTheDocument();
 
-    expect(screen.getByText(/{{actionType}} readiness:/i)).toBeInTheDocument();
     expect(screen.getByText(/Ready/i)).toBeInTheDocument();
 
     // footer

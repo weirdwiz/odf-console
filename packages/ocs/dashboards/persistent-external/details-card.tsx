@@ -67,6 +67,8 @@ export const DetailsCard: React.FC = () => {
   const resourcesObj: ResourcesObject = useK8sWatchResources(
     k8sResources(clusterNs)
   );
+  // SAFETY: k8sResources.ocs uses isList:true so data is K8sResourceKind[]
+  // at runtime; ResourcesObject unions single/list. Elements are StorageClusterKind.
   const ocsCluster = getStorageClusterInNs(
     resourcesObj['ocs'].data as StorageClusterKind[],
     clusterNs
@@ -85,6 +87,8 @@ export const DetailsCard: React.FC = () => {
   const serviceName = isODF
     ? t('Data Foundation')
     : t('OpenShift Container Storage');
+  // SAFETY: k8sResources.secret fetches a single resource (no isList), so
+  // data is K8sResourceKind at runtime; the union includes the array variant.
   const cephLink = getCephLink(resourcesObj['secret'].data as K8sResourceKind);
 
   return (

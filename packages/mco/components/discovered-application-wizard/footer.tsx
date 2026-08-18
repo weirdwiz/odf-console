@@ -85,7 +85,7 @@ export const EnrollDiscoveredApplicationFooter: React.FC<
   const [requestInProgress, setRequestInProgress] = React.useState(false);
   const { activeStep, goToNextStep, goToPrevStep } = useWizardContext();
 
-  const stepName = activeStep.name as string;
+  const stepName = String(activeStep.name ?? '');
 
   const canJumpToNext = canJumpToNextStep(state, stepName, t);
   const validationError = isValidationEnabled && !canJumpToNext;

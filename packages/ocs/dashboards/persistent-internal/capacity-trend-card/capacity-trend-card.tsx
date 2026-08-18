@@ -2,7 +2,10 @@ import * as React from 'react';
 import { pluralize } from '@odf/core/components/utils';
 import { useGetInternalClusterDetails } from '@odf/core/redux/utils';
 import { GraphEmpty } from '@odf/shared/charts';
-import { DEFAULT_PROMETHEUS_RETENTION } from '@odf/shared/constants';
+import {
+  DEFAULT_PROMETHEUS_RETENTION,
+  PrometheusEndpoint,
+} from '@odf/shared/constants';
 import { PrometheusUtilizationItem } from '@odf/shared/dashboards';
 import {
   dateTimeFormatterNoYear,
@@ -121,7 +124,7 @@ const CapacityTrendCard: React.FC = () => {
         CAPACITY_TREND_QUERIES(ocsCluster)[
           StorageDashboardQuery.RAW_CAPACITY_AVAILABLE
         ],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 
@@ -130,7 +133,7 @@ const CapacityTrendCard: React.FC = () => {
       query: CAPACITY_TREND_QUERIES(ocsCluster, retentionPeriod)[
         StorageDashboardQuery.UTILIZATION_VECTOR
       ],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     }
   );
@@ -138,7 +141,7 @@ const CapacityTrendCard: React.FC = () => {
     query: CAPACITY_TREND_QUERIES(ocsCluster, retentionPeriod)[
       StorageDashboardQuery.UPTIME_DAYS
     ],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 
@@ -147,7 +150,7 @@ const CapacityTrendCard: React.FC = () => {
       query: CEPH_CAPACITY_BREAKDOWN_QUERIES(null, ocsCluster)[
         StorageDashboardQuery.CEPH_CAPACITY_TOTAL
       ],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 

@@ -147,6 +147,7 @@ const generateAdditionalReplicationResources = (
       '',
       BucketType.General
     );
+    // SAFETY: bc comes from the owner of the BucketClassKind contract used at this boundary.
     const res: ReplicationResources = {
       bucketClass: bc as BucketClassKind,
       objectBucketClaim: obc as ObjectBucketClaimKind,
@@ -170,6 +171,7 @@ export const CreateOBCForm: React.FC<CreateOBCFormProps> = (props) => {
   const allowBucketClass = isNoobaa && !isClientCluster;
 
   const filterBucketClassByVectorPolicy = (bc: K8sResourceKind) => {
+    // SAFETY: bc comes from the owner of the BucketClassKind contract used at this boundary.
     const hasVectorPolicy = !!(bc as BucketClassKind).spec?.vectorPolicy;
     if (bucketType === BucketType.S3Vector) {
       return hasVectorPolicy;

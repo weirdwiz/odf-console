@@ -1,21 +1,26 @@
 import * as React from 'react';
+import * as TestDependency2 from '@odf/shared/status/SecondaryStatus';
 import { HealthState } from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen } from '@testing-library/react';
+import * as TestDependency1 from 'classnames';
+import * as TestDependency3 from '@patternfly/react-core';
 import HealthItem from './HealthItem';
+import * as TestDependency4 from './states';
 
 const classNames = jest.fn();
-jest.mock('classnames', () => (...props: string[]) => {
-  classNames(props);
-  return props[1] ? props[0] + ' ' + props[1] : props[0];
-});
+jest
+  .spyOn(TestDependency1, 'default')
+  .mockImplementation((...props: string[]) => {
+    classNames(props);
+    return props[1] ? props[0] + ' ' + props[1] : props[0];
+  });
 
 const mockSecondaryStatusComponent = jest.fn((_unused) => {
   return <div data-test-id="mocked-secondary-status" />;
 });
-jest.mock(
-  '@odf/shared/status/SecondaryStatus',
-  () => (props) => mockSecondaryStatusComponent(props)
-);
+jest
+  .spyOn(TestDependency2, 'default')
+  .mockImplementation((props) => mockSecondaryStatusComponent(props));
 
 const mockPopOverComponent = jest.fn((_unused) => {
   return <div data-test-id="mocked-pop-over" />;
@@ -24,27 +29,23 @@ const mockPopOverComponent = jest.fn((_unused) => {
 const mockButtonComponent = jest.fn((_unused) => {
   return <div data-test-id="mocked-button" />;
 });
-
-jest.mock('@patternfly/react-core', () => {
-  const originalModule = jest.requireActual('@patternfly/react-core');
-  return {
-    ...originalModule,
-    Popover: (props) => mockPopOverComponent(props),
-    Button: (props) => mockButtonComponent(props),
-  };
-});
-
-jest.mock('./states', () => ({
-  healthStateMapping: {
-    [HealthState.OK]: {
-      icon: 'unit-test-ok-icon',
-    },
-    [HealthState.UNKNOWN]: {
-      icon: 'unit-test-unknown-icon',
-    },
+jest
+  .spyOn(TestDependency3, 'Popover')
+  .mockImplementation((props) => mockPopOverComponent(props));
+jest
+  .spyOn(TestDependency3, 'Button')
+  .mockImplementation((props) => mockButtonComponent(props));
+jest.replaceProperty(TestDependency4, 'healthStateMapping', {
+  [HealthState.OK]: {
+    icon: 'unit-test-ok-icon',
   },
-  healthStateMessage: () => 'mocked-health-state-message',
-}));
+  [HealthState.UNKNOWN]: {
+    icon: 'unit-test-unknown-icon',
+  },
+});
+jest
+  .spyOn(TestDependency4, 'healthStateMessage')
+  .mockImplementation(() => 'mocked-health-state-message');
 
 const title = 'unit-tests';
 

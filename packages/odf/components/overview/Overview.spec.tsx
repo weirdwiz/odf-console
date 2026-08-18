@@ -1,25 +1,33 @@
 import * as React from 'react';
+import * as TestDependency1 from '@odf/core/redux/selectors';
+import * as TestDependency4 from '@odf/shared/hooks/custom-prometheus-poll';
 import {
   PrometheusData,
   PrometheusResponse,
   PrometheusResult,
   useFlag,
 } from '@openshift-console/dynamic-plugin-sdk';
+import * as TestDependency3 from '@openshift-console/dynamic-plugin-sdk';
+import * as TestDependency6 from '@openshift-console/dynamic-plugin-sdk/lib/utils/flags';
+import * as TestDependency5 from '@openshift-console/dynamic-plugin-sdk-internal';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router';
+import * as TestDependency2 from 'react-router';
 import Overview from './Overview';
 
 const odfNamespace = 'test-ns';
-
-jest.mock('@odf/core/redux/selectors', () => ({
-  useODFNamespaceSelector: () => ({
+jest
+  .spyOn(TestDependency1, 'useODFNamespaceSelector')
+  .mockImplementation(() => ({
     odfNamespace,
     isODFNsLoaded: true,
     odfNsLoadError: null,
     isNsSafe: true,
     isFallbackSafe: true,
-  }),
-  useODFSystemFlagsSelector: () => ({
+  }));
+jest
+  .spyOn(TestDependency1, 'useODFSystemFlagsSelector')
+  .mockImplementation(() => ({
     systemFlags: {
       [odfNamespace]: {
         isInternalMode: true,
@@ -28,29 +36,29 @@ jest.mock('@odf/core/redux/selectors', () => ({
       },
     },
     areFlagsSafe: true,
-  }),
-}));
-
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useLocation: jest.fn(() => ({ pathname: '/overview', search: '' })),
-}));
-
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  useK8sWatchResource: jest.fn(() => {
+  }));
+jest
+  .spyOn(TestDependency2, 'useLocation')
+  .mockImplementation(jest.fn(() => ({ pathname: '/overview', search: '' })));
+jest.spyOn(TestDependency3, 'useK8sWatchResource').mockImplementation(
+  jest.fn(() => {
     return [null, true, undefined];
-  }),
-  useK8sWatchResources: jest.fn(() => ({
+  })
+);
+jest.spyOn(TestDependency3, 'useK8sWatchResources').mockImplementation(
+  jest.fn(() => ({
     storageClusters: { data: [], loaded: true, loadError: null },
     flashSystemClusters: { data: [], loaded: true, loadError: null },
     remoteClusters: { data: [], loaded: true, loadError: null },
     sanClusters: { data: [], loaded: true, loadError: null },
     daemons: { data: [], loaded: true, loadError: null },
-  })),
-  useActivePerspective: jest.fn(() => ''),
-}));
+  }))
+);
+jest
+  .spyOn(TestDependency3, 'useActivePerspective')
+  .mockImplementation(jest.fn(() => ''));
 
+// SAFETY: The PrometheusData test value defines the members exercised by this test.
 const promResponse: PrometheusResponse = {
   status: 'success',
   data: {
@@ -63,25 +71,20 @@ const promResponse: PrometheusResponse = {
     resultType: 'vector',
   } as PrometheusData,
 };
-jest.mock('@odf/shared/hooks/custom-prometheus-poll', () => ({
-  useCustomPrometheusPoll: jest.fn(() => [promResponse, null, false]),
-  usePrometheusBasePath: jest.fn(() => ''),
-}));
-
-jest.mock('@openshift-console/dynamic-plugin-sdk-internal', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk-internal'),
-  useUtilizationDuration: jest.fn(() => ({ duration: 0 })),
-}));
-
-jest.mock('@openshift-console/dynamic-plugin-sdk/lib/utils/flags', () => ({
-  ...jest.requireActual(
-    '@openshift-console/dynamic-plugin-sdk/lib/utils/flags'
-  ),
-  useFlag: jest.fn(),
-}));
+jest
+  .spyOn(TestDependency4, 'useCustomPrometheusPoll')
+  .mockImplementation(jest.fn(() => [promResponse, null, false]));
+jest
+  .spyOn(TestDependency4, 'usePrometheusBasePath')
+  .mockImplementation(jest.fn(() => ''));
+jest
+  .spyOn(TestDependency5, 'useUtilizationDuration')
+  .mockImplementation(jest.fn(() => ({ duration: 0 })));
+jest.spyOn(TestDependency6, 'useFlag').mockImplementation(jest.fn());
 
 describe('General Overview', () => {
   it('only renders common cards', () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useFlag as jest.Mock).mockReturnValue(false);
     render(
       <BrowserRouter>
@@ -95,6 +98,7 @@ describe('General Overview', () => {
   });
 
   it('also renders External Systems card', () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useFlag as jest.Mock).mockReturnValue(true);
     render(
       <BrowserRouter>

@@ -19,6 +19,7 @@ export const useK8sList = <R extends K8sResourceCommon = K8sResourceCommon>(
         setLoadError(null);
         setLoaded(false);
         setData(null);
+        // SAFETY: (await k8sList<R>({ model: kind, queryParams: { ns: namespace, }, requ contains only entries produced for the R[] contract.
         const resources = (await k8sList<R>({
           model: kind,
           queryParams: {

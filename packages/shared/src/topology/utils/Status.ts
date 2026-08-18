@@ -24,6 +24,7 @@ const getStorageClusterStatus = (
   t: TFunction
 ) => {
   const anyUnavailableDeployment = deployments.some((resource) => {
+    // SAFETY: resource comes from the owner of the DeploymentKind contract used at this boundary.
     const availabilityStatus = (
       resource as DeploymentKind
     )?.status?.conditions?.find(
@@ -69,6 +70,7 @@ export const getStatusWithDescriptors = (
     };
   }
   if (_.isEqual(resourceModel, NodeModel)) {
+    // SAFETY: The receiving library accepts resource; its published type does not expose this supported value.
     return getNodeStatusWithDescriptors(
       resource as any,
       nodeDeploymentMap[getName(resource)],
@@ -76,6 +78,7 @@ export const getStatusWithDescriptors = (
     );
   }
   if (_.isEqual(resourceModel, DeploymentModel)) {
+    // SAFETY: resource comes from the owner of the DeploymentKind contract used at this boundary.
     const availabilityStatus = (
       resource as DeploymentKind
     )?.status?.conditions?.find(
@@ -91,6 +94,7 @@ export const getStatusWithDescriptors = (
   );
 };
 
+// SAFETY: _.identity comes from the owner of the TFunction contract used at this boundary.
 export const getStatus = (
   resourceModel: K8sModel,
   nodeDeploymentMap: NodeDeploymentMap,
@@ -102,5 +106,5 @@ export const getStatus = (
     nodeDeploymentMap,
     resource,
     alerts,
-    _.identity as TFunction
+    /* SAFETY: The value is supplied by the TFunction owner and follows that contract. */ _.identity as TFunction
   ).status;

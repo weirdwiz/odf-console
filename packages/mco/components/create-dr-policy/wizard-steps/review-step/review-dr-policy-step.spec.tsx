@@ -22,7 +22,7 @@ const reviewState = (overrides: ReviewStateOverrides = {}): DRPolicyState => ({
     selectedClusters: [
       { name: 'east-1' },
       { name: 'west-1' },
-    ] as DRPolicyState['clusters']['selectedClusters'],
+    ] satisfies DRPolicyState['clusters']['selectedClusters'],
     ...overrides.clusters,
   },
   configure: {

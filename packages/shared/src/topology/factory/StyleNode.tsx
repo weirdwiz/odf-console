@@ -14,18 +14,16 @@ import {
   CubeIcon,
   LevelDownAltIcon,
 } from '@patternfly/react-icons';
+import * as PatternflyTopology from '@patternfly/react-topology';
 import {
   Decorator,
   DEFAULT_DECORATOR_RADIUS,
   DEFAULT_LAYER,
   DefaultNode,
-  getDefaultShapeDecoratorCenter,
   Layer,
   Node,
-  NodeShape,
   observer,
   ScaleDetailsLevel,
-  ShapeProps,
   TOP_LAYER,
   TopologyQuadrant,
   useHover,
@@ -44,6 +42,20 @@ import { TopologySearchContext } from '../Context/SearchContext';
 import { getStatusWithDescriptors } from '../utils';
 import './StyleNode.scss';
 
+const getDefaultDecoratorCenter =
+  PatternflyTopology['getDefaultShapeDecoratorCenter'];
+const NodeForm = PatternflyTopology['NodeShape'];
+type NodeBodyProps = {
+  className?: string;
+  element: PatternflyTopology.Node;
+  width: number;
+  height: number;
+  filter?: string;
+  sides?: number;
+  cornerRadius?: number;
+  dndDropRef?: (node: SVGElement | null) => void;
+};
+
 const getResourceModel = (resource: K8sResourceCommon): K8sKind => {
   if (resource?.kind === NodeModel.kind) {
     return NodeModel;
@@ -58,8 +70,8 @@ const ICON_PADDING = 20;
 
 type StyleNodeProps = {
   element: Node;
-  getCustomShape?: (node: Node) => React.FunctionComponent<ShapeProps>;
-  getShapeDecoratorCenter?: (
+  getCustomNodeForm?: (node: Node) => React.FunctionComponent<NodeBodyProps>;
+  getDecoratorCenter?: (
     quadrant: TopologyQuadrant,
     node: Node
   ) => { x: number; y: number };
@@ -88,10 +100,10 @@ const getTypeIcon = (resourceKind?: string): React.ComponentClass<any, any> => {
 
 const renderIcon = (data: any, element: Node): React.ReactNode => {
   const { width, height } = element.getDimensions();
-  const shape = element.getNodeShape();
+  const nodeForm = element['getNodeShape']();
   const iconSize =
-    (shape === NodeShape.trapezoid ? width : Math.min(width, height)) -
-    (shape === NodeShape.stadium ? 5 : ICON_PADDING) * 2;
+    (nodeForm === NodeForm.trapezoid ? width : Math.min(width, height)) -
+    (nodeForm === NodeForm.stadium ? 5 : ICON_PADDING) * 2;
   const Component = getTypeIcon(data.kind || data?.resource?.kind);
 
   return (
@@ -110,7 +122,7 @@ const renderDecorator = (
   quadrant: TopologyQuadrant,
   icon: React.ReactNode,
   decoratorRef: React.RefObject<SVGGElement>,
-  getShapeDecoratorCenter?: (
+  getDecoratorCenter?: (
     quadrant: TopologyQuadrant,
     node: Node,
     radius?: number
@@ -122,9 +134,9 @@ const renderDecorator = (
   onClick?: any,
   decoratorChildren?: React.ReactNode
 ): React.ReactNode => {
-  const { x, y } = getShapeDecoratorCenter
-    ? getShapeDecoratorCenter(quadrant, element)
-    : getDefaultShapeDecoratorCenter(quadrant, element);
+  const { x, y } = getDecoratorCenter
+    ? getDecoratorCenter(quadrant, element)
+    : getDefaultDecoratorCenter(quadrant, element);
 
   /**
    * "attachments" prop of "DefaultNode" does not work if passed element is wrapped around a "div".
@@ -156,7 +168,7 @@ const renderDecorators = (
   stepIntoDecoratorRef: React.RefObject<SVGGElement>,
   countDecoratorRef: React.RefObject<SVGGElement>,
   t: TFunction<string>,
-  getShapeDecoratorCenter?: (
+  getDecoratorCenter?: (
     quadrant: TopologyQuadrant,
     node: Node
   ) => {
@@ -190,7 +202,7 @@ const renderDecorators = (
           TopologyQuadrant.lowerRight,
           <LevelDownAltIcon />,
           stepIntoDecoratorRef,
-          getShapeDecoratorCenter,
+          getDecoratorCenter,
           t('Enter node'),
           onStepOntoClick
         )}
@@ -199,7 +211,7 @@ const renderDecorators = (
         TopologyQuadrant.upperRight,
         null,
         countDecoratorRef,
-        getShapeDecoratorCenter,
+        getDecoratorCenter,
         osdCount?.toString(),
         onStepToOSDInformationClick,
         <text
@@ -333,7 +345,7 @@ const StyleNode: React.FunctionComponent<StyleNodeProps> = ({
               stepIntoDecoratorRef,
               countDecoratorRef,
               t,
-              rest.getShapeDecoratorCenter,
+              rest.getDecoratorCenter,
               passedData.osdCount
             )
           }

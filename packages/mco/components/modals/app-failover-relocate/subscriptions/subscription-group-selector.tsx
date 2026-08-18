@@ -102,7 +102,7 @@ export const SubscriptionGroupSelector: React.FC<
   );
 
   const setErrorMessage = React.useCallback(
-    (errorMessage: ErrorMessageType) => {
+    (errorMessage: ErrorMessageType | 0) => {
       dispatch({
         type: FailoverAndRelocateType.SET_ERROR_MESSAGE,
         payload: {
@@ -166,7 +166,7 @@ export const SubscriptionGroupSelector: React.FC<
           ...generatedOptions.validOptions,
           ...generatedOptions.inValidOptions,
         ]);
-        setErrorMessage(0 as ErrorMessageType);
+        setErrorMessage(0);
       } else {
         setOptions([]);
         setSelected([]);

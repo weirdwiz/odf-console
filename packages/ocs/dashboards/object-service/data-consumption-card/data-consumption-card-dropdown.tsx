@@ -89,10 +89,14 @@ export const DataConsumptionDropdown: React.FC<DataConsumptionDropdownProps> = (
     const breakdownBy = isBreakdown ? Groups.BREAKDOWN : Groups.METRIC;
     switch (breakdownBy) {
       case Groups.BREAKDOWN:
+        // SAFETY: id matched Breakdown.ACCOUNTS or Breakdown.PROVIDERS in
+        // the isBreakdown check above; TS cannot narrow through a boolean.
         setSelectedBreakdown(id as Breakdown);
         setSelectedMetric(DataConsumption.defaultMetrics[selectedService]);
         break;
       case Groups.METRIC:
+        // SAFETY: id is the remaining case from MCGDropdown items whose
+        // ids are Metrics enum members.
         setSelectedMetric(id as Metrics);
         break;
       default:

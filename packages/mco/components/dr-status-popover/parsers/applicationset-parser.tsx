@@ -5,7 +5,7 @@ import {
   getDRPolicyResourceObj,
   useDisasterRecoveryResourceWatch,
 } from '@odf/mco/hooks';
-import { ArgoApplicationSetKind, Phase } from '@odf/mco/types';
+import { ArgoApplicationSetKind } from '@odf/mco/types';
 import {
   findPlacementNameFromAppSet,
   findDRResourceUsingPlacement,
@@ -51,7 +51,7 @@ const ApplicationSetParser: React.FC<ApplicationSetParserProps> = ({
     if (!_.isEmpty(drResource)) {
       const drpc = drResource?.drPlacementControls?.[0];
       const drPolicy = drResource?.drPolicy;
-      const status = drpc?.status?.phase as Phase;
+      const status = drpc?.status?.phase;
       const primaryClusterName = getPrimaryClusterName(drpc);
       const targetCluster = findCluster(
         drResource.drClusters,

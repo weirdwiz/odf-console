@@ -1,30 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import useSANSystemFormValidation from './useFormValidation';
 
-jest.mock('@odf/shared/useCustomTranslationHook', () => ({
-  useCustomTranslation: () => ({ t: (key: string) => key }),
-}));
-
-jest.mock('@odf/shared/constants', () => ({
-  fieldRequirementsTranslations: {
-    maxChars: (_t: unknown, max: number) => `No more than ${max} characters`,
-    minChars: (_t: unknown, min: number) => `No less than ${min} characters`,
-    cannotBeEmpty: () => 'Cannot be empty',
-    mustBeUnique: () => 'Name must be unique',
-    mustBeLowercase: () =>
-      "Must consist of lower case alphanumeric characters or '-'",
-    startEndAlphanumeric: () =>
-      'Must start and end with an alphanumeric character',
-  },
-}));
-
-jest.mock(
-  '@odf/core/components/create-storage-system/external-systems/common/useResourceNameValidation',
-  () => ({
-    createUniquenessValidator: () => () => true,
-  })
-);
-
 describe('useSANSystemFormValidation', () => {
   const baseValidValues = {
     lunGroupName: 'valid-lun-group',

@@ -9,21 +9,19 @@ import { DRPolicyKind, MirrorPeerKind } from '@odf/mco/types';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
-  deleteDRPolicyByName,
-  deleteMirrorPeerByName,
-  restoreDRPolicySpec,
-} from '../utils/k8s-utils';
-import { ClusterPairingProgress } from './cluster-pairing-progress';
+  ClusterPairingProgress,
+  clusterPairingProgressDependencies,
+} from './cluster-pairing-progress';
 
-jest.mock('../utils/k8s-utils', () => ({
-  deleteMirrorPeerByName: jest.fn(() => Promise.resolve()),
-  deleteDRPolicyByName: jest.fn(() => Promise.resolve()),
-  restoreDRPolicySpec: jest.fn(() => Promise.resolve()),
-}));
-
-const mockDeleteMirrorPeerByName = deleteMirrorPeerByName as jest.Mock;
-const mockDeleteDRPolicyByName = deleteDRPolicyByName as jest.Mock;
-const mockRestoreDRPolicySpec = restoreDRPolicySpec as jest.Mock;
+const mockDeleteMirrorPeerByName = jest
+  .spyOn(clusterPairingProgressDependencies, 'deleteMirrorPeerByName')
+  .mockImplementation(jest.fn(() => Promise.resolve()));
+const mockDeleteDRPolicyByName = jest
+  .spyOn(clusterPairingProgressDependencies, 'deleteDRPolicyByName')
+  .mockImplementation(jest.fn(() => Promise.resolve()));
+const mockRestoreDRPolicySpec = jest
+  .spyOn(clusterPairingProgressDependencies, 'restoreDRPolicySpec')
+  .mockImplementation(jest.fn(() => Promise.resolve()));
 
 type MirrorPeerConditions = NonNullable<MirrorPeerKind['status']>['conditions'];
 
@@ -37,7 +35,7 @@ const mirrorPeer = (
     kind: 'MirrorPeer',
     metadata: { name: 'mirrorpeer-test' },
     status: { phase, message, conditions },
-  }) as MirrorPeerKind;
+  }) satisfies MirrorPeerKind;
 
 const readyPeer = mirrorPeer(
   MirrorPeerPhase.Ready,
@@ -49,7 +47,7 @@ const readyPeer = mirrorPeer(
       reason: MirrorPeerConditionReason.MirrorPeerReady,
       message: 'setup completed',
     },
-  ] as MirrorPeerConditions
+  ] satisfies MirrorPeerConditions
 );
 
 const validationFailedPeer = mirrorPeer(
@@ -62,7 +60,7 @@ const validationFailedPeer = mirrorPeer(
       reason: MirrorPeerConditionReason.ValidationFailed,
       message: 'validation error',
     },
-  ] as MirrorPeerConditions
+  ] satisfies MirrorPeerConditions
 );
 
 const recoverableConfiguringPeer = mirrorPeer(
@@ -75,7 +73,7 @@ const recoverableConfiguringPeer = mirrorPeer(
       reason: MirrorPeerConditionReason.ConfigurationFailed,
       message: 'configuration error',
     },
-  ] as MirrorPeerConditions
+  ] satisfies MirrorPeerConditions
 );
 
 type ProgressUnderTestProps = {

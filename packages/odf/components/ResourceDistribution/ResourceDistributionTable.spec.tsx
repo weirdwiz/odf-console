@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
@@ -37,30 +38,27 @@ const selectedResources: SelectedResources = {
     'test-snapshot-class': false,
   },
 };
-
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
-  return {
-    ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-    useListPageFilter: jest.fn().mockReturnValue([
-      [],
-      [
-        {
-          apiVersion: 'v1',
-          kind: 'StorageClass',
-          metadata: {
-            name: 'test-storage-class',
-            namespace: 'test-namespace',
-          },
-          provisioner: 'test-provisioner',
+jest.spyOn(TestDependency1, 'useListPageFilter').mockImplementation(
+  jest.fn().mockReturnValue([
+    [],
+    [
+      {
+        apiVersion: 'v1',
+        kind: 'StorageClass',
+        metadata: {
+          name: 'test-storage-class',
+          namespace: 'test-namespace',
         },
-      ],
-      jest.fn(),
-    ]),
-  };
-});
+        provisioner: 'test-provisioner',
+      },
+    ],
+    jest.fn(),
+  ])
+);
 
 describe('Resource distribution table component renders correctly for a storage class', () => {
   it('Renders basic features correctly', () => {
+    // SAFETY: The any test value defines the members exercised by this test.
     render(
       <ResourceDistributionTable
         columns={['Name', 'Provisioner', 'Deletion policy']}
@@ -83,6 +81,7 @@ describe('Resource distribution table component renders correctly for a storage 
   });
   it('Selection invokes setSelectedResources with correct parameters', async () => {
     const setSelectedResourcesMock = jest.fn();
+    // SAFETY: The any test value defines the members exercised by this test.
     render(
       <ResourceDistributionTable
         columns={['Name', 'Provisioner', 'Deletion policy']}

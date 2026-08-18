@@ -41,6 +41,11 @@ import {
 import { NamespaceSelectionTable } from './namespace-table';
 import './namespace-step.scss';
 
+export const namespaceStepDependencies = {
+  useK8sList,
+  useK8sWatchResource,
+};
+
 const getDRClusterFromPolicies = (drPolicies: DRPolicyKind[]): string[] => {
   // Only DRCluster names will be displayed for the selection.
   const drClusters: string[] = [];
@@ -163,9 +168,10 @@ export const NamespaceSelection: React.FC<NamespaceSelectionProps> = ({
   const { t } = useCustomTranslation();
 
   const [drPolicies, policyloaded, policyLoadError] =
-    useK8sList<DRPolicyKind>(DRPolicyModel);
+    namespaceStepDependencies.useK8sList<DRPolicyKind>(DRPolicyModel);
 
-  const [drPlacements, drpcLoaded, drpcLoadError] = useK8sWatchResource<
+  const [drPlacements, drpcLoaded, drpcLoadError] =
+    namespaceStepDependencies.useK8sWatchResource<
     DRPlacementControlKind[]
   >(getDRPlacementControlResourceObj());
 

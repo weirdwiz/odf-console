@@ -1,59 +1,29 @@
 import * as React from 'react';
+import { NamespaceStoreKind } from '@odf/core/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { S3EndPointType } from '../mcg-endpoints/s3-endpoint-type';
 import NamespaceStoreForm from './namespace-store-form';
 
 const mockOnCancel = jest.fn();
+const SafetyBox: React.FC<React.PropsWithChildren> = ({ children }) => children;
+const Endpoint: typeof S3EndPointType = () => null;
 const props = {
   redirectHandler: () => undefined,
   namespace: 'test-ns',
   onCancel: mockOnCancel,
+  SafetyBoxComponent: SafetyBox,
+  EndpointComponent: Endpoint,
+  namespaceStoreListHook: (): [
+    NamespaceStoreKind[],
+    boolean,
+    undefined,
+  ] => [
+    [{ metadata: { name: 'existing-ns-name' } }],
+    true,
+    undefined,
+  ],
 };
-
-jest.mock('@odf/shared/hooks/useK8sList', () => ({
-  __esModule: true,
-  useK8sList: () => [
-    [
-      {
-        metadata: {
-          name: 'existing-ns-name',
-        },
-      },
-    ],
-    true,
-    undefined,
-  ],
-}));
-
-jest.mock('@odf/core/hooks', () => ({
-  __esModule: true,
-  useSafeK8sList: () => [
-    [
-      {
-        metadata: {
-          name: 'existing-ns-name',
-        },
-      },
-    ],
-    true,
-    undefined,
-  ],
-}));
-
-jest.mock('@odf/core/redux', () => ({
-  useODFNamespaceSelector: () => ({
-    odfNamespace: 'test-ns',
-    isODFNsLoaded: true,
-    odfNsLoadError: null,
-    isNsSafe: true,
-    isFallbackSafe: true,
-  }),
-}));
-
-const MockResourceDropdown: React.FC = () => null;
-jest.mock('@odf/shared/dropdown/ResourceDropdown', () => () => {
-  return <MockResourceDropdown />;
-});
 
 describe('NamespaceStoreForm', () => {
   it('renders the form', () => {

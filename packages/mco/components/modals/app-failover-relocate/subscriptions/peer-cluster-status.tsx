@@ -163,7 +163,7 @@ export const PeerClusterStatus: React.FC<PeerClusterStatusProps> = ({
   );
 
   const setPeerStatusMessage = React.useCallback(
-    (errorMessage: ErrorMessageType) => {
+    (errorMessage: ErrorMessageType | 0) => {
       dispatch({
         type: FailoverAndRelocateType.SET_ERROR_MESSAGE,
         payload: {
@@ -176,7 +176,7 @@ export const PeerClusterStatus: React.FC<PeerClusterStatusProps> = ({
   );
 
   const setSyncDelayMessage = React.useCallback(
-    (errorMessage: ErrorMessageType) => {
+    (errorMessage: ErrorMessageType | 0) => {
       dispatch({
         type: FailoverAndRelocateType.SET_ERROR_MESSAGE,
         payload: {
@@ -208,7 +208,7 @@ export const PeerClusterStatus: React.FC<PeerClusterStatusProps> = ({
             : ErrorMessageType.RELOCATE_READINESS_CHECK_FAILED
         );
       } else {
-        setPeerStatusMessage(0 as ErrorMessageType);
+        setPeerStatusMessage(0);
       }
 
       if (
@@ -217,7 +217,7 @@ export const PeerClusterStatus: React.FC<PeerClusterStatusProps> = ({
           VolumeReplicationHealth.CRITICAL,
           VolumeReplicationHealth.WARNING,
         ].includes(
-          peerCurrentStatus.replicationHealth as VolumeReplicationHealth
+          peerCurrentStatus.replicationHealth
         )
       ) {
         setSyncDelayMessage(
@@ -226,14 +226,14 @@ export const PeerClusterStatus: React.FC<PeerClusterStatusProps> = ({
             : ErrorMessageType.VOLUME_SYNC_DELAY_RELOCATE
         );
       } else {
-        setSyncDelayMessage(0 as ErrorMessageType);
+        setSyncDelayMessage(0);
       }
       setPeerStatus(peerCurrentStatus);
     } else {
       // Default peer status is Unknown
       setPeerStatus(initalPeerStatus(t));
-      setPeerStatusMessage(0 as ErrorMessageType);
-      setSyncDelayMessage(0 as ErrorMessageType);
+      setPeerStatusMessage(0);
+      setSyncDelayMessage(0);
     }
   }, [
     selectedSubsGroups,

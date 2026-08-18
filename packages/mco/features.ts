@@ -6,7 +6,6 @@ import { SelfSubjectAccessReviewModel } from '@odf/shared/models';
 import {
   k8sCreate,
   k8sList,
-  K8sResourceCommon,
   SelfSubjectAccessReviewKind,
   SetFeatureFlag,
 } from '@openshift-console/dynamic-plugin-sdk';
@@ -72,11 +71,14 @@ const acmObservabilityDetector: FeatureDetector = async (
   // This set the flag to true only when ACM MultiClusterObservability CRD is in ready state.
   // which is later used by enable storage system.
   try {
-    const acmObservability: ACMMultiClusterObservability[] =
-      (await k8sList<K8sResourceCommon>({
+    const observabilityResponse =
+      await k8sList<ACMMultiClusterObservability>({
         model: AcmMultiClusterObservabilityModel,
         queryParams: { cluster: HUB_CLUSTER_NAME },
-      })) as ACMMultiClusterObservability[];
+      });
+    const acmObservability = Array.isArray(observabilityResponse)
+      ? observabilityResponse
+      : observabilityResponse.items;
     if (!!acmObservability.length) {
       const isEnabled = acmObservability?.[0]?.status?.conditions?.some(
         (condition) => condition.status === 'True' && condition.type === 'Ready'
@@ -98,14 +100,14 @@ export const detectSSAR = async (
   id: any
 ) => {
   try {
-    const result: SelfSubjectAccessReviewKind = (await k8sCreate({
+    const result = await k8sCreate<SelfSubjectAccessReviewKind>({
       model: SelfSubjectAccessReviewModel,
       data: {
         apiVersion: 'authorization.k8s.io/v1',
         kind: 'SelfSubjectAccessReview',
         spec: { resourceAttributes: ssarChecks[flagKey] },
       },
-    })) as SelfSubjectAccessReviewKind;
+    });
     const isAllowed = result?.status?.allowed;
     setFlag(flagKey, isAllowed);
     _.isBoolean(isAllowed) && clearInterval(intervals[id]);

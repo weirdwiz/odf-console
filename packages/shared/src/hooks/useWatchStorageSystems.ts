@@ -89,6 +89,7 @@ export const useWatchStorageSystems = (
     daemons,
   } = useWatchStorageClusters();
 
+  // SAFETY: daemons?.data contains only entries produced for the DaemonKind[] contract.
   const sanClusterName = (daemons?.data as DaemonKind[])?.[0]?.status
     ?.clusterName;
 

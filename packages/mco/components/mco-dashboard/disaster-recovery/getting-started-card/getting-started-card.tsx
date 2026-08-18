@@ -12,15 +12,26 @@ import { useFlag } from '@openshift-console/dynamic-plugin-sdk';
 import { useUserSettings } from '@openshift-console/dynamic-plugin-sdk';
 import { HeaderSection, BodySection, gettingStartedSteps } from './helper';
 
+export const gettingStartedCardDependencies = {
+  mcoDocVersion,
+  renderFooter: (FooterComponent: React.ComponentType, key: string) => (
+    <FooterComponent key={key} />
+  ),
+  useFlag,
+  useUserSettings: <T, >(key: string, defaultValue: T) =>
+    useUserSettings<T>(key, defaultValue),
+};
+
 export const GettingStartedCard: React.FC = () => {
   const { t } = useCustomTranslation();
 
   const [isGettingStartedSectionOpen, setIsGettingStartedSectionOpen] =
-    useUserSettings<boolean>(
+    gettingStartedCardDependencies.useUserSettings<boolean>(
       GETTING_STARTED_USER_SETTINGS_KEY_OVERVIEW_DASHBOARD,
       true
     );
-  const isMonitoringEnabled = useFlag(ACM_OBSERVABILITY_FLAG);
+  const isMonitoringEnabled =
+    gettingStartedCardDependencies.useFlag(ACM_OBSERVABILITY_FLAG);
 
   return (
     <GettingStartedExpandableGrid
@@ -30,7 +41,10 @@ export const GettingStartedCard: React.FC = () => {
       hideExpandable={!isMonitoringEnabled}
     >
       <div className="pf-v6-u-display-flex pf-v6-u-flex-direction-column pf-v6-u-flex-direction-row-on-lg pf-v6-u-justify-content-space-between">
-        {gettingStartedSteps(t, mcoDocVersion).map((step) => {
+        {gettingStartedSteps(
+          t,
+          gettingStartedCardDependencies.mcoDocVersion
+        ).map((step) => {
           const stepCount = step.stepCount;
           const FooterComponent = step.FooterComponent;
           return (
@@ -49,9 +63,11 @@ export const GettingStartedCard: React.FC = () => {
                 docText={step.docText}
                 key={`${stepCount}-body`}
               />
-              {!!FooterComponent && (
-                <FooterComponent key={`${stepCount}-footer`} />
-              )}
+              {!!FooterComponent &&
+                gettingStartedCardDependencies.renderFooter(
+                  FooterComponent,
+                  `${stepCount}-footer`
+                )}
             </div>
           );
         })}

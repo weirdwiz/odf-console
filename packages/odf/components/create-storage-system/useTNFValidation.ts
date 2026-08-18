@@ -20,11 +20,7 @@ const DRBD_AUTOSTART = 'drbd-autostart';
 /**
  * Custom hook to check if two nodes fencing is enabled and perform validations
  */
-const useTNFValidation = (): {
-  isTNFEnabled: boolean;
-  isTNFValidationLoading: boolean;
-  isTNFValidated: boolean;
-} => {
+const useTNFValidation = () => {
   const { odfNamespace, isODFNsLoaded } = useODFNamespaceSelector();
 
   const [infra, infraLoaded, infraLoadError] = useK8sGet<InfrastructureKind>(

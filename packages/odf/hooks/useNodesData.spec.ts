@@ -1,23 +1,25 @@
 import { useCustomPrometheusPoll } from '@odf/shared/hooks/custom-prometheus-poll';
+import * as TestDependency2 from '@odf/shared/hooks/custom-prometheus-poll';
 import {
   PrometheusData,
   PrometheusResponse,
   PrometheusResult,
   useK8sWatchResource,
 } from '@openshift-console/dynamic-plugin-sdk';
+import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
 import { renderHook } from '@testing-library/react';
 import { createFakeNodes } from '../../../jest/helpers';
 import { useNodesData } from './useNodesData';
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  useK8sWatchResource: jest.fn(),
-}));
-
-jest.mock('@odf/shared/hooks/custom-prometheus-poll', () => ({
-  useCustomPrometheusPoll: jest.fn(),
-  usePrometheusBasePath: jest.fn(() => ''),
-}));
+jest
+  .spyOn(TestDependency1, 'useK8sWatchResource')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency2, 'useCustomPrometheusPoll')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency2, 'usePrometheusBasePath')
+  .mockImplementation(jest.fn(() => ''));
 
 const cpu = 12;
 const memory = 8 * 1000 * 1000 * 1000;
@@ -47,8 +49,10 @@ const getUtilizationMetrics = (
 describe('useNodesData', () => {
   it('contains node memory from metrics', () => {
     const nodes = createFakeNodes(1, cpu, memory);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useK8sWatchResource as jest.Mock).mockReturnValue([nodes, true, null]);
     const promResponse = getUtilizationMetrics('node-name-0', metricMemory);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
       promResponse,
       null,
@@ -62,8 +66,10 @@ describe('useNodesData', () => {
 
   it('does not contain node memory from metrics (missing node metric)', () => {
     const nodes = createFakeNodes(1, cpu, memory);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useK8sWatchResource as jest.Mock).mockReturnValue([nodes, true, null]);
     const promResponse = getUtilizationMetrics('nonexistent', metricMemory);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
       promResponse,
       null,
@@ -77,7 +83,9 @@ describe('useNodesData', () => {
 
   it('does not return nodes when prom response is not available yet', () => {
     const nodes = createFakeNodes(1, cpu, memory);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useK8sWatchResource as jest.Mock).mockReturnValue([nodes, true, null]);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useCustomPrometheusPoll as jest.Mock).mockReturnValue([null, null, true]);
 
     const { result } = renderHook(() => useNodesData());
@@ -87,7 +95,9 @@ describe('useNodesData', () => {
 
   it('returns nodes when prom response errors out', () => {
     const nodes = createFakeNodes(1, cpu, memory);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useK8sWatchResource as jest.Mock).mockReturnValue([nodes, true, null]);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
       null,
       new Error('Bad Gateway'),

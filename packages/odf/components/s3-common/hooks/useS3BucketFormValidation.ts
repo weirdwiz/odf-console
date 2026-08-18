@@ -9,7 +9,7 @@ import validationRegEx from '@odf/shared/utils/validation';
 import * as Yup from 'yup';
 
 export type S3BucketFormSchema = Yup.ObjectSchema<{
-  bucketName: Yup.StringSchema;
+  bucketName: string;
 }>;
 
 export type S3BucketFormValidation = {
@@ -44,7 +44,7 @@ export const useS3BucketFormValidation = (): S3BucketFormValidation => {
     });
 
     return {
-      bucketFormSchema: bucketFormSchema as unknown as S3BucketFormSchema,
+      bucketFormSchema,
       fieldRequirements,
     };
   }, [t]);

@@ -40,6 +40,7 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
   inProgress,
   children,
 }) => {
+  // SAFETY: children comes from the owner of the React.ReactChild contract used at this boundary.
   return (
     <ButtonBar
       className="modal-footer"

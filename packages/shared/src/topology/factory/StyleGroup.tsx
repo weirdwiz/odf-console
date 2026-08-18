@@ -15,13 +15,13 @@ import {
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
 import classNames from 'classnames';
 import * as _ from 'lodash-es';
+import * as PatternflyTopology from '@patternfly/react-topology';
 import {
   DefaultGroup,
   Node,
   NodeStatus,
   observer,
   ScaleDetailsLevel,
-  ShapeProps,
   WithContextMenuProps,
   WithDragNodeProps,
   WithSelectionProps,
@@ -33,13 +33,24 @@ import { getStatus } from '../utils';
 import useMonitoring, { AlertFiringComponent } from '../utils/Monitoring';
 import './StyleGroup.scss';
 
+type NodeBodyProps = {
+  className?: string;
+  element: PatternflyTopology.Node;
+  width: number;
+  height: number;
+  filter?: string;
+  sides?: number;
+  cornerRadius?: number;
+  dndDropRef?: (node: SVGElement | null) => void;
+};
+
 type StyleGroupProps = {
   element: Node;
   collapsible?: boolean;
   collapsedWidth?: number;
   collapsedHeight?: number;
   onCollapseChange?: (group: Node, collapsed: boolean) => void;
-  getCollapsedShape?: (node: Node) => React.FunctionComponent<ShapeProps>;
+  getCollapsedNodeForm?: (node: Node) => React.FunctionComponent<NodeBodyProps>;
   collapsedShadowOffset?: number; // defaults to 10
 } & Partial<WithContextMenuProps & WithDragNodeProps & WithSelectionProps>;
 
@@ -82,6 +93,7 @@ const StyleGroup: React.FunctionComponent<StyleGroupProps> = ({
   const data = element.getData();
   const detailsLevel = useDetailsLevel();
 
+  // SAFETY: data.component comes from the owner of the AlertFiringComponent contract used at this boundary.
   const component = data.component as AlertFiringComponent;
 
   const { nodeDeploymentMap } = React.useContext(TopologyDataContext);

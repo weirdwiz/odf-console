@@ -41,5 +41,5 @@ export const CreateStorageSystemHeader: React.FC<
 };
 
 type CreateStorageSystemHeaderProps = {
-  state: WizardState;
+  state?: WizardState;
 };

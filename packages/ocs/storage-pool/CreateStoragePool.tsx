@@ -134,7 +134,7 @@ export const ensureErasureCodedMetadataPoolRef = (
   const mr = storageCluster.spec?.managedResources;
   const cephBlockPools = mr?.cephBlockPools;
   if (cephBlockPools?.erasureCodedMetadataPool) {
-    return Promise.resolve(storageCluster as K8sResourceCommon);
+    return Promise.resolve(storageCluster);
   }
 
   const metadataPoolPath =
@@ -241,6 +241,8 @@ const CreateStoragePool: React.FC<{}> = ({}) => {
   const [cephClusters, cephClustersLoaded, cephClustersLoadError] =
     useK8sWatchResource<CephClusterKind[]>(cephClusterResource);
   // Only single cluster per Namespace.
+  // SAFETY: getResourceInNs returns K8sResourceKind; the watched resource is
+  // CephClusterKind[] so every element is a CephClusterKind.
   const cephCluster = getCephClusterInNs(
     cephClusters,
     poolNs

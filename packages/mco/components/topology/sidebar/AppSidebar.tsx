@@ -133,7 +133,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ edgeData }) => {
     );
   }
 
-  const operationData = edgeData as OperationAppSidebarData;
+  if (!('isSource' in edgeData)) return null;
+
+  const operationData = edgeData;
   const operations =
     operationData.operations ||
     (operationData.operation ? [operationData.operation] : []);

@@ -1,122 +1,81 @@
 import * as React from 'react';
 import '@testing-library/jest-dom';
-import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import { render, waitFor } from '@testing-library/react';
 import { ACMManagedClusterKind } from '../../types';
-import Topology from './Topology';
+import Topology, { topologyDependencies } from './Topology';
 
-// Mock all dependencies
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  useK8sWatchResource: jest.fn(),
-  HealthState: {
-    OK: 'OK',
-    ERROR: 'ERROR',
-    WARNING: 'WARNING',
-    UNKNOWN: 'UNKNOWN',
-    LOADING: 'LOADING',
-    PROGRESS: 'PROGRESS',
-    UPDATING: 'UPDATING',
-    UPGRADABLE: 'UPGRADABLE',
-    NOT_AVAILABLE: 'NOT_AVAILABLE',
-  },
-  AlertSeverity: {
-    Critical: 'critical',
-    Warning: 'warning',
-    Info: 'info',
-    None: 'none',
-  },
-}));
-
-jest.mock('@odf/shared/hooks/use-fetch-csv', () => ({
-  useFetchCsv: jest.fn(() => [{ spec: { version: '4.18.0' } }, true, null]),
-}));
-
-jest.mock('../../hooks', () => ({
-  getManagedClusterResourceObj: jest.fn(() => ({})),
-  useProtectedAppsByCluster: jest.fn(() => [{}, true, null]),
-  useDRPoliciesByClusterPair: jest.fn(() => [{}, true, null]),
-  useActiveDROperations: jest.fn(() => [{}, true, null]),
-}));
-
-jest.mock('../../utils/managed-cluster-info', () => ({
-  getManagedClusterInfoTypes: jest.fn((clusters) => {
-    // Mock implementation that marks all clusters as having valid ODF
-    return clusters.map((cluster: any) => ({
-      ...cluster,
-      odfInfo: {
-        odfVersion: '4.18',
-        isValidODFVersion: true,
-        storageClusterCount: 1,
-        storageClusterInfo: {
-          storageClusterNamespacedName: '',
-          cephFSID: '',
-          deploymentType: '',
+const mockUseK8sWatchResource = jest
+  .spyOn(topologyDependencies, 'useK8sWatchResource')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(topologyDependencies, 'useFetchCsv')
+  .mockImplementation(
+    jest.fn(() => [{ spec: { version: '4.18.0' } }, true, null])
+  );
+jest
+  .spyOn(topologyDependencies, 'getManagedClusterResourceObj')
+  .mockImplementation(jest.fn(() => ({})));
+jest
+  .spyOn(topologyDependencies, 'useProtectedAppsByCluster')
+  .mockImplementation(jest.fn(() => [{}, true, null]));
+jest
+  .spyOn(topologyDependencies, 'useDRPoliciesByClusterPair')
+  .mockImplementation(jest.fn(() => [{}, true, null]));
+jest
+  .spyOn(topologyDependencies, 'useActiveDROperations')
+  .mockImplementation(jest.fn(() => [{}, true, null]));
+jest
+  .spyOn(topologyDependencies, 'getManagedClusterInfoTypes')
+  .mockImplementation(
+    jest.fn((clusters) =>
+      clusters.map((cluster) => ({
+        ...cluster,
+        odfInfo: {
+          odfVersion: '4.18',
+          isValidODFVersion: true,
+          storageClusterCount: 1,
+          storageClusterInfo: {
+            storageClusterNamespacedName: '',
+            cephFSID: '',
+            deploymentType: '',
+          },
         },
-      },
-    }));
-  }),
-}));
-
-jest.mock('@patternfly/react-topology', () => ({
-  ...jest.requireActual('@patternfly/react-topology'),
-  VisualizationProvider: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-  useVisualizationController: jest.fn(() => ({
-    fromModel: jest.fn(),
-    toModel: jest.fn(() => ({ nodes: [], edges: [] })),
-    getGraph: jest.fn(() => ({
-      scaleBy: jest.fn(),
-      fit: jest.fn(),
-      reset: jest.fn(),
-      layout: jest.fn(),
-    })),
+      }))
+    )
+  );
+const visualizationController = {
+  fromModel: jest.fn(),
+  toModel: jest.fn(() => ({ nodes: [], edges: [] })),
+  getGraph: jest.fn(() => ({
+    scaleBy: jest.fn(),
+    fit: jest.fn(),
+    reset: jest.fn(),
+    layout: jest.fn(),
   })),
-  VisualizationSurface: () => <div data-testid="visualization-surface" />,
-  TopologyView: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="topology-view">{children}</div>
-  ),
-  TopologyControlBar: () => <div data-testid="control-bar" />,
-}));
-
-jest.mock('@odf/shared/topology', () => ({
-  useVisualizationSetup: jest.fn(() => ({
-    fromModel: jest.fn(),
-    toModel: jest.fn(() => ({ nodes: [], edges: [] })),
-    getGraph: jest.fn(() => ({
-      scaleBy: jest.fn(),
-      fit: jest.fn(),
-      reset: jest.fn(),
-      layout: jest.fn(),
-    })),
-  })),
-  useTopologyControls: jest.fn(() => []),
-  useSelectionHandler: jest.fn(),
-  createNode: jest.fn((config: any) => ({
-    id: config.id,
-    type: config.type || 'node',
-    label: config.label,
-    data: { resource: config.resource, kind: config.kind, badge: config.badge },
-    width: config.width,
-    height: config.height,
-  })),
-  BaseTopologyView: ({
-    children,
-    sideBar,
-  }: {
-    children: React.ReactNode;
-    sideBar?: React.ReactNode;
-  }) => (
+};
+jest
+  .spyOn(topologyDependencies, 'useVisualizationController')
+  .mockImplementation(jest.fn(() => visualizationController));
+jest
+  .spyOn(topologyDependencies, 'useVisualizationSetup')
+  .mockImplementation(jest.fn(() => visualizationController));
+jest
+  .spyOn(topologyDependencies, 'useTopologyControls')
+  .mockImplementation(jest.fn(() => []));
+jest
+  .spyOn(topologyDependencies, 'useSelectionHandler')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(topologyDependencies, 'VisualizationProvider')
+  .mockImplementation(({ children }) => <div>{children}</div>);
+jest
+  .spyOn(topologyDependencies, 'BaseTopologyView')
+  .mockImplementation(({ children, sideBar }) => (
     <div data-testid="base-topology">
       {children}
       {sideBar}
     </div>
-  ),
-}));
-
-const mockUseK8sWatchResource = useK8sWatchResource as jest.MockedFunction<
-  typeof useK8sWatchResource
->;
+  ));
 
 describe('Topology Integration Tests', () => {
   beforeEach(() => {

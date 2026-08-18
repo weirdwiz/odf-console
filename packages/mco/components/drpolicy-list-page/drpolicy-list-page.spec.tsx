@@ -1,20 +1,21 @@
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DRPolicyListPage } from './drpolicy-list-page';
+import {
+  DRPolicyListPage,
+  drPolicyListDependencies,
+} from './drpolicy-list-page';
 
 let testCase = 1;
-
-jest.mock('@openshift-console/dynamic-plugin-sdk/lib/api/core-api', () => ({
-  ...jest.requireActual(
-    '@openshift-console/dynamic-plugin-sdk/lib/api/core-api'
-  ),
-  useListPageFilter: jest.fn(() => {
+jest.spyOn(drPolicyListDependencies, 'useListPageFilter').mockImplementation(
+  jest.fn(() => {
     if ([1, 2, 3].includes(testCase)) {
       return [[], [], jest.fn()];
     }
-  }),
-  useK8sWatchResource: jest.fn(() => {
+  })
+);
+jest.spyOn(drPolicyListDependencies, 'useK8sWatchResource').mockImplementation(
+  jest.fn(() => {
     if (testCase === 1) {
       return [[], true, ''];
     } else if (testCase === 2) {
@@ -30,31 +31,26 @@ jest.mock('@openshift-console/dynamic-plugin-sdk/lib/api/core-api', () => ({
     } else if (testCase === 3) {
       return [[], false, ''];
     }
-  }),
-}));
-
-jest.mock('@odf/mco/hooks/protected-applications', () => ({
-  useProtectedApplicationsWatch: jest.fn(() => {
+  })
+);
+jest
+  .spyOn(drPolicyListDependencies, 'useProtectedApplicationsWatch')
+  .mockImplementation(
+  jest.fn(() => {
     if ([1, 2, 3].includes(testCase)) {
       return [[], true, ''];
     }
-  }),
-}));
-
-jest.mock('@odf/shared/hooks/rbac-hook', () => ({
-  useAccessReview: jest.fn(() => [true, false]),
-}));
-
-jest.mock('react-router', () => ({
-  useLocation: jest.fn(() => ({ pathname: '' })),
-  useHistory: jest.fn(() => []),
-}));
-
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useNavigate: () => null,
-  useLocation: () => ({ pathname: '/' }),
-}));
+  })
+);
+jest
+  .spyOn(drPolicyListDependencies, 'useAccessReview')
+  .mockImplementation(jest.fn(() => [true, false]));
+jest
+  .spyOn(drPolicyListDependencies, 'useNavigate')
+  .mockImplementation(() => jest.fn());
+jest
+  .spyOn(drPolicyListDependencies, 'useLocation')
+  .mockImplementation(() => ({ pathname: '/' }));
 
 describe('Test drpolicy list page', () => {
   test('Empty page success test', async () => {

@@ -87,6 +87,7 @@ const SelectNodesText: React.FC<SelectNodesTextProps> = React.memo(
 
     // ToDo (epic 4422): Use StorageSystem namespace once we support multiple internal clusters
     const label = `cluster.ocs.openshift.io/${DEFAULT_STORAGE_NAMESPACE}=""`;
+    // SAFETY: The receiving library accepts t; its published type does not expose this supported value.
     return (
       <Content>
         <Content component="p">{text}</Content>
@@ -174,6 +175,7 @@ const SelectCapacityAndNodes: React.FC<SelectCapacityAndNodesProps> = ({
 
   const replicas = getReplicasFromSelectedNodes(nodes);
 
+  // SAFETY: capacity comes from the owner of the string contract used at this boundary.
   return (
     <>
       <Content>

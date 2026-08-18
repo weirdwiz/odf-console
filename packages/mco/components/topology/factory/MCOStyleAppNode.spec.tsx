@@ -1,39 +1,56 @@
 import * as React from 'react';
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
-import { Node } from '@patternfly/react-topology';
+import { ScaleDetailsLevel } from '@patternfly/react-topology';
 import { DRActionType } from '../../../constants';
 import { ActiveDROperation } from '../../../hooks/useActiveDROperations';
 import { Phase, Progression } from '../../../types';
-import { MCOStyleAppNode } from './MCOStyleAppNode';
+import { AppNodeData } from '../types';
+import { MCOStyleAppNodeView } from './MCOStyleAppNode';
 
-// Mock useDetailsLevel hook
-jest.mock('@patternfly/react-topology/dist/esm/hooks/useDetailsLevel', () => ({
-  __esModule: true,
-  default: jest.fn(() => 'high'),
-}));
+type MockAppNode = {
+  getData: () => AppNodeData;
+  getDimensions: () => { width: number; height: number };
+  getId: () => string;
+};
 
-// Mock PatternFly Topology components
-jest.mock('@patternfly/react-topology', () => ({
-  ...jest.requireActual('@patternfly/react-topology'),
-  DefaultNode: ({ element, children, attachments, className }: any) => (
-    <g
-      data-testid="default-node"
-      data-element-id={element.getId()}
-      className={className}
-    >
-      {children}
-      {attachments}
-    </g>
-  ),
-  Decorator: ({ icon, x, y }: any) => (
-    <g data-testid="decorator" transform={`translate(${x}, ${y})`}>
-      {icon}
-    </g>
-  ),
-  observer: (component: any) => component,
-  getDefaultShapeDecoratorCenter: () => ({ x: 0, y: 0 }),
-}));
+const TestNode: React.FC<
+  React.PropsWithChildren<{
+    element: MockAppNode;
+    attachments?: React.ReactNode;
+    className?: string;
+  }>
+> = ({ element, children, attachments, className }) => (
+  <g
+    data-testid="default-node"
+    data-element-id={element.getId()}
+    className={className}
+  >
+    {children}
+    {attachments}
+  </g>
+);
+
+const TestDecorator: React.FC<{
+  icon?: React.ReactNode;
+  x: number;
+  y: number;
+}> = ({ icon, x, y }) => (
+  <g data-testid="decorator" transform={`translate(${x}, ${y})`}>
+    {icon}
+  </g>
+);
+
+const MCOStyleAppNode: React.FC<{ element: MockAppNode }> = ({ element }) => (
+  <MCOStyleAppNodeView
+    element={element}
+    detailsLevel={ScaleDetailsLevel.high}
+    NodeComponent={TestNode}
+    CountDecoratorComponent={TestDecorator}
+    getCountDecoratorCenter={() => ({ x: 0, y: 0 })}
+    renderPhaseDecorators={() => null}
+  />
+);
 
 const createMockOperation = (
   overrides?: Partial<ActiveDROperation>
@@ -53,13 +70,14 @@ const createMockOperation = (
 const createMockAppNode = (
   isSource: boolean,
   operation: ActiveDROperation
-): Partial<Node> => ({
+): MockAppNode => ({
   getData: jest.fn(() => ({
     operation,
     isSource,
     clusterName: isSource ? operation.sourceCluster : operation.targetCluster,
-  })) as any,
-  getDimensions: jest.fn(() => ({ width: 50, height: 50 })) as any,
+    appCount: 1,
+  })),
+  getDimensions: jest.fn(() => ({ width: 50, height: 50 })),
   getId: jest.fn(
     () => `app-${operation.drpcName}-${isSource ? 'source' : 'target'}`
   ),
@@ -69,7 +87,7 @@ describe('MCOStyleAppNode', () => {
   describe('Source App Node', () => {
     it('should render source app with source animation class', () => {
       const operation = createMockOperation();
-      const node = createMockAppNode(true, operation) as Node;
+      const node = createMockAppNode(true, operation);
 
       const { container } = render(
         <svg>
@@ -83,7 +101,7 @@ describe('MCOStyleAppNode', () => {
 
     it('should have fade-pulse animation class', () => {
       const operation = createMockOperation();
-      const node = createMockAppNode(true, operation) as Node;
+      const node = createMockAppNode(true, operation);
 
       const { container } = render(
         <svg>
@@ -97,7 +115,7 @@ describe('MCOStyleAppNode', () => {
 
     it('should render with source class', () => {
       const operation = createMockOperation();
-      const node = createMockAppNode(true, operation) as Node;
+      const node = createMockAppNode(true, operation);
 
       const { container } = render(
         <svg>
@@ -111,7 +129,7 @@ describe('MCOStyleAppNode', () => {
 
     it('should have lower opacity (fading out)', () => {
       const operation = createMockOperation();
-      const node = createMockAppNode(true, operation) as Node;
+      const node = createMockAppNode(true, operation);
 
       const { container } = render(
         <svg>
@@ -128,7 +146,7 @@ describe('MCOStyleAppNode', () => {
   describe('Target App Node', () => {
     it('should render target app with target animation class', () => {
       const operation = createMockOperation();
-      const node = createMockAppNode(false, operation) as Node;
+      const node = createMockAppNode(false, operation);
 
       const { container } = render(
         <svg>
@@ -142,7 +160,7 @@ describe('MCOStyleAppNode', () => {
 
     it('should have brighten-pulse animation class', () => {
       const operation = createMockOperation();
-      const node = createMockAppNode(false, operation) as Node;
+      const node = createMockAppNode(false, operation);
 
       const { container } = render(
         <svg>
@@ -156,7 +174,7 @@ describe('MCOStyleAppNode', () => {
 
     it('should render with target class', () => {
       const operation = createMockOperation();
-      const node = createMockAppNode(false, operation) as Node;
+      const node = createMockAppNode(false, operation);
 
       const { container } = render(
         <svg>
@@ -170,7 +188,7 @@ describe('MCOStyleAppNode', () => {
 
     it('should have higher opacity (arriving/solid)', () => {
       const operation = createMockOperation();
-      const node = createMockAppNode(false, operation) as Node;
+      const node = createMockAppNode(false, operation);
 
       const { container } = render(
         <svg>
@@ -187,7 +205,7 @@ describe('MCOStyleAppNode', () => {
   describe('Visual Elements', () => {
     it('should render CubeIcon for app', () => {
       const operation = createMockOperation();
-      const node = createMockAppNode(true, operation) as Node;
+      const node = createMockAppNode(true, operation);
 
       const { container } = render(
         <svg>
@@ -209,7 +227,7 @@ describe('MCOStyleAppNode', () => {
           clusterName: 'cluster1',
           appCount: 3,
         })),
-      } as Node;
+      };
 
       const { container } = render(
         <svg>
@@ -224,7 +242,7 @@ describe('MCOStyleAppNode', () => {
 
     it('should have border stroke', () => {
       const operation = createMockOperation();
-      const node = createMockAppNode(true, operation) as Node;
+      const node = createMockAppNode(true, operation);
 
       const { container } = render(
         <svg>
@@ -242,7 +260,7 @@ describe('MCOStyleAppNode', () => {
   describe('Different Operations', () => {
     it('should render correctly for Failover operation', () => {
       const operation = createMockOperation({ action: DRActionType.FAILOVER });
-      const node = createMockAppNode(true, operation) as Node;
+      const node = createMockAppNode(true, operation);
 
       expect(() => {
         render(
@@ -255,7 +273,7 @@ describe('MCOStyleAppNode', () => {
 
     it('should render correctly for Relocate operation', () => {
       const operation = createMockOperation({ action: DRActionType.RELOCATE });
-      const node = createMockAppNode(false, operation) as Node;
+      const node = createMockAppNode(false, operation);
 
       expect(() => {
         render(

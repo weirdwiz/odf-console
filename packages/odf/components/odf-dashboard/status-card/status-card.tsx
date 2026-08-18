@@ -55,6 +55,7 @@ export const StatusCard: React.FC = () => {
   const [csvData, csvLoaded, csvLoadError] =
     useSafeK8sWatchResource<ClusterServiceVersionKind[]>(operatorResource);
   const [systems, systemsLoaded, systemsLoadError] = useWatchStorageSystems();
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [healthData, healthError, healthLoading] = useCustomPrometheusPoll({
     query: STATUS_QUERIES[StorageDashboard.HEALTH],
     endpoint: 'api/v1/query' as any,
@@ -93,21 +94,24 @@ export const StatusCard: React.FC = () => {
             referenceForGroupVersionKind(apiGroup)(apiVersion)(kind);
           const systemData =
             apiGroup === StorageClusterModel.apiGroup
-              ? {
-                  systemName,
-                  rawHealthData: ocsHealthStatus.rawHealthState,
-                  healthState: healthStateMap(ocsHealthStatus.rawHealthState),
-                  link: getVendorDashboardLinkFromMetrics(
-                    systemKind,
+              ? (() => {
+                  const value = {
                     systemName,
-                    systemNamespace,
-                    ocsHealthStatus.errorComponent
-                  ),
-
-                  ...(ocsHealthStatus.errorMessages
-                    ? { extraTexts: ocsHealthStatus.errorMessages }
-                    : {}),
-                }
+                    rawHealthData: ocsHealthStatus.rawHealthState,
+                    healthState: healthStateMap(ocsHealthStatus.rawHealthState),
+                    link: getVendorDashboardLinkFromMetrics(
+                      systemKind,
+                      systemName,
+                      systemNamespace,
+                      ocsHealthStatus.errorComponent
+                    ),
+                  };
+                  if (ocsHealthStatus.errorMessages)
+                    Object.assign(value, {
+                      extraTexts: ocsHealthStatus.errorMessages,
+                    });
+                  return value;
+                })()
               : {
                   systemName,
                   rawHealthData: curr.value[1],

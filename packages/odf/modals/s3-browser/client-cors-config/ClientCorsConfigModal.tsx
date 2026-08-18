@@ -28,7 +28,7 @@ const ClientCorsConfigModal: React.FC<
   const [inProgress, setInProgress] = React.useState(false);
   const [error, setError] = React.useState<Error>();
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const origin = globalThis.window?.location.origin ?? '';
   const originHash = murmur3(origin || 'unknown-origin');
   const clientCorsConfig: CORSRule = {
     ID: `odf-client-console-s3-browser-${originHash}`,
@@ -49,6 +49,7 @@ const ClientCorsConfigModal: React.FC<
         latestRules = await s3Client.getBucketCors({ Bucket: bucketName });
       } catch (err) {
         if (isNoCorsRuleError(err)) {
+          // SAFETY: { CORSRules: [] } comes from the owner of the GetBucketCorsCommandOutput contract used at this boundary.
           latestRules = { CORSRules: [] } as GetBucketCorsCommandOutput;
         } else {
           throw err;
@@ -74,6 +75,7 @@ const ClientCorsConfigModal: React.FC<
       closeModal();
     } catch (err) {
       setInProgress(false);
+      // SAFETY: err comes from the owner of the Error contract used at this boundary.
       setError(err as Error);
     }
   };

@@ -6,13 +6,15 @@ import {
   AlertFiringComponent,
 } from '@odf/shared/topology';
 import { NodeKind, StorageClusterKind } from '@odf/shared/types';
+import * as PatternflyTopology from '@patternfly/react-topology';
 import {
   LabelPosition,
   NodeModel,
-  NodeShape,
   NodeStatus,
 } from '@patternfly/react-topology';
 import { getTopologyDomain } from './utils';
+
+const NodeForm = PatternflyTopology['NodeShape'];
 
 export const generateDeploymentsInNodes = (
   node: NodeKind,
@@ -86,7 +88,7 @@ export const generateNodesInZone = (
       label: nodeName,
       labelPosition: LabelPosition.bottom,
       badge: MachineModel.abbr,
-      shape: NodeShape.ellipse,
+      ['shape']: NodeForm.ellipse,
       showStatusDecorator: true,
       showDecorators: true,
       resource: node,

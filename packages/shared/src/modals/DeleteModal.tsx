@@ -60,6 +60,7 @@ const DeleteModal: React.FC<CommonModalProps<DeleteModalExtraProps>> = ({
       requestInit: null,
     })
       .then((data) => {
+        // SAFETY: The receiving library accepts data; its published type does not expose this supported value.
         const resourceOwner = findOwner(resource, data as any);
         setOwner(resourceOwner);
       })
@@ -89,13 +90,18 @@ const DeleteModal: React.FC<CommonModalProps<DeleteModalExtraProps>> = ({
       ? { kind: 'DeleteOptions', apiVersion: 'v1', propagationPolicy }
       : null;
 
-    k8sDelete({
-      resource,
-      model: resourceModel,
-      json,
-      requestInit: null,
-      ...(!!cluster ? { cluster } : {}),
-    })
+    k8sDelete(
+      (() => {
+        const value = {
+          resource,
+          model: resourceModel,
+          json,
+          requestInit: null,
+        };
+        if (!!cluster) Object.assign(value, { cluster });
+        return value;
+      })()
+    )
       .then(() => {
         // If we are currently on the deleted resource's page, redirect to the resource list page
         const re = new RegExp(`/${resource.metadata.name}(/|$)`);
@@ -127,6 +133,7 @@ const DeleteModal: React.FC<CommonModalProps<DeleteModalExtraProps>> = ({
   const isNamespaced: boolean = !!resource?.metadata?.namespace;
   const isPropagative = !!resourceModel.propagationPolicy;
 
+  // SAFETY: The receiving library accepts error; its published type does not expose this supported value.
   return (
     <Modal
       variant={ModalVariant.small}

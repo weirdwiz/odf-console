@@ -74,7 +74,15 @@ Cypress.Commands.add('byTestActionID', (selector: string) => {
 
 Cypress.Commands.add(
   'byTestOperatorRow',
-  (selector: string, options?: object) => {
+  (
+    selector: string,
+    options?: Partial<
+      Cypress.Loggable &
+        Cypress.Timeoutable &
+        Cypress.Withinable &
+        Cypress.Shadow
+    >
+  ) => {
     cy.get(`[data-test-operator-row="${selector}"]`, options);
   }
 );

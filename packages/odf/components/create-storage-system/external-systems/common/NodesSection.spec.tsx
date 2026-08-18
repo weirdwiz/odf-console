@@ -1,31 +1,28 @@
 import * as React from 'react';
+import * as TestDependency2 from '@odf/core/components/utils';
 import { useNodesData } from '@odf/core/hooks';
+import * as TestDependency1 from '@odf/core/hooks';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import * as TestDependency4 from '../../../nodes-table/NodesTable';
 import { WizardNodeState } from '../../reducer';
 import { SANNodesSection, ScaleNodesSection } from './NodesSection';
+import * as TestDependency3 from './select-local-cluster-nodes-table/select-local-cluster-nodes-table';
 
-jest.mock('@odf/core/hooks', () => ({
-  useNodesData: jest.fn(),
-}));
-
-jest.mock('@odf/core/components/utils', () => ({
-  createWizardNodeState: jest.fn((nodes) =>
-    nodes.map((node) => ({ ...node, name: node.metadata.name }))
-  ),
-}));
-
-jest.mock(
-  './select-local-cluster-nodes-table/select-local-cluster-nodes-table',
-  () => ({
-    SelectLocalClusterNodesTable: () => (
-      <div data-test-id="local-cluster-nodes-table" />
-    ),
-  })
-);
-
-jest.mock('../../../nodes-table/NodesTable', () => ({
-  NodesTable: ({ nodes, selectedNodes, loaded, isRowSelectable }) => (
+jest.spyOn(TestDependency1, 'useNodesData').mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency2, 'createWizardNodeState')
+  .mockImplementation(
+    jest.fn((nodes) =>
+      nodes.map((node) => ({ ...node, name: node.metadata.name }))
+    )
+  );
+jest
+  .spyOn(TestDependency3, 'SelectLocalClusterNodesTable')
+  .mockImplementation(() => <div data-test-id="local-cluster-nodes-table" />);
+jest
+  .spyOn(TestDependency4, 'NodesTable')
+  .mockImplementation(({ nodes, selectedNodes, loaded, isRowSelectable }) => (
     <div
       data-test-id="nodes-table"
       data-nodes={nodes.map((node) => node.metadata.name).join(',')}
@@ -36,8 +33,7 @@ jest.mock('../../../nodes-table/NodesTable', () => ({
         .join(',')}
       data-loaded={loaded}
     />
-  ),
-}));
+  ));
 
 const ineligible = {
   areSelectedNodesEligible: false,
@@ -48,6 +44,7 @@ const ineligible = {
 
 describe('NodesSection', () => {
   it('renders the local cluster table when all-nodes selection is hidden', () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValue([[], true, null]);
 
     render(<SANNodesSection selectedNodes={[]} setSelectedNodes={jest.fn()} />);
@@ -79,6 +76,7 @@ describe('NodesSection', () => {
     ];
     const setSelectedNodes = jest.fn();
 
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValue([nodes, true, null]);
 
     render(
@@ -114,6 +112,7 @@ describe('NodesSection', () => {
         spec: {},
       },
     ];
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValue([nodes, true, null]);
 
     render(
@@ -163,6 +162,7 @@ describe('NodesSection', () => {
     ];
     const onSelectionChange = jest.fn();
 
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValue([nodes, true, null]);
 
     const TestScaleNodesSection = () => {
@@ -231,6 +231,7 @@ describe('NodesSection', () => {
         'Kernel-devel packages are missing on some selected nodes. Please apply the Machine Config Operator (MCO) update to install them before continuing.',
     },
   ])('renders kernel-devel status: $message', ({ eligibility, message }) => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValue([[], true, null]);
 
     render(
@@ -245,6 +246,7 @@ describe('NodesSection', () => {
   });
 
   it('renders verified kernel-devel status', () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValue([[], true, null]);
 
     render(
@@ -264,6 +266,7 @@ describe('NodesSection', () => {
   });
 
   it('passes the node loading state to the table', () => {
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValue([[], false, null]);
 
     render(

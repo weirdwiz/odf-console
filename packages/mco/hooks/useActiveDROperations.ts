@@ -21,6 +21,11 @@ import {
   ClusterPairKey,
 } from './useDRPoliciesByClusterPair';
 
+export const activeDROperationsDependencies = {
+  useDeepCompareMemoize,
+  useK8sWatchResource,
+};
+
 export type ActiveDROperation = {
   applicationName: string;
   applicationNamespace: string;
@@ -72,18 +77,22 @@ export const useActiveDROperations = (): [
   boolean,
   Error | null,
 ] => {
-  const [pavs, pavsLoaded, pavsLoadError] = useK8sWatchResource<
-    ProtectedApplicationViewKind[]
-  >(getProtectedApplicationViewResourceObj());
+  const [pavs, pavsLoaded, pavsLoadError] =
+    activeDROperationsDependencies.useK8sWatchResource<
+      ProtectedApplicationViewKind[]
+    >(getProtectedApplicationViewResourceObj());
 
-  const [drpcs, drpcsLoaded, drpcsLoadError] = useK8sWatchResource<
-    DRPlacementControlKind[]
-  >(getDRPlacementControlResourceObj());
+  const [drpcs, drpcsLoaded, drpcsLoadError] =
+    activeDROperationsDependencies.useK8sWatchResource<
+      DRPlacementControlKind[]
+    >(getDRPlacementControlResourceObj());
 
   // Deep compare inputs to prevent re-computation when data hasn't actually changed
   // useK8sWatchResource may return new array references even when content is the same
-  const memoizedPavs = useDeepCompareMemoize(pavs);
-  const memoizedDrpcs = useDeepCompareMemoize(drpcs);
+  const memoizedPavs =
+    activeDROperationsDependencies.useDeepCompareMemoize(pavs);
+  const memoizedDrpcs =
+    activeDROperationsDependencies.useDeepCompareMemoize(drpcs);
 
   // Compute operations map - only re-runs when memoized inputs actually change
   const clusterPairOperationsMap = React.useMemo(() => {

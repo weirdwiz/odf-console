@@ -22,55 +22,50 @@ const getSpecName = (resource: SubscriptionKind) => resource?.spec?.name;
 export const FDF_FLAG = 'FDF_FLAG'; // Based on whether installed operator is ODF or FDF
 
 const namespaceDetector = async (
-  maxAttempt = 5
+  maxAttempt = 5,
+  attempt = 1
 ): Promise<[string, boolean]> => {
-  let attempt = 0;
-  let ns = null;
-  let isFDF = false;
-  let shouldRetry = true;
+  try {
+    const subscriptionResponse = await k8sList<SubscriptionKind>({
+      model: SubscriptionModel,
+      queryParams: { ns: null },
+    });
+    const subscriptions = Array.isArray(subscriptionResponse)
+      ? subscriptionResponse
+      : subscriptionResponse.items;
+    const odfSubscription = subscriptions.find(
+      (subscription) => getSpecName(subscription) === ODF_SUBSCRIPTION_NAME
+    );
 
-  while (shouldRetry) {
-    shouldRetry = false;
-    attempt++;
-    try {
-      // this rule is to prevent independent async calls in a loop (next call shouldn't be blocked by previous call),
-      // here for retrying async operations (dependent as we only want next call when previous completes), it is fine to disable it.
-      // eslint-disable-next-line no-await-in-loop
-      const subscriptions = (await k8sList({
-        model: SubscriptionModel,
-        queryParams: { ns: null },
-      })) as SubscriptionKind[];
-      const odfSubscription = subscriptions.find(
-        (subscription) => getSpecName(subscription) === ODF_SUBSCRIPTION_NAME
+    if (odfSubscription) {
+      const namespace = getNamespace(odfSubscription);
+      if (!namespace) throw new Error('ODF install namespace not found');
+
+      // ToDo: Remove in z-stream (https://bugzilla.redhat.com/show_bug.cgi?id=2294383)
+      const csv = await k8sGet<ClusterServiceVersionKind>({
+        model: ClusterServiceVersionModel,
+        name: odfSubscription.status?.installedCSV,
+        ns: namespace,
+      });
+      const isFDF = !['redhat', 'red hat'].includes(
+        csv.spec?.provider?.name?.toLowerCase()
       );
-      const isODFPresent = odfSubscription !== undefined;
-      if (isODFPresent) {
-        ns = getNamespace(odfSubscription);
-
-        // ToDo: Remove in z-stream (https://bugzilla.redhat.com/show_bug.cgi?id=2294383)
-        // eslint-disable-next-line no-await-in-loop
-        const csv: ClusterServiceVersionKind = await k8sGet({
-          model: ClusterServiceVersionModel,
-          name: odfSubscription?.status?.installedCSV,
-          ns,
-        });
-        isFDF = !['redhat', 'red hat'].includes(
-          csv?.spec?.provider?.name?.toLowerCase()
-        );
-      } else {
-        const clientSubscription = subscriptions.find(
-          (sub) => getSpecName(sub) === CLIENT_SUBSCRIPTION_NAME
-        );
-        ns = getNamespace(clientSubscription);
-      }
-      if (!ns) throw new Error('ODF install namespace not found');
-    } catch (err) {
-      if (attempt <= maxAttempt && !isAbortError(err)) shouldRetry = true;
-      else throw err;
+      return [namespace, isFDF];
     }
-  }
 
-  return [ns, isFDF];
+    const clientSubscription = subscriptions.find(
+      (subscription) =>
+        getSpecName(subscription) === CLIENT_SUBSCRIPTION_NAME
+    );
+    const namespace = getNamespace(clientSubscription);
+    if (!namespace) throw new Error('ODF install namespace not found');
+    return [namespace, false];
+  } catch (error) {
+    if (attempt <= maxAttempt && !isAbortError(error)) {
+      return namespaceDetector(maxAttempt, attempt + 1);
+    }
+    throw error;
+  }
 };
 
 export const useODFNamespace = (setFlag: SetFeatureFlag): void => {

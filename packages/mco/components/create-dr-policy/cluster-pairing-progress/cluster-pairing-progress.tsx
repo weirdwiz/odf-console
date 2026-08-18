@@ -44,11 +44,24 @@ import {
 import { PairingSuccess, type PairingSuccessProps } from './pairing-success';
 import '../create-dr-policy.scss';
 
+export const clusterPairingProgressDependencies = {
+  deleteDRPolicyByName,
+  deleteMirrorPeerByName,
+  restoreDRPolicySpec,
+};
+
 const PROGRESS_STEP_MS = 450;
 const SUCCESS_HOLD_MS = 1000;
 
-const getErrorMessage = (error: unknown): string =>
-  (error as Error)?.message || JSON.stringify(error);
+const getErrorMessage = (cause: unknown): string =>
+  cause instanceof Error ? cause.message : JSON.stringify(cause);
+
+const isMirrorPeerPhaseMessage = (
+  message: string
+): message is MirrorPeerPhaseMessage =>
+  Object.values(MirrorPeerPhaseMessage).some(
+    (candidate) => candidate === message
+  );
 
 type ClusterPairingProgressProps = PairingSuccessProps & {
   mirrorPeerName: string;
@@ -141,10 +154,9 @@ export const ClusterPairingProgress: React.FC<ClusterPairingProgressProps> = ({
 
   const phase = getMirrorPeerPhase(mirrorPeer);
   const phaseMessage = getMirrorPeerMessage(mirrorPeer);
-  const phaseMessageDisplay =
-    MIRROR_PEER_PHASE_MESSAGE_DISPLAY_TEXT(t)[
-      phaseMessage as MirrorPeerPhaseMessage
-    ] || phaseMessage;
+  const phaseMessageDisplay = isMirrorPeerPhaseMessage(phaseMessage)
+    ? MIRROR_PEER_PHASE_MESSAGE_DISPLAY_TEXT(t)[phaseMessage]
+    : phaseMessage;
   const condition = getMirrorPeerPrimaryCondition(mirrorPeer);
   const pairingStatus = getMirrorPeerPairingStatus(mirrorPeer);
   const view = getPairingViewModel(
@@ -198,7 +210,10 @@ export const ClusterPairingProgress: React.FC<ClusterPairingProgressProps> = ({
     let policyCleanupFailed = false;
     if (pending.restorePolicy) {
       try {
-        await restoreDRPolicySpec(policyName, previousPolicySpec);
+        await clusterPairingProgressDependencies.restoreDRPolicySpec(
+          policyName,
+          previousPolicySpec
+        );
         pending.restorePolicy = false;
       } catch (error) {
         policyCleanupFailed = true;
@@ -206,7 +221,9 @@ export const ClusterPairingProgress: React.FC<ClusterPairingProgressProps> = ({
       }
     } else if (pending.drPolicy) {
       try {
-        await deleteDRPolicyByName(policyName);
+        await clusterPairingProgressDependencies.deleteDRPolicyByName(
+          policyName
+        );
         pending.drPolicy = false;
       } catch (error) {
         policyCleanupFailed = true;
@@ -217,7 +234,9 @@ export const ClusterPairingProgress: React.FC<ClusterPairingProgressProps> = ({
     // remove the peer once restore/delete has completed.
     if (!policyCleanupFailed && pending.mirrorPeer) {
       try {
-        await deleteMirrorPeerByName(mirrorPeerName);
+        await clusterPairingProgressDependencies.deleteMirrorPeerByName(
+          mirrorPeerName
+        );
         pending.mirrorPeer = false;
       } catch (error) {
         errors.push(getErrorMessage(error));

@@ -4,6 +4,7 @@ import {
   DualListSelectorControlsWrapper,
   DualListSelectorControl,
 } from '@patternfly/react-core/deprecated';
+import { isString } from 'lodash-es';
 import { SearchInput } from '@patternfly/react-core';
 import {
   AngleDoubleLeftIcon,
@@ -93,10 +94,10 @@ export const CustomDualListSelector = ({
     // To: (_event: React.FormEvent<HTMLInputElement>, value: string) => void
     // both cases need to be handled for backwards compatibility
     const onChange = (input: any) => {
-      const value =
-        typeof input === 'string'
-          ? input
-          : (input.target as HTMLInputElement).value;
+      // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
+      const value = isString(input)
+        ? input
+        : (input.target as HTMLInputElement).value;
       isAvailable ? setAvailableFilter(value) : setChosenFilter(value);
       const toFilter = isAvailable ? [...availableOptions] : [...chosenOptions];
       toFilter.forEach((option) => {

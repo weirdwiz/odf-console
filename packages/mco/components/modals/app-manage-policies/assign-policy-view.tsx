@@ -27,7 +27,6 @@ import {
 } from './utils/reducer';
 import {
   ApplicationType,
-  DRInfoType,
   DRPlacementControlType,
   DRPolicyType,
   ModalType,
@@ -215,7 +214,7 @@ export const AssignPolicyView: React.FC<AssignPolicyViewProps> = ({
   } = applicationInfo;
 
   const protectedPVCSelectors: PVCSelectorType[] = isEditMode
-    ? (drInfo as DRInfoType)?.placementControlInfo?.map((drpc) => ({
+    ? drInfo?.placementControlInfo?.map((drpc) => ({
         placementName: getName(drpc.placementInfo),
         labels: drpc.pvcSelector,
       }))

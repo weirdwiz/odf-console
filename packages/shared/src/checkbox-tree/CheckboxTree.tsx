@@ -52,6 +52,7 @@ export const CheckboxTree: React.FC<CheckboxTreeProps> = ({
     event: React.ChangeEvent,
     treeViewItem: TreeViewDataItem
   ) => {
+    // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
     const checked = (event.target as HTMLInputElement).checked;
 
     const checkedItemTree = options

@@ -1,37 +1,36 @@
+import { StorageClusterKind } from '@odf/shared';
 import { useCustomPrometheusPoll } from '@odf/shared/hooks/custom-prometheus-poll';
+import * as TestDependency2 from '@odf/shared/hooks/custom-prometheus-poll';
+import * as TestDependency3 from '@odf/shared/useCustomTranslationHook';
 import {
   HealthState,
   useK8sWatchResource,
 } from '@openshift-console/dynamic-plugin-sdk';
+import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
 import { renderHook } from '@testing-library/react';
 import * as utils from '../utils';
+import * as TestDependency4 from '../utils';
 import { useGetOCSHealth } from './useOcsHealth';
 
-// Mock dependencies
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  useK8sWatchResource: jest.fn(),
-}));
-
-jest.mock('@odf/shared/hooks/custom-prometheus-poll', () => ({
-  useCustomPrometheusPoll: jest.fn(),
-  usePrometheusBasePath: jest.fn(() => ''),
-}));
-
-jest.mock('@odf/shared/useCustomTranslationHook', () => ({
-  useCustomTranslation: jest.fn(() => ({
+jest
+  .spyOn(TestDependency1, 'useK8sWatchResource')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency2, 'useCustomPrometheusPoll')
+  .mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency2, 'usePrometheusBasePath')
+  .mockImplementation(jest.fn(() => ''));
+jest.spyOn(TestDependency3, 'useCustomTranslation').mockImplementation(
+  jest.fn(() => ({
     t: (key) => key,
-  })),
-}));
+  }))
+);
+jest.spyOn(TestDependency4, 'getCephHealthState').mockImplementation(jest.fn());
+jest.spyOn(TestDependency4, 'getRGWHealthState').mockImplementation(jest.fn());
+jest.spyOn(TestDependency4, 'getNooBaaState').mockImplementation(jest.fn());
 
-// Mock utility functions
-jest.mock('../utils', () => ({
-  getCephHealthState: jest.fn(),
-  getRGWHealthState: jest.fn(),
-  getNooBaaState: jest.fn(),
-}));
-
-const mockStorageCluster = {
+const mockStorageCluster: StorageClusterKind = {
   apiVersion: 'ocs.openshift.io/v1',
   kind: 'StorageCluster',
   metadata: {
@@ -39,7 +38,6 @@ const mockStorageCluster = {
     namespace: 'openshift-storage',
   },
   spec: {},
-  status: {},
 };
 
 const mockCephCluster = {
@@ -100,30 +98,30 @@ describe('useGetOCSHealth', () => {
 
   describe('Healthy scenarios', () => {
     it('returns OK when all subsystems are healthy', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null]) // cephData
         .mockReturnValueOnce([[mockCephObjectStore], true, null]) // cephObjData
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]); // noobaaData
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.OK);
@@ -131,30 +129,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns OK when Ceph is LOADING (acceptable state)', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.LOADING,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.OK);
@@ -162,30 +160,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns OK when RGW is NOT_AVAILABLE (acceptable state)', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.NOT_AVAILABLE,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.OK);
@@ -193,30 +191,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns OK when MCG is UPDATING (acceptable state)', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.UPDATING,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.OK);
@@ -226,30 +224,30 @@ describe('useGetOCSHealth', () => {
 
   describe('Unhealthy scenarios', () => {
     it('returns ERROR when Ceph is unhealthy', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.ERROR,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.ERROR);
@@ -257,30 +255,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns ERROR when RGW is in ERROR state', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.ERROR,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.ERROR);
@@ -288,30 +286,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns ERROR when MCG is in ERROR state', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('1'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.ERROR,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.ERROR);
@@ -319,30 +317,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns ERROR when both RGW and MCG are unhealthy', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('1'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.ERROR,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.ERROR,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.ERROR);
@@ -350,30 +348,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns ERROR when all subsystems are unhealthy', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('1'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.ERROR,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.ERROR,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.ERROR,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.ERROR);
@@ -381,30 +379,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns ERROR when Ceph is in WARNING state (unacceptable)', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.WARNING,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.ERROR);
@@ -412,30 +410,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns ERROR when MCG is in WARNING state (unacceptable)', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('2'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.WARNING,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.ERROR);
@@ -450,7 +448,7 @@ describe('useGetOCSHealth', () => {
         metadata: { ...mockCephCluster.metadata, namespace: 'other-namespace' },
       };
 
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([
           [mockCephCluster, otherNamespaceCeph],
           true,
@@ -459,24 +457,24 @@ describe('useGetOCSHealth', () => {
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      renderHook(() => useGetOCSHealth(mockStorageCluster as any));
+      renderHook(() => useGetOCSHealth(mockStorageCluster));
 
       expect(utils.getCephHealthState).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -497,7 +495,7 @@ describe('useGetOCSHealth', () => {
         },
       };
 
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([
           [mockCephObjectStore, otherNamespaceRGW],
@@ -506,24 +504,24 @@ describe('useGetOCSHealth', () => {
         ])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      renderHook(() => useGetOCSHealth(mockStorageCluster as any));
+      renderHook(() => useGetOCSHealth(mockStorageCluster));
 
       expect(utils.getRGWHealthState).toHaveBeenCalledWith(mockCephObjectStore);
     });
@@ -537,7 +535,7 @@ describe('useGetOCSHealth', () => {
         },
       };
 
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([
@@ -546,24 +544,24 @@ describe('useGetOCSHealth', () => {
           null,
         ]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      renderHook(() => useGetOCSHealth(mockStorageCluster as any));
+      renderHook(() => useGetOCSHealth(mockStorageCluster));
 
       expect(utils.getNooBaaState).toHaveBeenCalledWith(
         expect.any(Array),
@@ -577,30 +575,30 @@ describe('useGetOCSHealth', () => {
 
   describe('Edge cases - missing resources', () => {
     it('returns OK when no CephObjectStore exists (RGW N/A)', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[], true, null]) // no CephObjectStore
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.NOT_AVAILABLE,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.OK);
@@ -608,26 +606,26 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns OK when no NooBaa exists (MCG N/A)', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[], true, null]); // no NooBaa
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.OK);
@@ -636,7 +634,7 @@ describe('useGetOCSHealth', () => {
     });
 
     it('handles CephObjectStore not found in namespace (undefined)', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([
           [
@@ -653,25 +651,25 @@ describe('useGetOCSHealth', () => {
         ])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.NOT_AVAILABLE,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(utils.getRGWHealthState).toHaveBeenCalledWith(undefined);
@@ -679,7 +677,7 @@ describe('useGetOCSHealth', () => {
     });
 
     it('handles NooBaa not found in namespace (undefined)', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([
@@ -696,21 +694,21 @@ describe('useGetOCSHealth', () => {
           null,
         ]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(utils.getNooBaaState).not.toHaveBeenCalled();
@@ -720,56 +718,56 @@ describe('useGetOCSHealth', () => {
 
   describe('Edge cases - load errors', () => {
     it('handles CephCluster load error', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[], false, new Error('Failed to load')])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.NOT_AVAILABLE,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.OK);
     });
 
     it('handles CephObjectStore load error (RGW becomes N/A)', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[], false, new Error('Failed to load')])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(utils.getRGWHealthState).not.toHaveBeenCalled();
@@ -777,78 +775,78 @@ describe('useGetOCSHealth', () => {
     });
 
     it('handles NooBaa load error', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[], false, new Error('Failed to load')]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.NOT_AVAILABLE,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.OK);
     });
 
     it('handles Prometheus query error', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         null,
         new Error('Query failed'),
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.NOT_AVAILABLE,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.OK);
     });
 
     it('returns UNKNOWN when all resources have network errors', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[], false, new Error('Network error')])
         .mockReturnValueOnce([[], false, new Error('Network error')])
         .mockReturnValueOnce([[], false, new Error('Network error')]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.UNKNOWN);
@@ -859,18 +857,18 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns UNKNOWN when some resources have network errors and others not loaded', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[], false, new Error('Network error')])
         .mockReturnValueOnce([[], false, new Error('Network error')])
         .mockReturnValueOnce([[], false, null]); // Not loaded but no error
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       // Should be LOADING because noobaa is still loading (no error)
@@ -881,18 +879,18 @@ describe('useGetOCSHealth', () => {
 
   describe('Edge cases - not loaded yet', () => {
     it('returns LOADING when CephCluster not loaded yet', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[], false, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.LOADING);
@@ -901,18 +899,18 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns LOADING when CephObjectStore not loaded yet', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[], false, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.LOADING);
@@ -921,18 +919,18 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns LOADING when NooBaa not loaded yet', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[], false, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.LOADING);
@@ -941,18 +939,18 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns LOADING when all resources are not loaded yet', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[], false, null])
         .mockReturnValueOnce([[], false, null])
         .mockReturnValueOnce([[], false, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.LOADING);
@@ -965,56 +963,56 @@ describe('useGetOCSHealth', () => {
 
   describe('Edge cases - empty or null data', () => {
     it('handles null CephCluster data', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([null, true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.NOT_AVAILABLE,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.OK);
     });
 
     it('handles empty array for all resources', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[], true, null])
         .mockReturnValueOnce([[], true, null])
         .mockReturnValueOnce([[], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.NOT_AVAILABLE,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.NOT_AVAILABLE,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.OK);
@@ -1022,30 +1020,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('handles undefined CephCluster in namespace', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.UNKNOWN,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.ERROR);
@@ -1055,30 +1053,30 @@ describe('useGetOCSHealth', () => {
 
   describe('Mixed health states', () => {
     it('returns ERROR when block/file is OK but object is ERROR', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('1'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.ERROR,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.ERROR,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.ERROR);
@@ -1086,30 +1084,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('returns ERROR when block/file is ERROR but object is OK', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.ERROR,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.ERROR);
@@ -1117,30 +1115,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('handles PROGRESS state for RGW (unacceptable)', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.PROGRESS,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.ERROR);
@@ -1148,30 +1146,30 @@ describe('useGetOCSHealth', () => {
     });
 
     it('handles UNKNOWN state for MCG (unacceptable)', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.UNKNOWN,
       });
 
       const { result } = renderHook(() =>
-        useGetOCSHealth(mockStorageCluster as any)
+        useGetOCSHealth(mockStorageCluster)
       );
 
       expect(result.current.healthState).toBe(HealthState.ERROR);
@@ -1181,35 +1179,35 @@ describe('useGetOCSHealth', () => {
 
   describe('Memoization and dependency tracking', () => {
     it('recomputes when CephCluster data changes', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.ERROR,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      renderHook(() => useGetOCSHealth(mockStorageCluster as any));
+      renderHook(() => useGetOCSHealth(mockStorageCluster));
 
       expect(utils.getCephHealthState).toHaveBeenCalled();
     });
 
     it('passes correct arguments to utility functions', () => {
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
@@ -1217,24 +1215,24 @@ describe('useGetOCSHealth', () => {
       const promResponse = createPrometheusResponse('0');
       const promError = null;
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         promResponse,
         promError,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      renderHook(() => useGetOCSHealth(mockStorageCluster as any));
+      renderHook(() => useGetOCSHealth(mockStorageCluster));
 
       expect(utils.getCephHealthState).toHaveBeenCalledWith(
         {
@@ -1284,29 +1282,29 @@ describe('useGetOCSHealth', () => {
         },
       };
 
-      (useK8sWatchResource as jest.Mock)
+      jest.mocked(useK8sWatchResource)
         .mockReturnValueOnce([[customCeph, mockCephCluster], true, null])
         .mockReturnValueOnce([[mockCephObjectStore], true, null])
         .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+      jest.mocked(useCustomPrometheusPoll).mockReturnValue([
         createPrometheusResponse('0'),
         null,
       ]);
 
-      (utils.getCephHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getCephHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getRGWHealthState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      (utils.getNooBaaState as jest.Mock).mockReturnValue({
+      jest.mocked(utils.getNooBaaState).mockReturnValue({
         state: HealthState.OK,
       });
 
-      renderHook(() => useGetOCSHealth(customStorageCluster as any));
+      renderHook(() => useGetOCSHealth(customStorageCluster));
 
       expect(utils.getCephHealthState).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1329,30 +1327,30 @@ describe('useGetOCSHealth', () => {
 
     acceptableStates.forEach((state) => {
       it(`returns OK when all subsystems are in ${state} state`, () => {
-        (useK8sWatchResource as jest.Mock)
+        jest.mocked(useK8sWatchResource)
           .mockReturnValueOnce([[mockCephCluster], true, null])
           .mockReturnValueOnce([[mockCephObjectStore], true, null])
           .mockReturnValueOnce([[mockNoobaaSystem], true, null]);
 
-        (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
+        jest.mocked(useCustomPrometheusPoll).mockReturnValue([
           createPrometheusResponse('0'),
           null,
         ]);
 
-        (utils.getCephHealthState as jest.Mock).mockReturnValue({
+        jest.mocked(utils.getCephHealthState).mockReturnValue({
           state,
         });
 
-        (utils.getRGWHealthState as jest.Mock).mockReturnValue({
+        jest.mocked(utils.getRGWHealthState).mockReturnValue({
           state,
         });
 
-        (utils.getNooBaaState as jest.Mock).mockReturnValue({
+        jest.mocked(utils.getNooBaaState).mockReturnValue({
           state,
         });
 
         const { result } = renderHook(() =>
-          useGetOCSHealth(mockStorageCluster as any)
+          useGetOCSHealth(mockStorageCluster)
         );
 
         expect(result.current.healthState).toBe(HealthState.OK);

@@ -92,6 +92,7 @@ const LocalClusterRoleDropdown: React.FC<{
   onRoleChange: (role: NodeType) => void;
 }> = ({ role, onRoleChange }) => {
   const { t } = useCustomTranslation();
+  // SAFETY: value comes from the owner of the NodeType contract used at this boundary.
   return (
     <SingleSelectDropdown
       className="dropdown--full-width"
@@ -110,7 +111,13 @@ const LocalClusterRoleDropdown: React.FC<{
   );
 };
 
-const NodeRow: React.FC<RowComponentType<NodeData>> = ({
+type NodeRowExtraProps = {
+  enableStretchCluster: boolean;
+  nodes: WizardNodeState[];
+  onLocalClusterRoleChange: (nodeName: string, role: NodeType) => void;
+};
+
+const NodeRow: React.FC<RowComponentType<NodeData, NodeRowExtraProps>> = ({
   row: node,
   extraProps,
 }) => {
@@ -189,6 +196,7 @@ const InternalNodeTable: React.FC<NodeTableProps> = ({
   );
 
   const getColumns = React.useMemo((): TableColumnProps[] => {
+    // SAFETY: nameSort comes from the owner of the <T>(a: T, b: T, c: SortByDirection) => number contract used at this boundary.
     return [
       {
         columnName: t('Name'),
@@ -314,7 +322,7 @@ const InternalNodeTable: React.FC<NodeTableProps> = ({
 
   return (
     <div className="ceph-odf-install__select-nodes-table">
-      <SelectableTable<NodeData>
+      <SelectableTable<NodeData, NodeRowExtraProps>
         columns={getColumns}
         rows={filteredData}
         RowComponent={NodeRow}

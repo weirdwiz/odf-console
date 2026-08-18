@@ -85,6 +85,7 @@ describe('ODF common utilities', () => {
       },
     ];
     dataTest.forEach((test) => {
+      // SAFETY: The WizardNodeState[] test value defines the members exercised by this test.
       expect(
         getReplicasFromSelectedNodes(test.wizardNodeStates as WizardNodeState[])
       ).toBe(test.expectedReplicas);
@@ -99,21 +100,25 @@ describe('ODF common utilities', () => {
       { zone: '4' },
     ];
     // Stretch cluster.
+    // SAFETY: The WizardNodeState[] test value defines the members exercised by this test.
     expect(
       getDeviceSetReplica(true, false, wizardNodeStates as WizardNodeState[])
     ).toBe(5);
 
     // Flexible scaling.
+    // SAFETY: The WizardNodeState[] test value defines the members exercised by this test.
     expect(
       getDeviceSetReplica(false, true, wizardNodeStates as WizardNodeState[])
     ).toBe(OCS_DEVICE_SET_FLEXIBLE_REPLICA);
 
     // Stretch cluster + Flexible scaling.
+    // SAFETY: The WizardNodeState[] test value defines the members exercised by this test.
     expect(
       getDeviceSetReplica(true, true, wizardNodeStates as WizardNodeState[])
     ).toBe(OCS_DEVICE_SET_FLEXIBLE_REPLICA);
 
     // No stretch cluster, no flexible scaling.
+    // SAFETY: The WizardNodeState[] test value defines the members exercised by this test.
     expect(
       getDeviceSetReplica(false, false, wizardNodeStates as WizardNodeState[])
     ).toBe(4);

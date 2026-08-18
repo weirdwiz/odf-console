@@ -44,6 +44,8 @@ const VOLUME_HEALTH_ANNOTATION_PREFIX = 'csiaddons.openshift.io/volumehealth.';
 const PVC_LIST_PATH = resourcePathFromModel(PersistentVolumeClaimModel);
 const DEFAULT_PER_PAGE = 5;
 
+// SAFETY: Synthetic resource for the namespace dropdown's "all namespaces"
+// entry. Only metadata.name is read; K8sResourceCommon requires metadata.
 const allNamespacesResource = {
   metadata: {
     name: ALL_NAMESPACES_KEY,
@@ -99,6 +101,8 @@ const getUnhealthyRows = (
     }
 
     try {
+      // SAFETY: Annotation value is a JSON-serialized VolumeHealthAnnotation
+      // set by the CSI Addons operator. JSON.parse returns `any`.
       const parsedValue = JSON.parse(value) as VolumeHealthAnnotation;
       if (parsedValue.state !== VolumeHealthState.UNHEALTHY) {
         return acc;
@@ -169,13 +173,14 @@ export const VolumeHealthCard: React.FC<VolumeHealthCardProps> = ({
 
   const [pvcs = [], pvcLoaded, pvcLoadError] = useK8sWatchResource<
     PersistentVolumeClaimKind[]
-  >({
-    isList: true,
-    kind: PersistentVolumeClaimModel.kind,
-    ...(selectedNamespace !== ALL_NAMESPACES_KEY
-      ? { namespace: selectedNamespace }
-      : {}),
-  });
+  >(
+    (() => {
+      const value = { isList: true, kind: PersistentVolumeClaimModel.kind };
+      if (selectedNamespace !== ALL_NAMESPACES_KEY)
+        Object.assign(value, { namespace: selectedNamespace });
+      return value;
+    })()
+  );
   const [scs = [], scLoaded, scLoadError] = useK8sWatchResource<
     StorageClassResourceKind[]
   >({
@@ -192,8 +197,8 @@ export const VolumeHealthCard: React.FC<VolumeHealthCardProps> = ({
     const filter = pvcFilter(scs, pvcs, clusterNs);
 
     const rows = pvcs.reduce(
-      (acc, pvc) => [...acc, ...getUnhealthyRows(pvc, filter)],
-      [] as VolumeHealthRow[]
+      (acc: VolumeHealthRow[], pvc) => [...acc, ...getUnhealthyRows(pvc, filter)],
+      []
     );
 
     const pvcCount = new Set(
@@ -230,7 +235,7 @@ export const VolumeHealthCard: React.FC<VolumeHealthCardProps> = ({
         {
           columnName: '',
         },
-      ] as Column[],
+      ] satisfies Column<VolumeHealthRow>[],
       rowRenderer: (row: VolumeHealthRow) => getRow(row, t('View Events')),
     }),
     [t]
@@ -270,10 +275,12 @@ export const VolumeHealthCard: React.FC<VolumeHealthCardProps> = ({
       </CardHeader>
       <CardBody>
         {!loaded && (
+          /* SAFETY: React.memo erases Table's generic, so rawData needs
+           * an explicit type; the empty array is the skeleton placeholder. */
           <Table
             columns={columns}
-            rawData={[] as []}
-            rowRenderer={rowRenderer as any}
+            rawData={[] as VolumeHealthRow[]}
+            rowRenderer={rowRenderer}
             loaded={false}
             loadError={null}
             ariaLabel={t('Volume health table skeleton')}
@@ -310,8 +317,8 @@ export const VolumeHealthCard: React.FC<VolumeHealthCardProps> = ({
             </Flex>
             <Table
               columns={columns}
-              rawData={paginatedRows as []}
-              rowRenderer={rowRenderer as any}
+              rawData={paginatedRows}
+              rowRenderer={rowRenderer}
               loaded={loaded}
               loadError={loadError}
               ariaLabel={t('Volume health table')}

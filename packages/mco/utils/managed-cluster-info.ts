@@ -14,6 +14,7 @@ import {
   getResourceCondition,
 } from '@odf/shared/selectors';
 import { ConfigMapKind } from '@odf/shared/types';
+import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
 import { load } from 'js-yaml';
 import * as _ from 'lodash-es';
 import {
@@ -32,6 +33,13 @@ import {
 type ClusterToODFInfoMap = {
   [clusterId in string]: ODFConfigInfoType;
 };
+
+const isConfigMap = (
+  resource?: K8sResourceCommon
+): resource is ConfigMapKind =>
+  _.isObject(resource) &&
+  (!('data' in resource) ||
+    (_.isObject(resource.data) && Object.values(resource.data).every(_.isString)));
 
 const getODFInfo = (
   requiredODFVersion: string,
@@ -126,7 +134,7 @@ const clusterToODFInfoMapping = (
   mcvs: ACMManagedClusterViewKind[],
   requiredODFVersion: string
 ): ClusterToODFInfoMap =>
-  mcvs?.reduce((acc, mcv) => {
+  mcvs?.reduce<ClusterToODFInfoMap>((acc, mcv) => {
     const condition = getResourceCondition(
       mcv,
       MANAGED_CLUSTER_VIEW_PROCESSING
@@ -136,8 +144,8 @@ const clusterToODFInfoMapping = (
       return acc;
     }
 
-    const odfInfoConfig = mcv?.status?.result as ConfigMapKind;
-    const odfInfoConfigData = odfInfoConfig?.data || {};
+    const result = mcv?.status?.result;
+    const odfInfoConfigData = isConfigMap(result) ? result.data || {} : {};
     const [odfInfo, clients] = getODFInfo(
       requiredODFVersion,
       odfInfoConfigData
@@ -155,7 +163,7 @@ const clusterToODFInfoMapping = (
       acc[getNamespace(mcv)] = odfInfo;
     }
     return acc;
-  }, {} as ClusterToODFInfoMap);
+  }, {});
 
 export const getManagedClusterInfoTypes = (
   managedClusters: ACMManagedClusterKind[],

@@ -32,6 +32,7 @@ const getMetricForSystem = (
 const SystemCapacityCard: React.FC = () => {
   const { t } = useCustomTranslation();
   const [systems, systemsLoaded, systemsLoadError] = useWatchStorageSystems();
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [usedCapacity, errorUsedCapacity, loadingUsedCapacity] =
     useCustomPrometheusPoll({
       query: CAPACITY_QUERIES[StorageDashboard.USED_CAPACITY_FILE_BLOCK],
@@ -39,6 +40,7 @@ const SystemCapacityCard: React.FC = () => {
       basePath: usePrometheusBasePath(),
     });
 
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [totalCapacity, errorTotalCapacity, loadingTotalCapacity] =
     useCustomPrometheusPoll({
       query: CAPACITY_QUERIES[StorageDashboard.TOTAL_CAPACITY_FILE_BLOCK],

@@ -45,6 +45,7 @@ export const PrometheusUtilizationItem: React.FC<
   const { duration } = useUtilizationDuration();
   const defaultBasePath = usePrometheusBasePath();
 
+  // SAFETY: The receiving library accepts 'api/v1/query_range'; its published type does not expose this supported value.
   const [utilization, error, loading] = useCustomPrometheusPoll({
     query: utilizationQuery,
     endpoint: 'api/v1/query_range' as any,
@@ -104,6 +105,7 @@ type TotalUtilizationItemProps = UtilizationItemProps & {
 };
 
 const TotalUtilizationItem: React.FC<TotalUtilizationItemProps> = (props) => {
+  // SAFETY: The receiving library accepts 'api/v1/query_range'; its published type does not expose this supported value.
   const [total, totalError, totalLoading] = useCustomPrometheusPoll({
     query: props.totalQuery,
     endpoint: 'api/v1/query_range' as any,

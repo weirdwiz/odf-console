@@ -139,7 +139,7 @@ export const ClusterSidebar: React.FC<ClusterSidebarProps> = ({ resource }) => {
                       <LabelGroup numLabels={5}>
                         {Object.entries(labels).map(([key, value]) => (
                           <Label key={key} isCompact>
-                            {key}: {value as string}
+                            {key}: {value}
                           </Label>
                         ))}
                       </LabelGroup>

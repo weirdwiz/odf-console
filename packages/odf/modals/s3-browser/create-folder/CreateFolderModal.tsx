@@ -86,6 +86,7 @@ const CreateFolderModal: React.FC<CommonModalProps<CreateFolderModalProps>> = ({
     folderName,
     t
   );
+  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
   const providerType = s3Client.providerType as S3ProviderType;
 
   const onCreate = async (event) => {

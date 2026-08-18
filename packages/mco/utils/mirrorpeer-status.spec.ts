@@ -19,7 +19,7 @@ const peer = (phase?: MirrorPeerPhase, message?: string): MirrorPeerKind =>
   ({
     metadata: { name: 'mirrorpeer-test' },
     status: phase || message ? { phase, message } : undefined,
-  }) as MirrorPeerKind;
+  }) satisfies MirrorPeerKind;
 
 describe('mirrorpeer-status', () => {
   it('maps phase to a single MirrorPeerPairingStatus', () => {
@@ -71,7 +71,7 @@ describe('mirrorpeer-status', () => {
           },
         ],
       },
-    } as MirrorPeerKind;
+    } satisfies MirrorPeerKind;
 
     expect(getMirrorPeerPhase(configuringFailure)).toBe(
       MirrorPeerPhase.Configuring
@@ -102,7 +102,7 @@ describe('mirrorpeer-status', () => {
           },
         ],
       },
-    } as MirrorPeerKind;
+    } satisfies MirrorPeerKind;
 
     expect(getMirrorPeerPrimaryCondition(flapPeer)?.reason).toBe(
       MirrorPeerConditionReason.ValidationFailed
@@ -164,7 +164,7 @@ describe('mirrorpeer-status', () => {
           },
         ],
       },
-    } as MirrorPeerKind;
+    } satisfies MirrorPeerKind;
     expect(getMirrorPeerPairingStatus(recoverable)).toBe(
       MirrorPeerPairingStatus.FailedRecoverable
     );
@@ -186,7 +186,7 @@ describe('mirrorpeer-status', () => {
           },
         ],
       },
-    } as MirrorPeerKind;
+    } satisfies MirrorPeerKind;
     expect(getMirrorPeerPairingStatus(inProgress)).toBe(
       MirrorPeerPairingStatus.Progressing
     );

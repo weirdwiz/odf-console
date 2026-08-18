@@ -11,14 +11,14 @@ export const poolName: string = 'example.pool';
 export const replicaCount: string = '2';
 export const scName: string = 'testing-sc';
 
-export const poolMessage: {
-  [key in PoolProgress]?: string;
-} = {
+export const poolMessage = {
   [PoolProgress.FAILED]: `Pool "${poolName}" already exists`,
   [PoolProgress.CREATED]: `Pool ${poolName} was successfully created`,
   [PoolProgress.NOTALLOWED]:
     "Pool management tasks are not supported for default pool and ODF's external mode.",
   [PoolProgress.BOUNDED]: `${poolName} cannot be deleted. When a pool is bounded to PVC it cannot be deleted. Please detach all the resources from StorageClass(es):`,
+} satisfies {
+  [key in PoolProgress]?: string;
 };
 
 export const populateBlockPoolForm = () => {

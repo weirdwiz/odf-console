@@ -26,6 +26,7 @@ describe('Test getting started expandable card/grid (GettingStartedExpandableGri
     expect(screen.getByText(children)).toBeInTheDocument();
     expect(screen.getByText(children)).toBeVisible();
 
+    // SAFETY: The HTMLElement test value defines the members exercised by this test.
     const expandable = container.querySelector(
       '[data-test="getting-started-expandable"]'
     ) as HTMLElement;
@@ -53,6 +54,7 @@ describe('Test getting started expandable card/grid (GettingStartedExpandableGri
     expect(screen.getByText(children)).toBeInTheDocument();
     expect(screen.getByText(children)).not.toBeVisible();
 
+    // SAFETY: The HTMLElement test value defines the members exercised by this test.
     const expandable = container.querySelector(
       '[data-test="getting-started-expandable"]'
     ) as HTMLElement;

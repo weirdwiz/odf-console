@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useODFSystemFlagsSelector } from '@odf/core/redux';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,
@@ -41,13 +42,13 @@ export const RawCapacityCard: React.FC = () => {
   const [usedCapacityData, usedCapacityLoading, usedCapacityLoadError] =
     useCustomPrometheusPoll({
       query: queries[0],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
   const [availableData, availableLoading, availableError] =
     useCustomPrometheusPoll({
       query: queries[1],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 

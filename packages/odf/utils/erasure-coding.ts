@@ -26,8 +26,6 @@ export const isRecommendedScheme = (
   );
 };
 
-export const getErasureCodingNodeValidation = (
-  nodeCount: number
-): { valid: boolean } => ({
+export const getErasureCodingNodeValidation = (nodeCount: number) => ({
   valid: nodeCount >= ERASURE_CODING_MIN_NODES,
 });

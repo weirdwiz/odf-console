@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useODFSystemFlagsSelector } from '@odf/core/redux';
 import { getNamespace } from '@odf/shared';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import { EfficiencyItemBody } from '@odf/shared/dashboards/storage-efficiency/storage-efficiency-card-item';
 import {
   useCustomPrometheusPoll,
@@ -30,7 +31,7 @@ export const CompressionDetailsCard: React.FC = () => {
   const { t } = useCustomTranslation();
   const { obj } = React.useContext(BlockPoolDashboardContext);
 
-  const clusterNs = getNamespace(obj as any);
+  const clusterNs = getNamespace(obj);
   const { systemFlags } = useODFSystemFlagsSelector();
   const managedByOCS = systemFlags[clusterNs]?.ocsClusterName;
 
@@ -62,7 +63,7 @@ export const CompressionDetailsCard: React.FC = () => {
   const [poolCompressionSavings, savingsError, savingsLoading] =
     useCustomPrometheusPoll({
       query: queries[0],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
   const compressionSavings: PoolMetrics = getPerPoolMetrics(
@@ -74,7 +75,7 @@ export const CompressionDetailsCard: React.FC = () => {
   const [poolCompressionEligibility, eligibilityError, eligibilityLoading] =
     useCustomPrometheusPoll({
       query: queries[1],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
   const compressionEligibility: PoolMetrics = getPerPoolMetrics(
@@ -86,7 +87,7 @@ export const CompressionDetailsCard: React.FC = () => {
   const [poolCompressionRatio, ratioError, ratioLoading] =
     useCustomPrometheusPoll({
       query: queries[2],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
   const compressionRatio = getGaugeValue(poolCompressionRatio);

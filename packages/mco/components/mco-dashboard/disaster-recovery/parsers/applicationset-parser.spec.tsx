@@ -19,7 +19,10 @@ import {
   DRPolicyKind,
 } from '../../../../types';
 import { createRefFromK8Resource } from '../../../../utils';
-import { useApplicationSetParser } from './applicationset-parser';
+import {
+  applicationSetParserDependencies,
+  useApplicationSetParser,
+} from './applicationset-parser';
 
 let isUnProtectedApplicationTestCase = true;
 
@@ -259,24 +262,30 @@ const appResources2: ArgoApplicationSetResourceKind = {
 const managedClusters = [];
 const managedClusterLoaded = true;
 const managedClusterLoadError = null;
-
-jest.mock('@odf/mco/hooks/disaster-recovery', () => ({
-  __esModule: true,
-  useDisasterRecoveryResourceWatch: jest.fn(() => {
-    return [drResources1, true, ''];
-  }),
-}));
-
-jest.mock('@odf/mco/hooks/argo-application-set', () => ({
-  __esModule: true,
-  useArgoApplicationSetResourceWatch: jest.fn(() => {
-    if (isUnProtectedApplicationTestCase) {
-      return [appResources2, true, ''];
-    } else {
-      return [appResources1, true, ''];
-    }
-  }),
-}));
+jest
+  .spyOn(
+    applicationSetParserDependencies,
+    'useDisasterRecoveryResourceWatch'
+  )
+  .mockImplementation(
+    jest.fn(() => {
+      return [drResources1, true, ''];
+    })
+  );
+jest
+  .spyOn(
+    applicationSetParserDependencies,
+    'useArgoApplicationSetResourceWatch'
+  )
+  .mockImplementation(
+    jest.fn(() => {
+      if (isUnProtectedApplicationTestCase) {
+        return [appResources2, true, ''];
+      } else {
+        return [appResources1, true, ''];
+      }
+    })
+  );
 
 describe('useApplicationSetParser', () => {
   test('Application count with unprotected applications', async () => {

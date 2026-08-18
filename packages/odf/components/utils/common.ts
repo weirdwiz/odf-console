@@ -353,6 +353,7 @@ export const checkError = (
 
   // Check IP Compatibility
   const endpoints = _.find(parsedData, { name: 'rook-ceph-mon-endpoints' });
+  // SAFETY: The receiving library accepts endpoints; its published type does not expose this supported value.
   const ipAddr = (endpoints as any).data?.data
     ?.split('=')?.[1]
     ?.split(':')?.[0];
@@ -689,6 +690,7 @@ export const getOCSRequestData = ({
   }
   // Add forceful deployment configuration if enabled
   if (isNoProvisioner && enableForcefulDeployment) {
+    // SAFETY: This empty ManagedResourcesCephClusterKind accumulator receives only entries created by the reducer below.
     requestData.spec.managedResources.cephCluster = {
       ...(requestData.spec.managedResources.cephCluster ||
         ({} as ManagedResourcesCephClusterKind)),
@@ -713,6 +715,7 @@ const getNetworkField = (
     ?.map((cidr) => cidr?.trim())
     ?.filter(Boolean);
   if (networkType === NetworkType.HOST || networkType === NetworkType.NIC) {
+    // SAFETY: { network: { connections: { encryption: { enabled: isTransitEncryption comes from the owner of the StorageClusterKind['spec']['network'] contract used at this boundary.
     return {
       network: {
         connections: {

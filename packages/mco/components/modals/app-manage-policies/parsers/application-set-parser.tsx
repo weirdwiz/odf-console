@@ -29,12 +29,16 @@ import {
 import { ModalViewContext } from '../utils/reducer';
 import {
   ApplicationInfoType,
-  ApplicationType,
   DRPlacementControlType,
   DRPolicyType,
   ModalType,
   PVCQueryFilter,
 } from '../utils/types';
+
+export const applicationSetManageParserDependencies = {
+  useArgoApplicationSetResourceWatch,
+  useDisasterRecoveryResourceWatch,
+};
 
 const getApplicationSetResources = (
   appResource: ArgoApplicationSetKind,
@@ -75,22 +79,24 @@ const getApplicationSetResources = (
     loaded: drLoaded,
     loadError: drLoadError,
   },
-  overrides: {
-    ...(!isWatchApplication
-      ? {
-          applications: {
-            data: appResource,
-            loaded: true,
-            loadError: '',
-          },
-        }
-      : {}),
-    managedClusters: {
-      data: {},
-      loaded: true,
-      loadError: '',
-    },
-  },
+  overrides: (() => {
+    const value = {
+      managedClusters: {
+        data: {},
+        loaded: true,
+        loadError: '',
+      },
+    };
+    if (!isWatchApplication)
+      Object.assign(value, {
+        applications: {
+          data: appResource,
+          loaded: true,
+          loadError: '',
+        },
+      });
+    return value;
+  })(),
 });
 
 export const ApplicationSetParser: React.FC<ApplicationSetParserProps> = ({
@@ -101,11 +107,12 @@ export const ApplicationSetParser: React.FC<ApplicationSetParserProps> = ({
   modalType,
 }) => {
   const namespace = getNamespace(application);
-  const [drResources, drLoaded, drLoadError] = useDisasterRecoveryResourceWatch(
+  const [drResources, drLoaded, drLoadError] =
+    applicationSetManageParserDependencies.useDisasterRecoveryResourceWatch(
     getDRResources(namespace)
   );
   const [appSetResources, loaded, loadError] =
-    useArgoApplicationSetResourceWatch(
+    applicationSetManageParserDependencies.useArgoApplicationSetResourceWatch(
       getApplicationSetResources(
         application,
         namespace,
@@ -125,7 +132,7 @@ export const ApplicationSetParser: React.FC<ApplicationSetParserProps> = ({
   const { drPolicies } = drResources;
 
   const applicationInfo: ApplicationInfoType = React.useMemo(() => {
-    let applicationInfo: ApplicationInfoType = {};
+    let applicationInfo: ApplicationInfoType;
     if (loaded && !loadError) {
       // Today appset support maximum one placement, DRPC, DRPolicy per app.
       // When it support multi placement, need to change logic to,
@@ -180,7 +187,7 @@ export const ApplicationSetParser: React.FC<ApplicationSetParserProps> = ({
   const matchingPolicies: DRPolicyType[] = React.useMemo(
     () =>
       !_.isEmpty(applicationInfo)
-        ? getMatchingDRPolicies(applicationInfo as ApplicationType, drPolicies)
+        ? getMatchingDRPolicies(applicationInfo, drPolicies)
         : [],
     [applicationInfo, drPolicies]
   );

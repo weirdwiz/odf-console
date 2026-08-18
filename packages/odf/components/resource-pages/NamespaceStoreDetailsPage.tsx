@@ -77,6 +77,7 @@ const NamespaceStoreDetailsPage: React.FC<{}> = () => {
     );
   }, [memoizedResource]);
 
+  // SAFETY: The receiving library accepts NSDetails; its published type does not expose this supported value.
   return (
     <DetailsPage
       loaded={loaded && isODFNsLoaded}

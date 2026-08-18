@@ -1,5 +1,6 @@
 import React from 'react';
 import { screen, render, fireEvent } from '@testing-library/react';
+import * as TestDependency1 from 'lodash-es';
 import { AzureConfigure } from './azure-config';
 
 const state = {
@@ -30,17 +31,16 @@ const state = {
 };
 
 const dispatch = jest.fn();
-
-jest.mock('lodash-es', () => ({
-  ...jest.requireActual('lodash-es'),
-  cloneDeep: jest.fn((value) => value),
-}));
+jest
+  .spyOn(TestDependency1, 'cloneDeep')
+  .mockImplementation(jest.fn((value) => value));
 
 describe('AzureConfigure component', () => {
   it('renders correctly', () => {
     const { container } = render(
       <AzureConfigure state={state} dispatch={dispatch} />
     );
+    // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
     const serviceName = container.querySelector(
       '[data-test="kms-service-name-text"]'
     ) as HTMLInputElement;
@@ -68,6 +68,7 @@ describe('AzureConfigure component', () => {
       },
     });
 
+    // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
     const azureVaultURL = container.querySelector(
       '[data-test="azure-vault-url-text"]'
     ) as HTMLInputElement;
@@ -89,6 +90,7 @@ describe('AzureConfigure component', () => {
       },
     });
 
+    // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
     const clientID = container.querySelector(
       '[data-test="azure-client-id-text"]'
     ) as HTMLInputElement;
@@ -108,6 +110,7 @@ describe('AzureConfigure component', () => {
       },
     });
 
+    // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
     const tenantID = container.querySelector(
       '[data-test="azure-tenant-id-text"]'
     ) as HTMLInputElement;

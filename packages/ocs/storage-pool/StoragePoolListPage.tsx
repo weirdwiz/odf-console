@@ -9,6 +9,7 @@ import {
   CephFileSystemModel,
   ListPageFilterWrapper,
 } from '@odf/shared';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,
@@ -34,7 +35,6 @@ import {
   TableColumn,
   TableData,
   useActiveColumns,
-  WatchK8sResults,
   useListPageFilter,
   VirtualizedTable,
   useK8sWatchResources,
@@ -51,7 +51,6 @@ import {
   POOL_NEAR_FULL_THRESHOLD,
   POOL_FULL_THRESHOLD,
 } from '../constants';
-import { StoragePoolTableData } from '../dashboards/persistent-internal/pool-utilization-card/types';
 import { getPoolQuery, StorageDashboardQuery } from '../queries';
 import {
   StoragePoolKind,
@@ -376,7 +375,7 @@ const RowRenderer: React.FC<RowProps<StoragePool, CustomData>> = ({
       </TableData>
       <TableData {...tableColumnInfo[6]} activeColumnIDs={activeColumnIDs}>
         <PoolUtilizationDisplay
-          pool={obj as StoragePoolTableData}
+          pool={obj}
           usedCapacityDisplay={usedCapacityDisplay}
           utilizationPercentage={utilizationPercentage}
           isCritical={isCritical}
@@ -497,9 +496,7 @@ const StoragePoolListPage: React.FC = () => {
     useODFSystemFlagsSelector();
   const clusterName = systemFlags[clusterNs]?.ocsClusterName;
 
-  const response = useK8sWatchResources(
-    getResources(clusterName, clusterNs)
-  ) as WatchK8sResults<WatchType>;
+  const response = useK8sWatchResources(getResources(clusterName, clusterNs));
 
   const storageClasses = response.sc.data;
   const scLoaded = response.sc.loaded;
@@ -574,7 +571,7 @@ const StoragePoolList: React.FC<StoragePoolListProps> = ({
     useCustomPrometheusPoll(
       getValidPrometheusPollObj(
         {
-          endpoint: 'api/v1/query' as any,
+          endpoint: PrometheusEndpoint.QUERY,
           query: getPoolQuery(
             poolNames,
             StorageDashboardQuery.POOL_RAW_CAPACITY_USED,
@@ -590,7 +587,7 @@ const StoragePoolList: React.FC<StoragePoolListProps> = ({
     useCustomPrometheusPoll(
       getValidPrometheusPollObj(
         {
-          endpoint: 'api/v1/query' as any,
+          endpoint: PrometheusEndpoint.QUERY,
           query: getPoolQuery(
             poolNames,
             StorageDashboardQuery.POOL_MAX_CAPACITY_AVAILABLE,
@@ -609,7 +606,7 @@ const StoragePoolList: React.FC<StoragePoolListProps> = ({
   ] = useCustomPrometheusPoll(
     getValidPrometheusPollObj(
       {
-        endpoint: 'api/v1/query' as any,
+        endpoint: PrometheusEndpoint.QUERY,
         query: getPoolQuery(
           poolNames,
           StorageDashboardQuery.POOL_UTILIZATION_PERCENTAGE,
@@ -625,7 +622,7 @@ const StoragePoolList: React.FC<StoragePoolListProps> = ({
     useCustomPrometheusPoll(
       getValidPrometheusPollObj(
         {
-          endpoint: 'api/v1/query' as any,
+          endpoint: PrometheusEndpoint.QUERY,
           query: getPoolQuery(
             poolNames,
             StorageDashboardQuery.POOL_COMPRESSION_SAVINGS,

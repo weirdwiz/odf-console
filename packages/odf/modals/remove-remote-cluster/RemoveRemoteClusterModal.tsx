@@ -33,10 +33,11 @@ type RemoveRemoteClusterModalProps = CommonModalProps<{
   resource: RemoteClusterKind;
 }>;
 
-const getErrorMessage = (error: unknown): string =>
-  error instanceof Error
-    ? error.message
-    : (error as { message?: string })?.message || String(error);
+// SAFETY: The deletion client rejects with either Error or an object that has a message.
+const getErrorMessage = (cause: unknown): string =>
+  cause instanceof Error
+    ? cause.message
+    : (cause as { message?: string })?.message || String(cause);
 
 const RemoveRemoteClusterModal: React.FC<RemoveRemoteClusterModalProps> = ({
   isOpen,
@@ -74,6 +75,7 @@ const RemoveRemoteClusterModal: React.FC<RemoveRemoteClusterModalProps> = ({
       }
 
       failureMessage = t('Failed to list remote clusters');
+      // SAFETY: (await k8sList({ model: RemoteClusterModel, queryParams: { ns: IBM_SCA contains only entries produced for the RemoteClusterKind[] contract.
       const remoteClusters = (await k8sList({
         model: RemoteClusterModel,
         queryParams: { ns: IBM_SCALE_NAMESPACE },
@@ -87,6 +89,7 @@ const RemoveRemoteClusterModal: React.FC<RemoveRemoteClusterModalProps> = ({
         let localCluster: ClusterKind | undefined;
 
         try {
+          // SAFETY: (await k8sGet({ model: ClusterModel, name: IBM_SCALE_LOCAL_CLUSTER_NAM comes from the owner of the ClusterKind contract used at this boundary.
           localCluster = (await k8sGet({
             model: ClusterModel,
             name: IBM_SCALE_LOCAL_CLUSTER_NAME,

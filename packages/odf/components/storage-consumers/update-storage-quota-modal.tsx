@@ -47,6 +47,7 @@ const getStorageConsumerQuotaWithoutB = (quotaInGiB: number) => {
     units.dehumanize(quotaInGiB, 'binaryBytes').value,
     QuotaSize.Gi
   );
+  // SAFETY: { value: humanizedQuota.value, unit: humanizedQuota.unit, } comes from the owner of the StorageQuota contract used at this boundary.
   return {
     value: humanizedQuota.value,
     unit: humanizedQuota.unit,

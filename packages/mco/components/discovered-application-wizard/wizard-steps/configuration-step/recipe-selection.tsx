@@ -23,6 +23,8 @@ import {
 import './configuration-step.scss';
 import { RecipeParameterInput } from './recipe-parameter-input';
 
+export const recipeSelectionDependencies = { useACMSafeFetch };
+
 const getRecipeOptions = (
   searchResultItem: SearchResultItemType[]
 ): JSX.Element[] =>
@@ -60,7 +62,7 @@ export const RecipeSelection: React.FC<RecipeSelectionProps> = ({
 
   // ACM search proxy API call
   const [searchResult, searchError, searchLoaded] =
-    useACMSafeFetch(searchQuery);
+    recipeSelectionDependencies.useACMSafeFetch(searchQuery);
 
   const recipeOptions =
     searchLoaded && !searchError

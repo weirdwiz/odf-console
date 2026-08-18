@@ -15,9 +15,7 @@ export enum MirrorPeerPairingStatus {
   Ready = 'Ready',
 }
 
-export const MIRROR_PEER_PHASE_DISPLAY_TEXT = (
-  t: TFunction
-): { [key in MirrorPeerPhase]: string } => ({
+export const MIRROR_PEER_PHASE_DISPLAY_TEXT = (t: TFunction) => ({
   [MirrorPeerPhase.Initializing]: t('Initializing'),
   [MirrorPeerPhase.Configuring]: t('Configuring'),
   [MirrorPeerPhase.Ready]: t('Ready'),
@@ -64,9 +62,7 @@ export enum MirrorPeerPhaseMessage {
   MirrorPeerReady = 'Setup is completed',
 }
 
-export const MIRROR_PEER_PHASE_MESSAGE_DISPLAY_TEXT = (
-  t: TFunction
-): { [key in MirrorPeerPhaseMessage]: string } => ({
+export const MIRROR_PEER_PHASE_MESSAGE_DISPLAY_TEXT = (t: TFunction) => ({
   [MirrorPeerPhaseMessage.ValidationFailed]: t('Validation failed'),
   [MirrorPeerPhaseMessage.DeletionFailed]: t('Deletion failed'),
   [MirrorPeerPhaseMessage.DeletionInProgress]: t('Deletion is in progress'),

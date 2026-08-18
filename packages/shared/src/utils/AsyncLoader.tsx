@@ -1,6 +1,8 @@
 import * as React from 'react';
 
-type PromiseComponent = () => Promise<React.ComponentType>;
+type PromiseComponent<Props extends object> = () => Promise<
+  React.ComponentType<Props>
+>;
 
 enum AsyncComponentError {
   ComponentNotFound = 'COMPONENT_NOT_FOUND',
@@ -8,13 +10,19 @@ enum AsyncComponentError {
 
 const MAX_RETRY_BASE = 25;
 
-const sameLoader = (a: PromiseComponent, b: PromiseComponent) =>
-  a?.name === b?.name && (a || 'a').toString() === (b || 'b').toString();
+const sameLoader = <Props extends object>(
+  a: PromiseComponent<Props>,
+  b: PromiseComponent<Props>
+) => a?.name === b?.name && (a || 'a').toString() === (b || 'b').toString();
 
 // Todo: Improve this by having a proper basic loading component
 const EmptyComponent: React.FC = () => null;
 
-const loadComponentAt = (loader: PromiseComponent, setComponent, count = 0) =>
+const loadComponentAt = <Props extends object>(
+  loader: PromiseComponent<Props>,
+  setComponent: (component: React.ComponentType<Props>) => void,
+  count = 0
+) =>
   loader()
     .then((c) => {
       if (!c) {
@@ -37,18 +45,14 @@ const loadComponentAt = (loader: PromiseComponent, setComponent, count = 0) =>
       }
     });
 
-type UseAsynchronousLoading = (
-  loader: PromiseComponent
-) => [React.ComponentType, boolean];
-
-const useAsynchronousLoading: UseAsynchronousLoading = (
-  loader: PromiseComponent
-) => {
-  const Component = React.useRef<React.ComponentType>(null);
+const useAsynchronousLoading = <Props extends object>(
+  loader: PromiseComponent<Props>
+): [React.ComponentType<Props>, boolean] => {
+  const Component = React.useRef<React.ComponentType<Props>>(null);
   const [loadingStarted, setLoadingStarted] = React.useState(false);
   const [loaded, setLoaded] = React.useState(false);
 
-  const prevLoader = React.useRef<PromiseComponent>(null);
+  const prevLoader = React.useRef<PromiseComponent<Props>>(null);
 
   const setComponent = React.useCallback(
     (value) => {
@@ -72,18 +76,23 @@ const useAsynchronousLoading: UseAsynchronousLoading = (
   return [Component.current, loaded];
 };
 
-export const AsyncLoader: React.FC<AsyncComponentProps> = ({
-  loader,
-  LoadingComponent = EmptyComponent,
-  ...props
-}) => {
+export const AsyncLoader = <Props extends object>(
+  props: AsyncComponentProps<Props>
+): JSX.Element => {
+  const { loader, LoadingComponent = EmptyComponent } = props;
   const [Component, loaded] = useAsynchronousLoading(loader);
+  const componentProps = { ...props };
+  Reflect.deleteProperty(componentProps, 'loader');
+  Reflect.deleteProperty(componentProps, 'LoadingComponent');
 
-  return loaded ? <Component {...props} /> : <LoadingComponent />;
+  return loaded ? (
+    React.createElement(Component, componentProps)
+  ) : (
+    <LoadingComponent />
+  );
 };
 
-type AsyncComponentProps = {
-  loader: PromiseComponent;
+type AsyncComponentProps<Props extends object> = {
+  loader: PromiseComponent<Props>;
   LoadingComponent?: React.FC;
-  [key: string]: any;
-};
+} & Props;

@@ -93,7 +93,9 @@ const EmptyRowMessage: React.FC = () => {
   );
 };
 
-const UsersTableRow: React.FC<RowComponentType<IamUserCrFormat>> = ({
+const UsersTableRow: React.FC<
+  RowComponentType<IamUserCrFormat, RowExtraPropsType>
+> = ({
   row: user,
   rowIndex,
   extraProps,
@@ -106,7 +108,7 @@ const UsersTableRow: React.FC<RowComponentType<IamUserCrFormat>> = ({
     setFavorites,
     triggerRefresh,
     iamClient,
-  }: RowExtraPropsType = extraProps;
+  } = extraProps;
 
   const userName = user.UserName || DASH;
 
@@ -174,6 +176,7 @@ export const UsersListTable: React.FC<UsersListTableProps> = ({
   );
   const launcher = useModalWrapper();
 
+  // SAFETY: allUsers contains only entries produced for the [] contract.
   return (
     <ComposableTable
       rows={filteredUsers}

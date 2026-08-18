@@ -17,14 +17,30 @@ type MCOStyleNodeProps = {
   element: Node;
 } & Partial<WithSelectionProps & { hover?: boolean }>;
 
+type MCOStyleNodeElement = Pick<Node, 'getData' | 'getDimensions'>;
+
+type NodeRendererProps<Element extends MCOStyleNodeElement> = Omit<
+  React.ComponentProps<typeof DefaultNode>,
+  'element'
+> & {
+  element: Element;
+};
+
+type MCOStyleNodeViewProps<Element extends MCOStyleNodeElement> = {
+  element: Element;
+  detailsLevel: ScaleDetailsLevel;
+  NodeComponent: React.ComponentType<NodeRendererProps<Element>>;
+} & Partial<WithSelectionProps & { hover?: boolean }>;
+
 export const ICON_SIZE = 45;
 
-const MCOStyleNodeComponent: React.FC<MCOStyleNodeProps> = ({
+export const MCOStyleNodeView = <Element extends MCOStyleNodeElement>({
   element,
+  detailsLevel,
+  NodeComponent,
   ...rest
-}) => {
+}: MCOStyleNodeViewProps<Element>) => {
   const data = element.getData();
-  const detailsLevel = useDetailsLevel();
   const { width, height } = element.getDimensions();
 
   const isHealthy = validateManagedClusterCondition(
@@ -40,7 +56,7 @@ const MCOStyleNodeComponent: React.FC<MCOStyleNodeProps> = ({
   const showLabel = rest.hover || detailsLevel !== ScaleDetailsLevel.low;
 
   return (
-    <DefaultNode
+    <NodeComponent
       element={element}
       scaleLabel={false}
       showLabel={showLabel}
@@ -57,8 +73,20 @@ const MCOStyleNodeComponent: React.FC<MCOStyleNodeProps> = ({
       >
         <TopologyIcon width={ICON_SIZE} height={ICON_SIZE} />
       </g>
-    </DefaultNode>
+    </NodeComponent>
   );
 };
+
+const DefaultNodeRenderer: React.FC<NodeRendererProps<Node>> = (props) => (
+  <DefaultNode {...props} />
+);
+
+const MCOStyleNodeComponent: React.FC<MCOStyleNodeProps> = (props) => (
+  <MCOStyleNodeView<Node>
+    {...props}
+    detailsLevel={useDetailsLevel()}
+    NodeComponent={DefaultNodeRenderer}
+  />
+);
 
 export const MCOStyleNode = observer(MCOStyleNodeComponent);

@@ -27,17 +27,17 @@ export enum DiskStates {
   Unknown = 'Unknown',
 }
 
-export const DISK_TYPES: {
-  [key: string]: {
-    property: keyof typeof DiskMechanicalProperties;
-  };
-} = {
+export const DISK_TYPES = {
   [DiskType.SSD]: {
     property: 'NonRotational',
   },
   [DiskType.HDD]: {
     property: 'Rotational',
   },
+} satisfies {
+  [key: string]: {
+    property: keyof typeof DiskMechanicalProperties;
+  };
 };
 
 export type LocalVolumeSetKind = K8sResourceCommon & {

@@ -36,9 +36,13 @@ const getSharedVMGroupsColumns = (t: TFunction<string>) => [
   { columnName: t('Action') },
 ];
 
+type SharedVMGroupsRowExtraProps = {
+  onClick: (placementControlInfo: DRPlacementControlType) => void;
+};
+
 // Row component for the table
 const SharedVMGroupsTableRow: React.FC<
-  RowComponentType<DRPlacementControlType>
+  RowComponentType<DRPlacementControlType, SharedVMGroupsRowExtraProps>
 > = ({ row: placementControlInfo, extraProps: { onClick } }) => {
   const { t } = useCustomTranslation();
 
@@ -94,7 +98,7 @@ export const SharedVMGroupsTable: React.FC<SharedVMGroupsTableProps> = ({
   };
 
   return (
-    <SelectableTable<DRPlacementControlType>
+    <SelectableTable<DRPlacementControlType, SharedVMGroupsRowExtraProps>
       columns={getSharedVMGroupsColumns(t)}
       rows={sharedVMGroups}
       RowComponent={SharedVMGroupsTableRow}
@@ -117,10 +121,10 @@ const getSharedVMGroupColumns = (t: TFunction<string>) => [
 
 // Row component for the table
 const sharedVMGroupTableRow = (vmName: string, index: number) => [
-  <>
-    <ResourceIcon resourceModel={VirtualMachineModel} key={index} />
+  <React.Fragment key={index}>
+    <ResourceIcon resourceModel={VirtualMachineModel} />
     {vmName}
-  </>,
+  </React.Fragment>,
 ];
 
 // Main component for displaying the table
@@ -132,8 +136,8 @@ export const ViewSharedVMGroupTable: React.FC<ViewSharedVMGroupTableProps> = ({
   return (
     <Table
       columns={getSharedVMGroupColumns(t)}
-      rawData={sharedVMGroup.vmSharedGroup as []}
-      rowRenderer={sharedVMGroupTableRow as any}
+      rawData={sharedVMGroup.vmSharedGroup}
+      rowRenderer={sharedVMGroupTableRow}
       ariaLabel={t('Virtual machines')}
       variant={TableVariant.compact}
     />

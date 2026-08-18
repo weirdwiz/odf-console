@@ -100,7 +100,7 @@ const shouldShowSyncDetails = ({
   return false;
 };
 
-const getStatusIcon = (status?: DRStatus): JSX.Element => {
+const getStatusIcon = (status?: string): JSX.Element => {
   const iconMap = {
     [DRStatus.Critical]: <RedExclamationCircleIcon />,
     [DRStatus.Warning]: <YellowExclamationTriangleIcon />,
@@ -220,7 +220,7 @@ const SyncStatus: React.FC<{
         label,
         value: value || t('No data available'),
       })}
-      icon={getStatusIcon(status as any)}
+      icon={getStatusIcon(status)}
     />
   );
 };

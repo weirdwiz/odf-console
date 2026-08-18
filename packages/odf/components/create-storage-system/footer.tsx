@@ -473,6 +473,7 @@ export const CreateStorageSystemFooter: React.FC<
   const [requestError, setRequestError] = React.useState('');
   const [showErrorAlert, setShowErrorAlert] = React.useState(false);
 
+  // SAFETY: activeStep.name comes from the owner of the string contract used at this boundary.
   const stepName = activeStep.name as string;
   const { deployment } = state.backingStorage;
   const { isDbBackup } = state.optionalSettings;

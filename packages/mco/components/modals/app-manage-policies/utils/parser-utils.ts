@@ -30,6 +30,7 @@ import {
   ApplicationType,
   DRPlacementControlType,
   DRInfoType,
+  DRPolicyType,
   PlacementType,
   PVCQueryFilter,
 } from './types';
@@ -39,35 +40,40 @@ const getPVCSelector = (pvcSelector: Selector): string[] => {
   return convertExpressionToLabel(matchExpressions) || arrayify(matchLabels);
 };
 
-const getDRPolicyInfo = (drPolicy: DRPolicyKind, assignedOn?: string) =>
+const getDRPolicyInfo = (
+  drPolicy: DRPolicyKind,
+  assignedOn?: string
+): DRPolicyType | undefined =>
   !_.isEmpty(drPolicy)
-    ? {
-        apiVersion: drPolicy.apiVersion,
-        kind: drPolicy.kind,
-        metadata: drPolicy.metadata,
-        isValidated: isDRPolicyValidated(drPolicy),
-        schedulingInterval: drPolicy.spec.schedulingInterval,
-        replicationType: getReplicationType(drPolicy),
-        drClusters: drPolicy.spec.drClusters,
-        ...(!!assignedOn ? { assignedOn } : {}),
-      }
-    : {};
+    ? (() => {
+        const value = {
+          apiVersion: drPolicy.apiVersion,
+          kind: drPolicy.kind,
+          metadata: drPolicy.metadata,
+          isValidated: isDRPolicyValidated(drPolicy),
+          schedulingInterval: drPolicy.spec.schedulingInterval,
+          replicationType: getReplicationType(drPolicy),
+          drClusters: drPolicy.spec.drClusters,
+        };
+        if (!!assignedOn) Object.assign(value, { assignedOn });
+        return value;
+      })()
+    : undefined;
 
 export const generateDRInfo = (
   drPolicy: DRPolicyKind,
   drpcInfo?: DRPlacementControlType[]
-): DRInfoType | {} =>
-  !_.isEmpty(drPolicy) && !_.isEmpty(drpcInfo)
-    ? {
-        drPolicyInfo: getDRPolicyInfo(
-          drPolicy,
-          getLatestDate(
-            drpcInfo.map((drpc) => drpc.metadata?.creationTimestamp)
-          )
-        ),
-        placementControlInfo: drpcInfo,
-      }
-    : {};
+): DRInfoType | undefined => {
+  if (_.isEmpty(drPolicy) || _.isEmpty(drpcInfo)) return undefined;
+
+  const drPolicyInfo = getDRPolicyInfo(
+    drPolicy,
+    getLatestDate(drpcInfo.map((drpc) => drpc.metadata?.creationTimestamp))
+  );
+  return drPolicyInfo
+    ? { drPolicyInfo, placementControlInfo: drpcInfo }
+    : undefined;
+};
 
 export const generatePlacementInfo = (
   placement: ACMPlacementType,
@@ -118,7 +124,7 @@ export const generateApplicationInfo = (
   application: K8sResourceCommon,
   workloadNamespace: string,
   plsInfo: PlacementType[],
-  drInfo: DRInfoType | {},
+  drInfo: DRInfoType | undefined,
   pvcQueryFilter: PVCQueryFilter,
   discoveredVMPVCs?: string[]
 ): ApplicationType => ({

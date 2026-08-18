@@ -1,26 +1,27 @@
 import { BackendType, ReplicationType } from '@odf/mco/constants';
 import { ManagedClusterInfoType, MirrorPeerKind } from '@odf/mco/types';
 import {
-  k8sCreate,
-  k8sDelete,
-  k8sGet,
-  k8sUpdate,
-} from '@openshift-console/dynamic-plugin-sdk';
-import { createPolicyPromises } from './k8s-utils';
+  createPolicyPromises,
+  drPolicyK8sDependencies,
+} from './k8s-utils';
 import { drPolicyInitialState, DRPolicyState } from './reducer';
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  k8sGet: jest.fn(),
-  k8sCreate: jest.fn(),
-  k8sUpdate: jest.fn(),
-  k8sDelete: jest.fn(),
-}));
-
-const mockK8sGet = k8sGet as jest.Mock;
-const mockK8sCreate = k8sCreate as jest.Mock;
-const mockK8sUpdate = k8sUpdate as jest.Mock;
-const mockK8sDelete = k8sDelete as jest.Mock;
+const mockCreateOrUpdate = jest.spyOn(
+  drPolicyK8sDependencies,
+  'createOrUpdate'
+);
+const mockK8sGet = jest
+  .spyOn(drPolicyK8sDependencies, 'k8sGet')
+  .mockImplementation(jest.fn());
+const mockK8sCreate = jest
+  .spyOn(drPolicyK8sDependencies, 'k8sCreate')
+  .mockImplementation(jest.fn());
+const mockK8sUpdate = jest
+  .spyOn(drPolicyK8sDependencies, 'k8sUpdate')
+  .mockImplementation(jest.fn());
+const mockK8sDelete = jest
+  .spyOn(drPolicyK8sDependencies, 'k8sDelete')
+  .mockImplementation(jest.fn());
 
 const notFound = { response: { status: 404 } };
 const forbidden = { response: { status: 403 } };
@@ -76,7 +77,7 @@ const peerItem = (clusterName: string) => ({
 const existingMirrorPeer = {
   metadata: { name: 'mirrorpeer-existing' },
   spec: { items: [peerItem('east-1'), peerItem('west-1')] },
-} as MirrorPeerKind;
+} satisfies MirrorPeerKind;
 
 const existingPolicy = {
   metadata: { name: 'policy-1', uid: 'uid-1', resourceVersion: '1' },
@@ -93,6 +94,38 @@ const resolveCreate = ({ model, data }) =>
 describe('createPolicyPromises DRPolicy create vs update detection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCreateOrUpdate.mockImplementation(
+      async ({ model, name, namespace, mutate, mutationDetails }) => {
+        try {
+          const current = await mockK8sGet({ model, name, ns: namespace });
+          const result = await mockK8sUpdate({
+            model,
+            data: mutate(current),
+          });
+          mutationDetails.isUpdated = true;
+          return result;
+        } catch (error) {
+          if (error?.response?.status !== 404) throw error;
+          try {
+            const result = await mockK8sCreate({
+              model,
+              data: mutate(null),
+            });
+            mutationDetails.isUpdated = false;
+            return result;
+          } catch (createError) {
+            if (createError?.response?.status !== 409) throw createError;
+            const current = await mockK8sGet({ model, name, ns: namespace });
+            const result = await mockK8sUpdate({
+              model,
+              data: mutate(current),
+            });
+            mutationDetails.isUpdated = true;
+            return result;
+          }
+        }
+      }
+    );
     mockK8sCreate.mockImplementation(({ data }) => Promise.resolve(data));
     mockK8sUpdate.mockImplementation(({ data }) => Promise.resolve(data));
     mockK8sDelete.mockResolvedValue({});
@@ -177,7 +210,7 @@ describe('createPolicyPromises DRPolicy create vs update detection', () => {
           },
         ],
       },
-    } as MirrorPeerKind;
+    } satisfies MirrorPeerKind;
 
     await expect(
       createPolicyPromises(state, [staleMirrorPeer])

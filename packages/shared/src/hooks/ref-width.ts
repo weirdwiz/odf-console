@@ -28,6 +28,7 @@ const useRefWidth = () => {
     width !== clientWidth && setWidth(clientWidth);
   }, [clientWidth, width]);
 
+  // SAFETY: React invokes this handler from the rendered [React.Ref<HTMLDivElement>, number] control.
   return [setRef, width] as [React.Ref<HTMLDivElement>, number];
 };
 

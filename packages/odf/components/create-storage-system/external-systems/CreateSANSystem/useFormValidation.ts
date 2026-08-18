@@ -9,21 +9,11 @@ import {
   UseFormHandleSubmit,
   UseFormWatch,
   UseFormGetValues,
-  FieldValues,
 } from 'react-hook-form';
 import * as Yup from 'yup';
 
 const LUN_GROUP_NAME_MAX_LENGTH = 63;
 const LUN_GROUP_NAME_MIN_LENGTH = 1;
-
-export type SANSystemFormSchema = Yup.ObjectSchema<{
-  lunGroupName: Yup.StringSchema;
-  imageRegistryUrl: Yup.StringSchema;
-  imageRepositoryName: Yup.StringSchema;
-  secretKey: Yup.StringSchema;
-  caCertificateSecret: Yup.StringSchema;
-  privateKeySecret: Yup.StringSchema;
-}>;
 
 export type SANSystemFormData = {
   lunGroupName: string;
@@ -34,6 +24,8 @@ export type SANSystemFormData = {
   privateKeySecret: string;
 };
 
+export type SANSystemFormSchema = Yup.ObjectSchema<SANSystemFormData>;
+
 export type SANSystemFormValidation = {
   formSchema: SANSystemFormSchema;
   fieldRequirements: {
@@ -41,7 +33,7 @@ export type SANSystemFormValidation = {
     imageRegistryUrl: string[];
     imageRepositoryName: string[];
   };
-  control: Control<FieldValues>;
+  control: Control<SANSystemFormData>;
   handleSubmit: UseFormHandleSubmit<SANSystemFormData>;
   formState: { isSubmitted: boolean };
   watch: UseFormWatch<SANSystemFormData>;
@@ -153,7 +145,7 @@ const useSANSystemFormValidation = (
     });
 
     return {
-      formSchema: formSchema as unknown as SANSystemFormSchema,
+      formSchema,
       fieldRequirements: {
         lunGroupName: Object.values(lunGroupNameFieldRequirements),
         imageRegistryUrl: [
@@ -165,7 +157,7 @@ const useSANSystemFormValidation = (
     };
   }, [t, existingNames, showRegistrySection]);
 
-  const resolver = useYupValidationResolver(formSchema) as any;
+  const resolver = useYupValidationResolver<SANSystemFormData>(formSchema);
 
   const {
     control,
@@ -173,7 +165,7 @@ const useSANSystemFormValidation = (
     formState: { isSubmitted },
     watch,
     getValues,
-  } = useForm({
+  } = useForm<SANSystemFormData>({
     ...formSettings,
     resolver,
     defaultValues: {
@@ -189,11 +181,11 @@ const useSANSystemFormValidation = (
   return {
     formSchema,
     fieldRequirements,
-    control: control as Control<FieldValues>,
-    handleSubmit: handleSubmit as UseFormHandleSubmit<SANSystemFormData>,
+    control,
+    handleSubmit,
     formState: { isSubmitted },
-    watch: watch as unknown as UseFormWatch<SANSystemFormData>,
-    getValues: getValues as unknown as UseFormGetValues<SANSystemFormData>,
+    watch,
+    getValues,
   };
 };
 

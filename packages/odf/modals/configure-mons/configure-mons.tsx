@@ -82,6 +82,7 @@ const LowMonAlertModal: ModalComponent = ({ closeModal }) => {
       });
   };
 
+  // SAFETY: The receiving library accepts errorMessage; its published type does not expose this supported value.
   return (
     <Modal
       onClose={closeModal}

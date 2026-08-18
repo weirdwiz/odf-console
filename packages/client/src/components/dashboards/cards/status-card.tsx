@@ -23,6 +23,7 @@ import {
 } from '@patternfly/react-core';
 import '../../../../style.scss';
 
+// SAFETY: HealthBodyBase comes from the owner of the React.FC<React.PropsWithChildren<{}>> contract used at this boundary.
 const HealthBody = HealthBodyBase as React.FC<React.PropsWithChildren<{}>>;
 
 const clientResource: WatchK8sResource = {

@@ -41,6 +41,8 @@ const getModalText = (t: TFunction) => ({
   },
 });
 
+export const failoverRelocateModalDependencies = { k8sPatch };
+
 export const FailoverRelocateModal: React.FC<FailoverRelocateModalProps> = (
   props
 ) => {
@@ -83,7 +85,7 @@ export const FailoverRelocateModal: React.FC<FailoverRelocateModalProps> = (
             : placementControl?.targetClusterName,
       },
     ];
-    k8sPatch({
+    failoverRelocateModalDependencies.k8sPatch({
       model: DRPlacementControlModel,
       resource: {
         metadata: {

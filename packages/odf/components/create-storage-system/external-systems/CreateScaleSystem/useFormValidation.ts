@@ -27,21 +27,6 @@ const USERNAME_MIN_LENGTH = 1;
 const PORT_MIN = 1;
 const PORT_MAX = 65535;
 
-export type ScaleSystemFormSchema = Yup.ObjectSchema<
-  {
-    name: Yup.StringSchema;
-    'mandatory-endpoint-host': Yup.StringSchema;
-    'mandatory-endpoint-port': Yup.StringSchema;
-    'optional-endpoint-1-host': Yup.StringSchema;
-    'optional-endpoint-1-port': Yup.StringSchema;
-    'optional-endpoint-2-host': Yup.StringSchema;
-    'optional-endpoint-2-port': Yup.StringSchema;
-    userName: Yup.StringSchema;
-    password: Yup.StringSchema;
-    fileSystemName: Yup.StringSchema;
-  } & Record<keyof ScaleEncryptionFormData, Yup.StringSchema>
->;
-
 export type ScaleSystemFormData = {
   name: string;
   'mandatory-endpoint-host': string;
@@ -54,6 +39,8 @@ export type ScaleSystemFormData = {
   password: string;
   fileSystemName: string;
 } & ScaleEncryptionFormData;
+
+export type ScaleSystemFormSchema = Yup.ObjectSchema<ScaleSystemFormData>;
 
 export type ScaleSystemFormValidation = {
   formSchema: ScaleSystemFormSchema;
@@ -228,7 +215,7 @@ const useScaleSystemFormValidation = (
     });
 
     return {
-      formSchema: formSchema as unknown as ScaleSystemFormSchema,
+      formSchema,
       fieldRequirements: {
         name: nameFieldRequirements,
         hostname: hostnameFieldRequirements,
@@ -240,7 +227,7 @@ const useScaleSystemFormValidation = (
     };
   }, [t, existingFileSystemNames, encryptionEnabled]);
 
-  const resolver = useYupValidationResolver(formSchema) as any;
+  const resolver = useYupValidationResolver<ScaleSystemFormData>(formSchema);
 
   const {
     control,
@@ -248,7 +235,7 @@ const useScaleSystemFormValidation = (
     formState: { isSubmitted },
     watch,
     getValues,
-  } = useForm({
+  } = useForm<ScaleSystemFormData>({
     ...formSettings,
     resolver,
     defaultValues: {
@@ -266,6 +253,7 @@ const useScaleSystemFormValidation = (
     },
   });
 
+  // SAFETY: Object.keys( scaleEncryptionDefaultValues ) contains only entries produced for the (keyof ScaleEncryptionFormData)[] contract.
   const encryptionFieldNames = Object.keys(
     scaleEncryptionDefaultValues
   ) as (keyof ScaleEncryptionFormData)[];

@@ -35,8 +35,9 @@ const useIamUserFormValidation = (): IamUserFormValidation => {
         .transform((value: string) => (!!value ? value.trim() : '')),
     });
 
+    // SAFETY: userFormSchema as unknown comes from the owner of the IamUserFormSchema contract used at this boundary.
     return {
-      userFormSchema: userFormSchema as unknown as IamUserFormSchema,
+      userFormSchema: userFormSchema as IamUserFormSchema,
       fieldRequirements,
     };
   }, [t]);

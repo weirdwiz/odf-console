@@ -69,6 +69,7 @@ const DeleteLifecycleRuleModal: React.FC<
         });
       } catch (err) {
         if (isNoLifecycleRuleError(err)) {
+          // SAFETY: { Rules: [], } comes from the owner of the GetBucketLifecycleConfigurationCommandOutput contract used at this boundary.
           latestRules = {
             Rules: [],
           } as GetBucketLifecycleConfigurationCommandOutput;

@@ -12,29 +12,28 @@ import {
   TableVariant,
 } from '@patternfly/react-table';
 
-export type Column = {
+export type Column<T = unknown> = {
   columnName: string;
   className?: string;
-  sortFunction?: (a: any, b: any, c: SortByDirection) => any;
+  sortFunction?: (a: T, b: T, direction: SortByDirection) => number;
 };
 
-export type RowData = [];
+export type RowData = React.ReactNode[];
 
-type TableProps = {
-  columns: Column[];
-  rowRenderer: (rawData: []) => RowData;
-  rawData: [];
+export type TableProps<T> = {
+  columns: Column<T>[];
+  rowRenderer: (rawData: T, index: number) => RowData;
+  rawData: T[];
   ariaLabel: string;
   loaded?: boolean;
-  loadError?: any;
-  unfilteredData?: [];
+  loadError?: unknown;
+  unfilteredData?: T[];
   noDataMsg?: React.FC;
   emptyRowMessage?: React.FC;
   variant?: TableVariant;
 };
 
-const Table: React.FC<TableProps> = React.memo(
-  ({
+const TableComponent = <T, >({
     ariaLabel,
     columns,
     rawData,
@@ -45,7 +44,7 @@ const Table: React.FC<TableProps> = React.memo(
     noDataMsg,
     emptyRowMessage,
     variant,
-  }) => {
+  }: TableProps<T>) => {
     const [sortIndex, setSortIndex] = React.useState(-1);
     const [sortDirection, setSortDirection] = React.useState<SortByDirection>(
       SortByDirection.asc
@@ -63,7 +62,8 @@ const Table: React.FC<TableProps> = React.memo(
     const sortedData =
       sortIndex !== -1
         ? rawData?.sort((a, b) => {
-            return columns[sortIndex].sortFunction(a, b, sortDirection);
+            const sortFunction = columns[sortIndex].sortFunction;
+            return sortFunction ? sortFunction(a, b, sortDirection) : 0;
           })
         : rawData;
     const rowData = sortedData?.length > 0 ? sortedData.map(rowRenderer) : [];
@@ -122,7 +122,8 @@ const Table: React.FC<TableProps> = React.memo(
         </PfTable>
       </StatusBox>
     );
-  }
-);
+  };
+
+const Table = React.memo(TableComponent);
 
 export default Table;

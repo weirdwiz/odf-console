@@ -205,6 +205,11 @@ const DRActionReadiness = ({ canInitiate }: { canInitiate: boolean }) => {
   );
 };
 
+export const failoverRelocateModalBodyDependencies = {
+  mcoDocVersion,
+  useDocVersion,
+};
+
 export const FailoverRelocateModalBody: React.FC<
   FailoverRelocateModalBodyProps
 > = (props) => {
@@ -224,7 +229,8 @@ export const FailoverRelocateModalBody: React.FC<
   const [errorMessage, setErrorMessage] = React.useState<ErrorMessageType>();
   const placement = placementControls?.[0];
 
-  const acmDocVersion = useDocVersion({
+  const acmDocVersion =
+    failoverRelocateModalBodyDependencies.useDocVersion({
     defaultDocVersion: ACM_DEFAULT_DOC_VERSION,
     specName: ACM_OPERATOR_SPEC_NAME,
   });
@@ -332,7 +338,7 @@ export const FailoverRelocateModalBody: React.FC<
             message={
               ErrorMessages(
                 t,
-                mcoDocVersion,
+                failoverRelocateModalBodyDependencies.mcoDocVersion,
                 acmDocVersion,
                 placement?.invalidDRPolicy
               )[errorMessage]

@@ -31,6 +31,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { isFunction } from 'lodash-es';
 import { NOOBAA_AVAILABLE_STORAGE_CLASSES_HEADER } from './constants';
 import {
   CreateBucket,
@@ -129,6 +130,7 @@ export class S3Commands extends S3Client {
     command.middlewareStack.add(
       (next) => async (args) => {
         const result = await next(args);
+        // SAFETY: result?.response contains only entries produced for the { headers?: Record<string, string> } contract.
         responseHeaders =
           (result?.response as { headers?: Record<string, string> })?.headers ||
           {};
@@ -221,12 +223,11 @@ export class S3Commands extends S3Client {
   getUploader = (file: File, key: string, bucketName: string): Upload => {
     const uploader = new Upload({
       client: this,
-      params: {
-        Bucket: bucketName,
-        Key: key,
-        Body: file,
-        ...(file.type ? { ContentType: file.type } : {}),
-      },
+      params: (() => {
+        const value = { Bucket: bucketName, Key: key, Body: file };
+        if (file.type) Object.assign(value, { ContentType: file.type });
+        return value;
+      })(),
       partSize: 5 * 1024 * 1024,
       queueSize: 4,
     });
@@ -244,7 +245,8 @@ export const dataPathSeparationProxy = (
   return new Proxy(managementOpsClient, {
     get(target, prop) {
       const value = target[prop];
-      if (typeof value !== 'function') return value;
+      if (!isFunction(value)) return value;
+      // SAFETY: prop comes from the owner of the string contract used at this boundary.
       const isDataOp =
         !!dataOpsClient && DATA_OPERATION_COMMANDS.includes(prop as string);
       const client = isDataOp ? dataOpsClient : target;

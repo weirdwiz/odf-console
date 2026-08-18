@@ -63,14 +63,14 @@ export type ApplicationType = K8sResourceCommon & {
   // Cluster info, Only Subscription application can have more than one placements
   placements: PlacementType[];
   // Disaster recovery info
-  drInfo?: DRInfoType | {};
+  drInfo?: DRInfoType;
   // ACM search API filter to read application PVCs
   pvcQueryFilter: PVCQueryFilter;
   // List of discovered VM PVCs
   discoveredVMPVCs?: string[];
 };
 
-export type ApplicationInfoType = ApplicationType | {};
+export type ApplicationInfoType = ApplicationType | undefined;
 
 export enum ModalType {
   Application = 'Application',

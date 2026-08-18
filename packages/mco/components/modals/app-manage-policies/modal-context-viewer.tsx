@@ -11,8 +11,6 @@ import {
 } from './utils/reducer';
 import {
   ApplicationInfoType,
-  ApplicationType,
-  DRInfoType,
   DRPlacementControlType,
   DRPolicyType,
   ModalType,
@@ -53,13 +51,13 @@ export const ModalContextViewer: React.FC<ModalContextViewerProps> = ({
     []
   );
 
-  const application = applicationInfo as ApplicationType;
+  const application = applicationInfo;
 
   const renderView = () => {
     if (state.modalViewContext === ModalViewContext.MANAGE_POLICY_VIEW) {
       return (
         <ManagePolicyView
-          drInfo={application?.drInfo as DRInfoType}
+          drInfo={application?.drInfo}
           workloadNamespace={application?.workloadNamespace}
           eligiblePolicies={matchingPolicies}
           appType={application?.type}
@@ -97,7 +95,7 @@ export const ModalContextViewer: React.FC<ModalContextViewerProps> = ({
       return (
         <VolumeConsistencyGroupView
           setModalContext={setModalContext}
-          drInfo={application?.drInfo as DRInfoType}
+          drInfo={application?.drInfo}
         />
       );
     }

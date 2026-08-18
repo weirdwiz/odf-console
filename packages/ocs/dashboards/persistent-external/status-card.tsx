@@ -3,7 +3,7 @@ import { useGetExternalClusterDetails } from '@odf/core/redux/utils';
 import { cephClusterResource } from '@odf/core/resources';
 import { getResourceInNs as getCephClusterInNs } from '@odf/core/utils';
 import { getCephHealthState } from '@odf/ocs/utils';
-import { K8sResourceKind, CephClusterKind } from '@odf/shared/types';
+import { CephClusterKind } from '@odf/shared/types';
 import { useCustomTranslation } from '@odf/shared/useCustomTranslationHook';
 import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import { HealthItem } from '@openshift-console/dynamic-plugin-sdk-internal';
@@ -20,14 +20,14 @@ import '../../style.scss';
 export const StatusCard: React.FC = () => {
   const { t } = useCustomTranslation();
   const [data, loaded, loadError] =
-    useK8sWatchResource<K8sResourceKind[]>(cephClusterResource);
+    useK8sWatchResource<CephClusterKind[]>(cephClusterResource);
 
   const { clusterNamespace: clusterNs } = useGetExternalClusterDetails();
 
   const cephHealth = getCephHealthState(
     {
       ceph: {
-        data: getCephClusterInNs(data as CephClusterKind[], clusterNs),
+        data: getCephClusterInNs(data, clusterNs),
         loaded,
         loadError,
       },

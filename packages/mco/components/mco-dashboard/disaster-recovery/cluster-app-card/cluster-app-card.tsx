@@ -14,8 +14,12 @@ import {
   MirrorPeerKind,
 } from '@odf/mco/types';
 import { getClusterNamesFromMirrorPeers } from '@odf/mco/utils';
-import { useCustomTranslation } from '@odf/shared';
-import { ACMManagedClusterViewModel, MirrorPeerModel } from '@odf/shared';
+import {
+  ACMManagedClusterViewModel,
+  MirrorPeerModel,
+  useCustomTranslation,
+} from '@odf/shared';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import { DataUnavailableError } from '@odf/shared/generic/Error';
 import {
   useCustomPrometheusPoll,
@@ -288,7 +292,7 @@ export const ClusterAppCard: React.FC = () => {
   });
   const [lastSyncTimeData, lastSyncTimeError, lastSyncTimeLoading] =
     useCustomPrometheusPoll({
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       query: !!cluster ? getLastSyncPerClusterQuery() : null,
       basePath: usePrometheusBasePath(),
     });

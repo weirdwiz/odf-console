@@ -37,11 +37,11 @@ type SilenceAlertModalProps = {
   storageClusterLoaded?: boolean;
 };
 
-const DURATION_UNIT_MULTIPLIERS: Record<DurationUnit, number> = {
+const DURATION_UNIT_MULTIPLIERS = {
   hours: 60 * 60 * 1000,
   days: 24 * 60 * 60 * 1000,
   weeks: 7 * 24 * 60 * 60 * 1000,
-};
+} satisfies Record<DurationUnit, number>;
 
 export const SilenceAlertModal: React.FC<SilenceAlertModalProps> = ({
   isOpen,
@@ -80,6 +80,7 @@ export const SilenceAlertModal: React.FC<SilenceAlertModalProps> = ({
 
   // Event handlers
   const handleDurationChange = (event: React.FormEvent<HTMLInputElement>) => {
+    // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
     const value = (event.target as HTMLInputElement).value;
     const numValue = parseInt(value, 10);
     setDurationValue(isNaN(numValue) ? 0 : Math.max(0, numValue));
@@ -96,6 +97,7 @@ export const SilenceAlertModal: React.FC<SilenceAlertModalProps> = ({
   // Callbacks
   const handleUnitSelect = React.useCallback(
     (_event: React.MouseEvent | undefined, selection: string) => {
+      // SAFETY: selection comes from the owner of the DurationUnit contract used at this boundary.
       setDurationUnit(selection as DurationUnit);
       setIsUnitSelectOpen(false);
     },
@@ -286,6 +288,7 @@ export const SilenceAlertModal: React.FC<SilenceAlertModalProps> = ({
     if (isOpen && modalContentRef.current) {
       // Use setTimeout to ensure the modal is fully rendered before focusing
       setTimeout(() => {
+        // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
         const input = modalContentRef.current?.querySelector(
           'input[name="duration"]'
         ) as HTMLInputElement;

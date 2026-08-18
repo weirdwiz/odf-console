@@ -127,9 +127,11 @@ export const SilencedAlertsTable: React.FC<SilencedAlertsTableProps> = ({
 
   const filteredAlerts = React.useMemo(() => {
     // Extract selected severity and silence type filters
+    // SAFETY: f comes from the owner of the (typeof SEVERITY_FILTERS)[number] contract used at this boundary.
     const selectedSeverities = selectedFilters.filter((f) =>
       SEVERITY_FILTERS.includes(f as (typeof SEVERITY_FILTERS)[number])
     );
+    // SAFETY: f comes from the owner of the (typeof SILENCE_TYPE_FILTERS)[number] contract used at this boundary.
     const selectedSilenceTypes = selectedFilters.filter((f) =>
       SILENCE_TYPE_FILTERS.includes(f as (typeof SILENCE_TYPE_FILTERS)[number])
     );
@@ -277,12 +279,14 @@ export const SilencedAlertsTable: React.FC<SilencedAlertsTableProps> = ({
     }
   };
 
-  const columns = React.useMemo<TableColumnProps[]>(
+  const columns = React.useMemo<TableColumnProps<SilencedAlertRowData>[]>(
     () => [
       {
         columnName: t('Silenced on'),
         sortFunction: (a, b, direction) => {
+          // SAFETY: a comes from the owner of the SilencedAlertRowData contract used at this boundary.
           const aTime = (a as SilencedAlertRowData).silencedOn?.getTime() || 0;
+          // SAFETY: b comes from the owner of the SilencedAlertRowData contract used at this boundary.
           const bTime = (b as SilencedAlertRowData).silencedOn?.getTime() || 0;
           return direction === 'asc' ? bTime - aTime : aTime - bTime;
         },
@@ -290,6 +294,7 @@ export const SilencedAlertsTable: React.FC<SilencedAlertsTableProps> = ({
       {
         columnName: t('Check'),
         sortFunction: (a, b, direction) => {
+          // SAFETY: a comes from the owner of the SilencedAlertRowData contract used at this boundary.
           const cmp = (a as SilencedAlertRowData).alertname.localeCompare(
             (b as SilencedAlertRowData).alertname
           );

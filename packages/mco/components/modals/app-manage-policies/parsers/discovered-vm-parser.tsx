@@ -29,7 +29,6 @@ import {
 import { ModalViewContext } from '../utils/reducer';
 import {
   ApplicationInfoType,
-  ApplicationType,
   DRPolicyType,
   ModalType,
   PVCQueryFilter,
@@ -80,7 +79,7 @@ export const DiscoveredVMParser: React.FC<DiscoveredVMParserProps> = ({
   const isLoadedWOError = isLoaded && !loadError;
 
   const applicationInfo: ApplicationInfoType = React.useMemo(() => {
-    if (!isLoadedWOError) return {};
+    if (!isLoadedWOError) return undefined;
 
     const vmLabels = getLabels(virtualMachine);
     const drpc = findDRPCByNsClusterAndVMName(
@@ -122,7 +121,7 @@ export const DiscoveredVMParser: React.FC<DiscoveredVMParserProps> = ({
 
   const matchingPolicies: DRPolicyType[] = React.useMemo(() => {
     return Object.keys(applicationInfo).length
-      ? getMatchingDRPolicies(applicationInfo as ApplicationType, drPolicies)
+      ? getMatchingDRPolicies(applicationInfo, drPolicies)
       : [];
   }, [applicationInfo, drPolicies]);
 

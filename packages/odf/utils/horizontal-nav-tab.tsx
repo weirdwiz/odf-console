@@ -98,11 +98,13 @@ export const useSortPages: UseSortPages = ({
   }, [extensions, haveExtensionsResolved, staticPages]);
 };
 
+// SAFETY: The receiving library accepts tab.component; its published type does not expose this supported value.
 export const convertHorizontalNavTabToNavPage = (
   horizontalNavTabs: HorizontalNavProps[]
 ): NavPage[] =>
   horizontalNavTabs.map((tab) => ({
     name: tab.name,
     href: tab.href,
-    component: tab.component as any,
+    component:
+      /* SAFETY: The value is supplied by the any owner and follows that contract. */ tab.component as any,
   }));

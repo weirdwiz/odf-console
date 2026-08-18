@@ -2,38 +2,41 @@ import React from 'react';
 import { PersistentVolumeClaimModel } from '@odf/shared/models';
 import { render } from '@testing-library/react';
 import { BreakdownCardBody, BreakdownBodyProps } from './breakdown-body';
+import * as TestDependency3 from './breakdown-capacity';
+import * as TestDependency4 from './breakdown-chart';
+import * as TestDependency2 from './breakdown-loading';
+import * as TestDependency1 from './utils';
 
 const mockHumanize = jest.fn((value: string) => ({ string: `${value} MB` }));
-
-jest.mock('./utils', () => ({
-  getLegends: jest.fn(() => ['Legend1', 'Legend2', 'Available']),
-  addAvailable: jest.fn((_unused) => {
+jest
+  .spyOn(TestDependency1, 'getLegends')
+  .mockImplementation(jest.fn(() => ['Legend1', 'Legend2', 'Available']));
+jest.spyOn(TestDependency1, 'addAvailable').mockImplementation(
+  jest.fn((_unused) => {
     return [
       { label: 'Label1', data: [10, 20, 30] },
       { label: 'Label2', data: [15, 25, 35] },
     ];
-  }),
-}));
-
-jest.mock('./breakdown-loading', () => ({
-  BreakdownChartLoading: () => (
+  })
+);
+jest
+  .spyOn(TestDependency2, 'BreakdownChartLoading')
+  .mockImplementation(() => (
     <div data-test-id="mocked-breakdown-chart-loading" />
-  ),
-}));
+  ));
 
 const mockTotalCapacityBody = jest.fn((_unused) => {
   return <div data-test-id="mocked-total-capacity-body" />;
 });
-
-jest.mock('./breakdown-capacity', () => ({
-  TotalCapacityBody: (props) => mockTotalCapacityBody(props),
-}));
-
-jest.mock('./breakdown-chart', () => ({
-  BreakdownChart: () => <div data-test-id="mocked-breakdown-chart" />,
-}));
+jest
+  .spyOn(TestDependency3, 'TotalCapacityBody')
+  .mockImplementation((props) => mockTotalCapacityBody(props));
+jest
+  .spyOn(TestDependency4, 'BreakdownChart')
+  .mockImplementation(() => <div data-test-id="mocked-breakdown-chart" />);
 
 describe('tests for BreakdownCardBody', () => {
+  // SAFETY: The any test value defines the members exercised by this test.
   const defaultProps: BreakdownBodyProps = {
     isLoading: false,
     hasLoadError: false,

@@ -8,9 +8,7 @@ import { t_color_green_50 as okColor } from '@patternfly/react-tokens';
 import { t_global_color_status_warning_100 as warningColor } from '@patternfly/react-tokens';
 import { ImageStates } from '../../types';
 
-export const ImageStateLegendMap = (
-  t: TFunction
-): { [state in ImageStates]: string } => ({
+export const ImageStateLegendMap = (t: TFunction) => ({
   [ImageStates.STARTING_REPLAY]: t('Starting replay'),
   [ImageStates.STOPPING_REPLAY]: t('Stopping replay'),
   [ImageStates.REPLAYING]: t('Replaying'),

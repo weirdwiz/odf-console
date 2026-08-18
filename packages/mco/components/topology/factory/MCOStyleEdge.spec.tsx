@@ -1,26 +1,21 @@
 import * as React from 'react';
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
-import { Edge } from '@patternfly/react-topology';
-import { MCOStyleEdge } from './MCOStyleEdge';
+import { MCOStyleEdgeView } from './MCOStyleEdge';
 
-// Mock PatternFly Topology components
-jest.mock('@patternfly/react-topology', () => ({
-  ...jest.requireActual('@patternfly/react-topology'),
-  DefaultEdge: ({ element }: any) => (
-    <g data-testid="default-edge" data-element-id={element.getId()} />
-  ),
-  observer: (component: any) => component,
-}));
+type MockEdge = {
+  getId: () => string;
+};
 
-const createMockEdge = (data: Record<string, unknown>): Partial<Edge> => ({
-  getData: jest.fn(() => data) as any,
-  getSource: jest.fn(() => ({
-    getBounds: () => ({ x: 100, y: 100, width: 75, height: 75 }),
-  })) as any,
-  getTarget: jest.fn(() => ({
-    getBounds: () => ({ x: 400, y: 100, width: 75, height: 75 }),
-  })) as any,
+const TestEdge: React.FC<{ element: MockEdge }> = ({ element }) => (
+  <g data-testid="default-edge" data-element-id={element.getId()} />
+);
+
+const MCOStyleEdge: React.FC<{ element: MockEdge }> = ({ element }) => (
+  <MCOStyleEdgeView element={element} EdgeComponent={TestEdge} />
+);
+
+const createMockEdge = <Data extends object>(_data: Data): MockEdge => ({
   getId: jest.fn(() => 'test-edge'),
 });
 
@@ -33,7 +28,7 @@ describe('MCOStyleEdge', () => {
         ],
         isConfiguring: false,
         pairKey: 'cluster1::cluster2',
-      }) as Edge;
+      });
 
       const { container } = render(
         <svg>
@@ -52,7 +47,7 @@ describe('MCOStyleEdge', () => {
         ],
         isConfiguring: true,
         pairKey: 'cluster1::cluster2',
-      }) as Edge;
+      });
 
       const { container } = render(
         <svg>
@@ -70,7 +65,7 @@ describe('MCOStyleEdge', () => {
         ],
         isConfiguring: false,
         pairKey: 'cluster1::cluster2',
-      }) as Edge;
+      });
 
       const { container } = render(
         <svg>
@@ -94,7 +89,7 @@ describe('MCOStyleEdge', () => {
           phase: 'FailingOver',
         },
         pairKey: 'cluster1::cluster2',
-      }) as Edge;
+      });
 
       const { container } = render(
         <svg>
@@ -117,7 +112,7 @@ describe('MCOStyleEdge', () => {
           progression: 'WaitOnUserToCleanUp',
         },
         pairKey: 'cluster1::cluster2',
-      }) as Edge;
+      });
 
       const { container } = render(
         <svg>
@@ -135,7 +130,7 @@ describe('MCOStyleEdge', () => {
       const edge = createMockEdge({
         isOperation: true,
         operation: { applicationName: 'app1' },
-      }) as Edge;
+      });
 
       const { container } = render(
         <svg>
@@ -151,7 +146,7 @@ describe('MCOStyleEdge', () => {
       const edge = createMockEdge({
         policies: [{ name: 'policy1' }],
         isConfiguring: false,
-      }) as Edge;
+      });
 
       const { container } = render(
         <svg>
@@ -166,7 +161,7 @@ describe('MCOStyleEdge', () => {
 
   describe('Edge Cases', () => {
     it('should handle missing data gracefully', () => {
-      const edge = createMockEdge({}) as Edge;
+      const edge = createMockEdge({});
 
       expect(() => {
         render(
@@ -181,7 +176,7 @@ describe('MCOStyleEdge', () => {
       const edge = createMockEdge({
         isOperation: false,
         isConfiguring: false,
-      }) as Edge;
+      });
 
       expect(() => {
         render(

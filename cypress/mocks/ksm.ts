@@ -1,3 +1,11 @@
+type KsmValue =
+  | string
+  | number
+  | boolean
+  | null
+  | KsmValue[]
+  | { [key: string]: KsmValue };
+
 export type ResourceConstraints = {
   limits?: {
     cpu: string;
@@ -77,10 +85,10 @@ export declare type OwnerReference = {
 export type K8sResourceKind = K8sResourceCommon & {
   spec?: {
     selector?: Selector | MatchLabels;
-    [key: string]: any;
+    [key: string]: KsmValue;
   };
-  status?: { [key: string]: any };
-  data?: { [key: string]: any };
+  status?: { [key: string]: KsmValue };
+  data?: { [key: string]: KsmValue };
 };
 
 export type Selector = {

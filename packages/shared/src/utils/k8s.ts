@@ -5,6 +5,7 @@ import {
   K8sResourceCommon,
   k8sUpdate,
 } from '@openshift-console/dynamic-plugin-sdk';
+import * as _ from 'lodash-es';
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
@@ -31,16 +32,16 @@ export async function createOrUpdate<T extends K8sResourceCommon>({
   maxRetries?: number;
   mutationDetails?: CreateOrUpdateMutationDetails;
 }): Promise<T> {
-  let attempt = 0;
-  let lastError: any;
+  let lastError: unknown;
 
-  /* Next loop attempts to sequentially retry create or update operations to avoid conflicts. Hence no-await and continue are being disabled */
-  while (attempt < maxRetries) {
+  const retryError = () =>
+    new Error(
+      `Failed to createOrUpdate ${model.kind} ${name} after ${maxRetries} attempts. Last error: ${lastError}`
+    );
+
+  const runAttempt = async (attempt: number): Promise<T> => {
     try {
-      const current =
-        //eslint-disable-next-line no-await-in-loop
-        ((await k8sGet({ model, name, ns: namespace })) as T) || ({} as T);
-
+      const current = await k8sGet<T>({ model, name, ns: namespace });
       const updated = mutate(current);
 
       updated.metadata = {
@@ -55,62 +56,55 @@ export async function createOrUpdate<T extends K8sResourceCommon>({
         generation: current.metadata?.generation,
 
         ...(current.metadata?.deletionTimestamp && {
-          deletionTimestamp: current.metadata?.deletionTimestamp,
+          deletionTimestamp: current.metadata.deletionTimestamp,
           deletionGracePeriodSeconds:
-            current.metadata?.deletionGracePeriodSeconds,
+            current.metadata.deletionGracePeriodSeconds,
         }),
 
         ...(current.metadata?.managedFields && {
-          managedFields: current.metadata?.managedFields,
+          managedFields: current.metadata.managedFields,
         }),
       };
 
-      // eslint-disable-next-line no-await-in-loop
-      const result = (await k8sUpdate({ model, data: updated })) as T;
+      const result = await k8sUpdate<T>({ model, data: updated });
       if (mutationDetails) {
         mutationDetails.isUpdated = true;
       }
       return result;
-    } catch (e: any) {
-      lastError = e;
+    } catch (error) {
+      lastError = error;
 
-      if (e?.response?.status === 404) {
+      if (_.get(error, 'response.status') === 404) {
         try {
           const fresh = mutate(null);
-          // eslint-disable-next-line no-await-in-loop
-          const result = (await k8sCreate({ model, data: fresh })) as T;
+          const result = await k8sCreate<T>({ model, data: fresh });
           if (mutationDetails) {
             mutationDetails.isUpdated = false;
           }
           return result;
-        } catch (createError: any) {
-          const status = createError?.response?.status;
+        } catch (createError) {
+          const status = _.get(createError, 'response.status');
           if (![400, 401, 403, 422].includes(status) && status < 500) {
-            attempt++;
-            if (attempt >= maxRetries) break;
-            // eslint-disable-next-line no-continue
-            continue;
+            const nextAttempt = attempt + 1;
+            if (nextAttempt >= maxRetries) throw retryError();
+            return runAttempt(nextAttempt);
           }
           throw createError;
         }
       }
 
-      const status = e?.response?.status;
+      const status = _.get(error, 'response.status');
       // Retry on 4xx errors other than 400, 401, 403, 422 and all 5xx errors
       if (![400, 401, 403, 422].includes(status) && status < 500) {
-        attempt++;
-        if (attempt >= maxRetries) break;
-        // eslint-disable-next-line no-await-in-loop
-        await delay(100 * 2 ** attempt);
-        // eslint-disable-next-line no-continue
-        continue;
+        const nextAttempt = attempt + 1;
+        if (nextAttempt >= maxRetries) throw retryError();
+        await delay(100 * 2 ** nextAttempt);
+        return runAttempt(nextAttempt);
       }
 
-      throw e;
+      throw error;
     }
-  }
+  };
 
-  throw new Error(
-    `Failed to createOrUpdate ${model.kind} ${name} after ${maxRetries} attempts. Last error: ${lastError}`
-  );
+  return runAttempt(0);
 }

@@ -138,6 +138,7 @@ describe('filterUsedDiscoveredDevices', () => {
   it('filters SAN devices already used as LocalDisks', () => {
     const wwn = '0x6001405c595842b2d484d0bb11e42179';
     const devices = [makeDevice({ WWN: wwn }), makeDevice({ WWN: '0xother' })];
+    // SAFETY: The LocalDiskKind test value defines the members exercised by this test.
     const localDisks = [
       {
         metadata: { name: getLocalDiskNameFromDeviceKey(wwn) },
@@ -163,6 +164,7 @@ describe('filterUsedDiscoveredDevices', () => {
         path: '/dev/dasdb',
       }),
     ];
+    // SAFETY: The LocalDiskKind test value defines the members exercised by this test.
     const localDisks = [
       {
         metadata: { name: getLocalDiskNameFromDeviceKey(dasdUID) },
@@ -184,6 +186,7 @@ describe('filterUsedDiscoveredDevices', () => {
       makeDevice({ WWN: '', deviceID: '', path }),
       makeDevice({ WWN: '', deviceID: '', path: '/dev/dasdb' }),
     ];
+    // SAFETY: The LocalDiskKind test value defines the members exercised by this test.
     const localDisks = [
       {
         metadata: { name: getLocalDiskNameFromDeviceKey(path) },
@@ -205,6 +208,7 @@ describe('filterUsedDiscoveredDevices', () => {
         path: '/dev/sdc',
       }),
     ];
+    // SAFETY: The LocalDiskKind test value defines the members exercised by this test.
     const localDisks = [
       {
         metadata: { name: getLocalDiskNameFromDeviceKey(byId) },
@@ -227,6 +231,7 @@ describe('filterUsedDiscoveredDevices', () => {
       makeDevice({ WWN: '', deviceID: '', path: underscorePath }),
       makeDevice({ WWN: '', deviceID: '', path: hyphenPath }),
     ];
+    // SAFETY: The LocalDiskKind test value defines the members exercised by this test.
     const localDisks = [
       {
         metadata: {

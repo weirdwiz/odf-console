@@ -1,38 +1,32 @@
 import * as React from 'react';
+import * as TestDependency4 from '@odf/core/hooks';
+import * as TestDependency5 from '@odf/core/redux';
+import * as TestDependency6 from '@odf/core/redux/utils';
+import * as TestDependency3 from '@odf/shared/hooks/custom-prometheus-poll/custom-prometheus-poll-hook';
+import * as TestDependency8 from '@odf/shared/useCustomTranslationHook';
+import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk/lib/extensions';
+import * as TestDependency2 from '@openshift-console/dynamic-plugin-sdk/lib/utils/flags';
 import { render, screen } from '@testing-library/react';
+import * as TestDependency7 from 'react-router';
 import BreakdownCard from './capacity-breakdown-card';
 
 const testNamespace = 'test-ns';
-
-jest.mock('@openshift-console/dynamic-plugin-sdk/lib/extensions', () => {
-  const originalModule = jest.requireActual<
-    typeof import('@openshift-console/dynamic-plugin-sdk/lib/extensions')
-  >('@openshift-console/dynamic-plugin-sdk/lib/extensions');
-  return {
-    ...originalModule,
-    useK8sWatchResource: () => [true, false, false],
-  };
-});
-
-jest.mock('@openshift-console/dynamic-plugin-sdk/lib/utils/flags', () => ({
-  useFlag: () => true,
-}));
-
-jest.mock(
-  '@odf/shared/hooks/custom-prometheus-poll/custom-prometheus-poll-hook',
-  () => ({
-    useCustomPrometheusPoll: () => [true, false, false],
-  })
-);
-
-jest.mock('@odf/core/hooks', () => ({
-  useSafeK8sWatchResource: () => [true, false, false],
-}));
-
-jest.mock('@odf/core/redux', () => ({
-  ...jest.requireActual('@odf/core/redux'),
-  useODFNamespaceSelector: () => ({ odfNamespace: testNamespace }),
-  useODFSystemFlagsSelector: () => ({
+jest
+  .spyOn(TestDependency1, 'useK8sWatchResource')
+  .mockImplementation(() => [true, false, false]);
+jest.spyOn(TestDependency2, 'useFlag').mockImplementation(() => true);
+jest
+  .spyOn(TestDependency3, 'useCustomPrometheusPoll')
+  .mockImplementation(() => [true, false, false]);
+jest
+  .spyOn(TestDependency4, 'useSafeK8sWatchResource')
+  .mockImplementation(() => [true, false, false]);
+jest
+  .spyOn(TestDependency5, 'useODFNamespaceSelector')
+  .mockImplementation(() => ({ odfNamespace: testNamespace }));
+jest
+  .spyOn(TestDependency5, 'useODFSystemFlagsSelector')
+  .mockImplementation(() => ({
     systemFlags: {
       [testNamespace]: {
         isRGWAvailable: true,
@@ -40,30 +34,20 @@ jest.mock('@odf/core/redux', () => ({
         ocsClusterName: 'test-cluster',
       },
     },
-  }),
+  }));
+jest.spyOn(TestDependency6, 'useGetClusterDetails').mockImplementation(() => ({
+  clusterName: 'test-cluster',
+  clusterNamespace: testNamespace,
 }));
-
-jest.mock('@odf/core/redux/utils', () => ({
-  ...jest.requireActual('@odf/core/redux/utils'),
-  useGetClusterDetails: () => ({
-    clusterName: 'test-cluster',
-    clusterNamespace: testNamespace,
-  }),
-}));
-
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useParams: () => ({ namespace: testNamespace }),
-}));
-
-jest.mock('@odf/shared/useCustomTranslationHook', () => ({
-  useCustomTranslation: () => ({
-    t: (key: string, params?: Record<string, any>) => {
-      if (!params) return key;
-      // Simple interpolation for test purposes
-      return key.replace(/\{\{(\w+)\}\}/g, (_, param) => params[param] || '');
-    },
-  }),
+jest
+  .spyOn(TestDependency7, 'useParams')
+  .mockImplementation(() => ({ namespace: testNamespace }));
+jest.spyOn(TestDependency8, 'useCustomTranslation').mockImplementation(() => ({
+  t: (key: string, params?: Record<string, string | number>) => {
+    if (!params) return key;
+    // Simple interpolation for test purposes
+    return key.replace(/\{\{(\w+)\}\}/g, (_, param) => params[param] || '');
+  },
 }));
 
 describe('Capacity Breakdown Card', () => {

@@ -52,6 +52,7 @@ export const VaultConfigure: React.FC<KMSConfigureProps> = ({
 
   const launchModal = useModalWrapper();
 
+  // SAFETY: useDeepCompareMemoize( state.kms.providerState, true ) comes from the owner of the VaultConfig contract used at this boundary.
   const vaultState = useDeepCompareMemoize(
     state.kms.providerState,
     true
@@ -139,6 +140,7 @@ export const VaultConfigure: React.FC<KMSConfigureProps> = ({
 
   const getValidatedAuthMethodProp = getValidatedProp(!vaultState.authMethod);
 
+  // SAFETY: value comes from the owner of the VaultAuthMethods contract used at this boundary.
   return (
     <>
       <FormGroup

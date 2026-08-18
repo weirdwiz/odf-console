@@ -30,7 +30,7 @@ describe('useYupValidationResolver tests', () => {
     });
     expect(actual).toMatchObject(expected);
     expect(actual?.errors).toMatchObject({});
-    expect(typeof result.current).toBe('function');
+    expect(result.current).toEqual(expect.any(Function));
     expect(validateSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -62,7 +62,7 @@ describe('useYupValidationResolver tests', () => {
     });
 
     expect(actual).toMatchObject(expected);
-    expect(typeof result.current).toBe('function');
+    expect(result.current).toEqual(expect.any(Function));
     expect(validateSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -81,7 +81,7 @@ describe('useYupValidationResolver tests', () => {
 
     expect(actual?.values).toMatchObject({});
     expect(actual?.errors['name']).toHaveProperty('messages');
-    expect(typeof result.current).toBe('function');
+    expect(result.current).toEqual(expect.any(Function));
     expect(validateSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -100,7 +100,7 @@ describe('useYupValidationResolver tests', () => {
 
     expect(actual?.values).toMatchObject({});
     expect(actual?.errors['name'].messages).toHaveProperty('Required');
-    expect(typeof result.current).toBe('function');
+    expect(result.current).toEqual(expect.any(Function));
     expect(validateSpy).toHaveBeenCalledTimes(1);
   });
 });

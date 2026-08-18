@@ -13,13 +13,26 @@ type MCOStyleEdgeProps = {
   element: Edge;
 } & Partial<WithSelectionProps & { hover?: boolean }>;
 
-const MCOStyleEdgeComponent: React.FC<MCOStyleEdgeProps> = ({
+type EdgeRendererProps<Element> = Omit<
+  React.ComponentProps<typeof DefaultEdge>,
+  'element'
+> & {
+  element: Element;
+};
+
+type MCOStyleEdgeViewProps<Element> = {
+  element: Element;
+  EdgeComponent: React.ComponentType<EdgeRendererProps<Element>>;
+} & Partial<WithSelectionProps & { hover?: boolean }>;
+
+export const MCOStyleEdgeView = <Element, >({
   element,
+  EdgeComponent,
   ...rest
-}) => {
+}: MCOStyleEdgeViewProps<Element>) => {
   // Directional edges with arrows to show operation direction clearly
   return (
-    <DefaultEdge
+    <EdgeComponent
       element={element}
       {...rest}
       endTerminalType={EdgeTerminalType.directional}
@@ -29,5 +42,9 @@ const MCOStyleEdgeComponent: React.FC<MCOStyleEdgeProps> = ({
     />
   );
 };
+
+const MCOStyleEdgeComponent: React.FC<MCOStyleEdgeProps> = (props) => (
+  <MCOStyleEdgeView {...props} EdgeComponent={DefaultEdge} />
+);
 
 export const MCOStyleEdge = observer(MCOStyleEdgeComponent);

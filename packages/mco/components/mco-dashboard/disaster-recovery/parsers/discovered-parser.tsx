@@ -11,7 +11,6 @@ import {
   DRClusterKind,
   DRPlacementControlKind,
   DRPolicyKind,
-  Phase,
 } from '@odf/mco/types';
 import {
   findDRPolicyUsingDRPC,
@@ -65,7 +64,7 @@ export const useDiscoveredParser: UseDiscoveredParser = (
 
   const drClusterAppsMap: DRClusterAppsMap = React.useMemo(() => {
     if (loaded && !loadError) {
-      const drClusterAppsMap: DRClusterAppsMap = drClusters.reduce(
+      const drClusterAppsMap: DRClusterAppsMap = drClusters.reduce<DRClusterAppsMap>(
         (acc, drCluster) => {
           const clusterName = getName(drCluster);
           acc[clusterName] = {
@@ -77,7 +76,7 @@ export const useDiscoveredParser: UseDiscoveredParser = (
           };
           return acc;
         },
-        {} as DRClusterAppsMap
+        {}
       );
 
       // DRCluster to its ApplicationSets (total and protected) mapping
@@ -108,7 +107,7 @@ export const useDiscoveredParser: UseDiscoveredParser = (
                   preferredCluster: drPlacementControl.spec?.preferredCluster,
                   lastVolumeGroupSyncTime:
                     drPlacementControl.status?.lastGroupSyncTime,
-                  status: drPlacementControl.status?.phase as Phase,
+                  status: drPlacementControl.status?.phase,
                   kubeObjSyncInterval:
                     drPlacementControl.spec?.kubeObjectProtection
                       ?.captureInterval,

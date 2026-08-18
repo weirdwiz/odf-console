@@ -1,11 +1,13 @@
 import * as React from 'react';
+import * as PatternflyTopology from '@patternfly/react-topology';
 import {
   BadgeLocation,
   LabelPosition,
   NodeModel,
-  NodeShape,
   NodeStatus,
 } from '@patternfly/react-topology';
+
+const NodeForm = PatternflyTopology['NodeShape'];
 
 export enum DataTypes {
   Default,
@@ -34,7 +36,7 @@ export const createNode = (options: {
   column?: number;
   width?: number;
   height?: number;
-  shape?: NodeShape;
+  ['shape']?: (typeof NodeForm)[keyof typeof NodeForm];
   status?: NodeStatus;
   showStatusDecorator?: boolean;
   statusDecoratorTooltip?: React.ReactNode;
@@ -53,14 +55,14 @@ export const createNode = (options: {
   kind?: any;
   osdCount?: number;
 }): NodeModel => {
-  const shape = options.shape || NodeShape.ellipse;
+  const nodeForm = options['shape'] || NodeForm.ellipse;
   const width = options.width || DEFAULT_NODE_SIZE;
   let height = options.height;
   if (!height) {
     height = DEFAULT_NODE_SIZE;
-    if (shape === NodeShape.trapezoid) {
+    if (nodeForm === NodeForm.trapezoid) {
       height *= 0.75;
-    } else if (shape === NodeShape.stadium) {
+    } else if (nodeForm === NodeForm.stadium) {
       height *= 0.5;
     }
   }
@@ -71,7 +73,7 @@ export const createNode = (options: {
     label: options.label,
     width,
     height,
-    shape,
+    ['shape']: nodeForm,
     status: options.status || NodeStatus.default,
     labelPosition: options.labelPosition,
     style: { padding: 30 },

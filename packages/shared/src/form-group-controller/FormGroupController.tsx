@@ -1,5 +1,9 @@
 import * as React from 'react';
-import { useController, UseControllerProps } from 'react-hook-form';
+import {
+  useController,
+  FieldValues,
+  UseControllerProps,
+} from 'react-hook-form';
 import {
   FormGroup,
   FormGroupProps,
@@ -17,18 +21,20 @@ export type FormGroupControllerRenderProps = {
   onBlur: () => void;
 };
 
-export type FormGroupControllerProps = UseControllerProps & {
+export type FormGroupControllerProps<
+  TFieldValues extends FieldValues = FieldValues,
+> = UseControllerProps<TFieldValues> & {
   formGroupProps: FormGroupProps & {
     helperText?: string;
   };
   render: (props: FormGroupControllerRenderProps) => React.ReactNode;
 };
 
-const FormGroupController: React.FC<FormGroupControllerProps> = ({
+const FormGroupController = <TFieldValues extends FieldValues>({
   formGroupProps,
   render,
   ...controllerProps
-}) => {
+}: FormGroupControllerProps<TFieldValues>): JSX.Element => {
   const {
     field: { value, onChange, onBlur },
     fieldState: { error, isDirty },

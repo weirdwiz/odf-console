@@ -256,12 +256,17 @@ export const OBCListPage: React.FC<ObjectBucketClaimsPageProps> = (props) => {
   const [namespace] = useActiveNamespace();
   const { selector } = props;
 
-  const [obc, loaded, loadError] = useK8sWatchResource<K8sResourceKind[]>({
-    kind: referenceForModel(NooBaaObjectBucketClaimModel),
-    isList: true,
-    selector,
-    ...(namespace !== ALL_NAMESPACES_KEY ? { namespace } : {}),
-  });
+  const [obc, loaded, loadError] = useK8sWatchResource<K8sResourceKind[]>(
+    (() => {
+      const value = {
+        kind: referenceForModel(NooBaaObjectBucketClaimModel),
+        isList: true,
+        selector,
+      };
+      if (namespace !== ALL_NAMESPACES_KEY) Object.assign(value, { namespace });
+      return value;
+    })()
+  );
 
   const rowFilters = React.useMemo(() => [obcStatusFilter(t)], [t]);
   const [data, filteredData, onFilterChange] = useListPageFilter(
@@ -423,6 +428,7 @@ export const OBCDetailsPage: React.FC<{}> = () => {
     },
   ];
 
+  // SAFETY: The receiving library accepts OBCDetails; its published type does not expose this supported value.
   return loaded ? (
     <DetailsPage
       breadcrumbs={breadcrumbs}

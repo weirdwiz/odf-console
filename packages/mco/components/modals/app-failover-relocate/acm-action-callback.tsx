@@ -1,32 +1,27 @@
 import * as React from 'react';
-import { ArgoApplicationSetModel } from '@odf/shared';
-import { ApplicationModel } from '@odf/shared/models';
-import { ApplicationKind } from '@odf/shared/types';
-import { referenceForModel } from '@odf/shared/utils';
 import { DRActionType } from '../../../constants';
-import { ACMApplicationKind, ArgoApplicationSetKind } from '../../../types';
-import { getGVKFromK8Resource } from '../../../utils';
+import { ACMApplicationKind } from '../../../types';
+import { isACMApplication, isArgoApplicationSet } from '../../../utils';
 import { ArogoApplicationSetParser as ArogoApplicationSetModal } from './parser/argo-application-set-parser';
 import { SubscriptionFailoverRelocateModal } from './subscriptions/failover-relocate-modal';
 
 export const ApplicationFailover = (props: ModalProps) => {
   const { resource, close, isOpen } = props;
-  const gvk = getGVKFromK8Resource(resource);
 
   return (
     <>
-      {gvk === referenceForModel(ArgoApplicationSetModel) && (
+      {isArgoApplicationSet(resource) && (
         <ArogoApplicationSetModal
           action={DRActionType.FAILOVER}
-          application={resource as ArgoApplicationSetKind}
+          application={resource}
           isOpen={isOpen}
           close={close}
         />
       )}
-      {gvk === referenceForModel(ApplicationModel) && (
+      {isACMApplication(resource) && (
         <SubscriptionFailoverRelocateModal
           action={DRActionType.FAILOVER}
-          resource={resource as ApplicationKind}
+          resource={resource}
           isOpen={isOpen}
           close={close}
         />
@@ -37,22 +32,21 @@ export const ApplicationFailover = (props: ModalProps) => {
 
 export const ApplicationRelocate = (props: ModalProps) => {
   const { resource, close, isOpen } = props;
-  const gvk = getGVKFromK8Resource(resource);
 
   return (
     <>
-      {gvk === referenceForModel(ArgoApplicationSetModel) && (
+      {isArgoApplicationSet(resource) && (
         <ArogoApplicationSetModal
           action={DRActionType.RELOCATE}
-          application={resource as ArgoApplicationSetKind}
+          application={resource}
           isOpen={isOpen}
           close={close}
         />
       )}
-      {gvk === referenceForModel(ApplicationModel) && (
+      {isACMApplication(resource) && (
         <SubscriptionFailoverRelocateModal
           action={DRActionType.RELOCATE}
-          resource={resource as ApplicationKind}
+          resource={resource}
           isOpen={isOpen}
           close={close}
         />

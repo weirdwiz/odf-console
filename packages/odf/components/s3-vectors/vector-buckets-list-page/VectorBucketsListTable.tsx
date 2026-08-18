@@ -103,7 +103,9 @@ const EmptyRowMessage: React.FC = () => {
   );
 };
 
-const VectorBucketsTableRow: React.FC<RowComponentType<K8sResourceCommon>> = ({
+const VectorBucketsTableRow: React.FC<
+  RowComponentType<K8sResourceCommon, RowExtraPropsType>
+> = ({
   row: vectorBucket,
   rowIndex,
   extraProps,
@@ -118,7 +120,7 @@ const VectorBucketsTableRow: React.FC<RowComponentType<K8sResourceCommon>> = ({
     setFavorites,
     triggerRefresh,
     launcher,
-  }: RowExtraPropsType = extraProps;
+  } = extraProps;
 
   const { s3VectorsClient } = React.useContext(S3VectorsContext);
 
@@ -128,6 +130,7 @@ const VectorBucketsTableRow: React.FC<RowComponentType<K8sResourceCommon>> = ({
       ...(active ? [key] : []),
     ]);
   };
+  // SAFETY: s3VectorsClient.providerType comes from the owner of the S3ProviderType contract used at this boundary.
   const providerType = s3VectorsClient.providerType as S3ProviderType;
 
   return (
@@ -178,6 +181,7 @@ export const VectorBucketsListTable: React.FC<VectorBucketsListTableProps> = ({
     []
   );
   const launcher = useModalWrapper();
+  // SAFETY: allVectorBuckets contains only entries produced for the [] contract.
   return (
     <ComposableTable
       rows={filteredVectorBuckets}

@@ -1,12 +1,18 @@
-import { DRPlacementControlKind } from '@odf/mco/types';
+import { ArgoApplicationSetKind, DRPlacementControlKind } from '@odf/mco/types';
 import { Operator as VMOperator } from '@odf/shared/label-expression-selector';
+import { ApplicationModel, ArgoApplicationSetModel } from '@odf/shared/models';
 import {
   getAPIVersion,
   getName,
   getNamespace,
   getUID,
 } from '@odf/shared/selectors';
-import { groupVersionFor, referenceFor } from '@odf/shared/utils';
+import { ApplicationKind } from '@odf/shared/types';
+import {
+  groupVersionFor,
+  referenceFor,
+  referenceForModel,
+} from '@odf/shared/utils';
 import {
   ObjectReference,
   K8sResourceCommon,
@@ -14,12 +20,29 @@ import {
   MatchExpression,
   Operator,
 } from '@openshift-console/dynamic-plugin-sdk';
+import * as _ from 'lodash-es';
 import { getPrimaryClusterName } from './disaster-recovery';
 
 export const getGVKFromK8Resource = (resource: K8sResourceCommon) => {
   const { group, version } = groupVersionFor(resource?.apiVersion || '');
   return referenceFor(group)(version)(resource?.kind);
 };
+
+export const isArgoApplicationSet = (
+  resource: K8sResourceCommon
+): resource is ArgoApplicationSetKind =>
+  getGVKFromK8Resource(resource) === referenceForModel(ArgoApplicationSetModel) &&
+  'spec' in resource &&
+  _.isObject(resource.spec);
+
+export const isACMApplication = (
+  resource: K8sResourceCommon
+): resource is ApplicationKind =>
+  getGVKFromK8Resource(resource) === referenceForModel(ApplicationModel) &&
+  'spec' in resource &&
+  _.isObject(resource.spec) &&
+  'componentKinds' in resource.spec &&
+  Array.isArray(resource.spec.componentKinds);
 
 export const createRefFromK8Resource = (
   resource: K8sResourceCommon
@@ -55,7 +78,7 @@ export const convertLabelToExpression = (
       }
       return acc;
     },
-    {} as { [key in string]: MatchExpression }
+    {} satisfies { [key in string]: MatchExpression }
   );
   return Object.values(labelExpressions);
 };

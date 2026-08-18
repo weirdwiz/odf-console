@@ -216,7 +216,7 @@ const getCurrentStepFromFlow = (
   }
 
   const stepConfig = flow.find((config) =>
-    config.statuses.includes(progression as ProgressionStatus)
+    config.statuses.some((status) => status === progression)
   );
 
   // Fallback to first step if progression not recognized

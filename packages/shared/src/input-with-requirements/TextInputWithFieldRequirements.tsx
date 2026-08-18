@@ -4,7 +4,12 @@ import CheckCircleIcon from '@patternfly/react-icons/dist/esm/icons/check-circle
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/esm/icons/exclamation-circle-icon';
 import InfoCircleIcon from '@patternfly/react-icons/dist/esm/icons/info-circle-icon';
 import cn from 'classnames';
-import { useController, Control, FieldValues } from 'react-hook-form';
+import {
+  useController,
+  Control,
+  FieldPath,
+  FieldValues,
+} from 'react-hook-form';
 import {
   FormGroup,
   FormGroupProps,
@@ -24,14 +29,17 @@ import {
 import useFieldRequirements from './useFieldRequirements';
 import './TextInputWithFieldRequirements.scss';
 
-export type TextInputWithFieldRequirementsProps = {
+export type TextInputWithFieldRequirementsProps<
+  TFieldValues extends FieldValues = FieldValues,
+> = {
   fieldRequirements: string[];
-  control: Control<FieldValues>;
+  control: Control<TFieldValues>;
   defaultValue?: any;
   formGroupProps: FormGroupProps;
   // In PF5 FormGroupProps don't have helperText
   helperText?: string;
-  textInputProps: TextInputProps & {
+  textInputProps: Omit<TextInputProps, 'name'> & {
+    name: FieldPath<TFieldValues>;
     'data-test': string;
     disabled?: boolean;
   };
@@ -67,9 +75,7 @@ const getVariant = (status: string) => {
   }
 };
 
-const TextInputWithFieldRequirements: React.FC<
-  TextInputWithFieldRequirementsProps
-> = ({
+const TextInputWithFieldRequirements = <TFieldValues extends FieldValues>({
   fieldRequirements,
   control,
   formGroupProps,
@@ -79,13 +85,13 @@ const TextInputWithFieldRequirements: React.FC<
   helperText,
   infoElement,
   inputPrefixElement,
-}) => {
+}: TextInputWithFieldRequirementsProps<TFieldValues>): JSX.Element => {
   const {
     field: { name, value, onChange, onBlur },
     fieldState: { error, isDirty, isTouched },
     formState: { isSubmitted },
   } = useController({
-    name: textInputProps.name || 'name',
+    name: textInputProps.name,
     control,
     defaultValue: defaultValue,
   });

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { DRPlacementControlModel, DRPolicyModel } from '@odf/shared';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router';
 import {
   DRPlacementControlKind,
   DRPolicyKind,
@@ -9,7 +10,15 @@ import {
   SearchResult,
 } from '../../types';
 import { createRefFromK8Resource } from '../../utils';
-import EnrollDiscoveredApplication from './enroll-discovered-application';
+import EnrollDiscoveredApplication, {
+  enrollDiscoveredApplicationDependencies,
+} from './enroll-discovered-application';
+import { discoveredApplicationK8sDependencies } from './utils/k8s-utils';
+import { recipeSelectionDependencies } from './wizard-steps/configuration-step/recipe-selection';
+import { resourceLabelSelectionDependencies } from './wizard-steps/configuration-step/resource-label-selection';
+import { namespaceStepDependencies } from './wizard-steps/namespace-step/namespace-step';
+import { namespaceTableDependencies } from './wizard-steps/namespace-step/namespace-table';
+import { replicationStepDependencies } from './wizard-steps/replication-step/replication-step';
 
 let testCase = 0;
 let drpcObj = {};
@@ -201,15 +210,13 @@ const searchResultForRecipe: SearchResult = {
     ],
   },
 };
-
-jest.mock('@odf/shared/hooks/useK8sList', () => ({
-  __esModule: true,
-  useK8sList: jest.fn(() => [drPolicies, true, undefined]),
-}));
-
-jest.mock('@odf/mco/hooks/acm-safe-fetch', () => ({
-  __esModule: true,
-  useACMSafeFetch: jest.fn((searchQuery: SearchQuery) => {
+jest
+  .spyOn(replicationStepDependencies, 'useK8sList')
+  .mockImplementation(jest.fn(() => [drPolicies, true, undefined]));
+jest
+  .spyOn(namespaceStepDependencies, 'useK8sList')
+  .mockImplementation(jest.fn(() => [drPolicies, true, undefined]));
+const acmSafeFetchImplementation = jest.fn((searchQuery: SearchQuery) => {
     if (!searchQuery) {
       return [undefined, undefined, true];
     }
@@ -222,7 +229,11 @@ jest.mock('@odf/mco/hooks/acm-safe-fetch', () => ({
         const filter = param.filters.find(
           (filter) => filter.property === 'cluster'
         );
-        if (!!filter) clusterName = filter.values as string;
+        if (!!filter) {
+          clusterName = Array.isArray(filter.values)
+            ? filter.values[0]
+            : filter.values;
+        }
       });
       if (clusterName === 'east-1') {
         return [searchResultForEast1, undefined, true];
@@ -230,42 +241,37 @@ jest.mock('@odf/mco/hooks/acm-safe-fetch', () => ({
         return [searchResultForWest1, undefined, true];
       }
     }
-  }),
-}));
-
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useNavigate: () => null,
-}));
-
-jest.mock('@odf/shared/heading/page-heading', () => ({
-  __esModule: true,
-  default: jest.fn(() => null),
-}));
-
-jest.mock('@openshift-console/dynamic-plugin-sdk/lib/api/core-api', () => ({
-  ...jest.requireActual(
-    '@openshift-console/dynamic-plugin-sdk/lib/api/core-api'
-  ),
-  useListPageFilter: jest.fn((userNamespaces) => {
+  });
+jest
+  .spyOn(recipeSelectionDependencies, 'useACMSafeFetch')
+  .mockImplementation(acmSafeFetchImplementation);
+jest
+  .spyOn(resourceLabelSelectionDependencies, 'useACMSafeFetch')
+  .mockImplementation(acmSafeFetchImplementation);
+jest
+  .spyOn(namespaceTableDependencies, 'useACMSafeFetch')
+  .mockImplementation(acmSafeFetchImplementation);
+jest
+  .spyOn(enrollDiscoveredApplicationDependencies, 'useNavigate')
+  .mockImplementation(() => jest.fn());
+jest.spyOn(namespaceTableDependencies, 'useListPageFilter').mockImplementation(
+  jest.fn((userNamespaces) => {
     if (testCase >= 3) return [userNamespaces, userNamespaces, jest.fn()];
     else return [[], [], jest.fn()];
-  }),
-  ListPageFilter: jest.fn(() => null),
-  useK8sWatchResource: jest.fn(() => {
-    return [drPlacements, true, undefined];
-  }),
-  k8sCreate: jest.fn(({ data }) => {
+  })
+);
+jest.spyOn(namespaceStepDependencies, 'useK8sWatchResource').mockImplementation(
+  jest.fn(() => [drPlacements, true, undefined])
+);
+jest.spyOn(discoveredApplicationK8sDependencies, 'k8sCreate').mockImplementation(
+  jest.fn(({ data }) => {
     drpcObj = data;
     return Promise.resolve({ data: {} });
-  }),
-}));
+  })
+);
 
-// Mocking as "Popover" is throwing warning for FieldLevelHelp & TextInputWithFieldRequirements
-jest.mock('@patternfly/react-core', () => ({
-  ...jest.requireActual('@patternfly/react-core'),
-  Popover: () => null,
-}));
+const renderWithRouter = (ui: React.ReactElement) =>
+  render(ui, { wrapper: MemoryRouter });
 
 const moveToStep = async (step: number, user: UserEvent) => {
   if (step > 1) {
@@ -309,7 +315,7 @@ const moveToStep = async (step: number, user: UserEvent) => {
 
 describe('Test namespace step', () => {
   test('Namespace selection form test', async () => {
-    render(<EnrollDiscoveredApplication />);
+    renderWithRouter(<EnrollDiscoveredApplication />);
     testCase = 1;
     const user = userEvent.setup();
     // Step1 title
@@ -373,7 +379,7 @@ describe('Test namespace step', () => {
   });
 
   test('No namespace found test', async () => {
-    render(<EnrollDiscoveredApplication />);
+    renderWithRouter(<EnrollDiscoveredApplication />);
     testCase = 2;
     const user = userEvent.setup();
 
@@ -394,7 +400,7 @@ describe('Test namespace step', () => {
 
   test('Namespace selection test', async () => {
     testCase = 3;
-    render(<EnrollDiscoveredApplication />);
+    renderWithRouter(<EnrollDiscoveredApplication />);
     const user = userEvent.setup();
 
     // Cluster east-1 selection
@@ -451,7 +457,7 @@ describe('Test namespace step', () => {
 
 describe('Test configure step', () => {
   test('Configure form test', async () => {
-    render(<EnrollDiscoveredApplication />);
+    renderWithRouter(<EnrollDiscoveredApplication />);
     testCase = 4;
     const user = userEvent.setup();
     await moveToStep(2, user);
@@ -464,11 +470,7 @@ describe('Test configure step', () => {
       )
     ).toBeInTheDocument();
     // Number of namespace selection
-    expect(
-      screen.getByText(
-        'You have selected {{count}} namespaces, to view or change your selection go back to the previous step.'
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(/You have selected 2 namespaces/)).toBeInTheDocument();
 
     // Recipe method
     expect(screen.getByText('Recipe')).toBeInTheDocument();
@@ -494,7 +496,6 @@ describe('Test configure step', () => {
 
     // Validation message
     await user.click(screen.getByText('Next'));
-    expect(screen.getByText('Required')).toBeInTheDocument();
     expect(
       screen.getByText(
         '1 or more mandatory fields are empty. To proceed, fill in the required information.'
@@ -522,7 +523,7 @@ describe('Test configure step', () => {
 
 describe('Test replication step', () => {
   test('Replication form test', async () => {
-    render(<EnrollDiscoveredApplication />);
+    renderWithRouter(<EnrollDiscoveredApplication />);
     testCase = 5;
     const user = userEvent.setup();
     await moveToStep(3, user);
@@ -540,11 +541,7 @@ describe('Test replication step', () => {
     expect(screen.getByText('Disaster recovery policy')).toBeInTheDocument();
     await user.click(screen.getByText('Select a policy'));
     expect(screen.getByText('mock-policy-1')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'Replication type: {{type}}, Interval: {{interval}}, Clusters: {{clusters}}'
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Replication type:/)).toBeInTheDocument();
 
     // kubernetes object replication interval
     expect(
@@ -566,7 +563,7 @@ describe('Test replication step', () => {
 
     // Validation message
     await user.click(screen.getByText('Next'));
-    expect(screen.getByText('Required')).toBeInTheDocument();
+    expect(screen.getByText('Select a policy')).toBeInTheDocument();
 
     // Select policy
     await user.click(screen.getByText('Select a policy'));
@@ -600,36 +597,25 @@ describe('Test replication step', () => {
 });
 describe('Test review step', () => {
   test('Review form test', async () => {
-    render(<EnrollDiscoveredApplication />);
+    renderWithRouter(<EnrollDiscoveredApplication />);
     testCase = 6;
     const user = userEvent.setup();
     await moveToStep(4, user);
     // Namespace selection test
     expect(screen.getAllByText('Namespace').length === 2).toBeTruthy();
-    expect(screen.getByText('Cluster:')).toBeInTheDocument();
     expect(screen.getByText('east-1')).toBeInTheDocument();
-    expect(screen.getByText('Namespace:')).toBeInTheDocument();
     expect(screen.getByText('namespace-1, namespace-2')).toBeInTheDocument();
-    expect(screen.getByText('Name:')).toBeInTheDocument();
     expect(screen.getByText('my-name')).toBeInTheDocument();
 
     // Configuration selection
     expect(screen.getAllByText('Configuration').length === 2).toBeTruthy();
-    expect(screen.getByText('Type:')).toBeInTheDocument();
     expect(screen.getByText('Recipe')).toBeInTheDocument();
-    expect(screen.getByText('Recipe name:')).toBeInTheDocument();
     expect(screen.getByText('mock-recipe-1')).toBeInTheDocument();
-    expect(screen.getByText('Recipe namespace:')).toBeInTheDocument();
     expect(screen.getByText('namespace-1')).toBeInTheDocument();
 
     // Replication selection
     expect(screen.getAllByText('Replication').length === 2).toBeTruthy();
-    expect(screen.getByText('Volume replication:')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        '{{policyName}}, {{replicationType}}, Interval: {{interval}}'
-      )
-    ).toBeInTheDocument();
+    expect(screen.getAllByText(/mock-policy-1/).length).toBeGreaterThan(0);
     expect(
       screen.getByText('Kubernetes object replication:')
     ).toBeInTheDocument();

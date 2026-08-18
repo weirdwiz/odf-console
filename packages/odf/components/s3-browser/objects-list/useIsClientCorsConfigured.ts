@@ -9,7 +9,7 @@ import { AllowedMethods } from '../create-or-edit-cors-rules/reducer';
 import { S3Context } from '../s3-context';
 
 function ruleAllowsConsoleWithAllMethods(rule: CORSRule): boolean {
-  if (typeof window === 'undefined') {
+  if (globalThis.window === undefined) {
     return false;
   }
 

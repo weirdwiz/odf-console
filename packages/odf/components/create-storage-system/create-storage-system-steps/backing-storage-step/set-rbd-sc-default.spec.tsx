@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as TestDependency1 from '@odf/shared';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
@@ -6,10 +7,9 @@ import { SetCephRBDStorageClassDefault } from './set-rbd-sc-default';
 
 // Mock useK8sGet
 const mockUseK8sGet = jest.fn();
-jest.mock('@odf/shared', () => ({
-  ...jest.requireActual('@odf/shared'),
-  useK8sGet: () => mockUseK8sGet(),
-}));
+jest
+  .spyOn(TestDependency1, 'useK8sGet')
+  .mockImplementation(() => mockUseK8sGet());
 
 describe('Setting Ceph RBD StorageClass as default, during installation', () => {
   it('renders the FC, on infra with existing default StorageClass', async () => {
@@ -42,6 +42,7 @@ describe('Setting Ceph RBD StorageClass as default, during installation', () => 
     };
 
     const { container, rerender } = render(<Wrapper />);
+    // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
     const checkbox = container.querySelector(
       '[data-test="set-rbd-sc-default"]'
     ) as HTMLInputElement;
@@ -79,6 +80,7 @@ describe('Setting Ceph RBD StorageClass as default, during installation', () => 
     };
 
     const { container, rerender } = render(<Wrapper />);
+    // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
     const checkbox = container.querySelector(
       '[data-test="set-rbd-sc-default"]'
     ) as HTMLInputElement;

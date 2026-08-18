@@ -1,20 +1,15 @@
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import ManagedApplicationsModal from './managed-applications-modal';
+import ManagedApplicationsModal, {
+  managedApplicationsModalDependencies,
+} from './managed-applications-modal';
 
 const closeModal = jest.fn(() => null);
 const navigate = jest.fn((route: string) => route);
-
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  AlertSeverity: { Critical: 'critical' },
-}));
-
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useNavigate: () => navigate,
-}));
+jest
+  .spyOn(managedApplicationsModalDependencies, 'useNavigate')
+  .mockImplementation(() => navigate);
 
 describe('Test managed applications modal (ManagedApplicationsModal)', () => {
   afterEach(() => jest.clearAllMocks());

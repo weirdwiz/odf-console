@@ -7,7 +7,7 @@ import {
   getResourceInNs as getCephClusterInNs,
 } from '@odf/core/utils';
 import { getOSDMigrationStatus } from '@odf/ocs/utils';
-import { OCS_OPERATOR } from '@odf/shared/constants';
+import { OCS_OPERATOR, PrometheusEndpoint } from '@odf/shared/constants';
 import { DataResiliency } from '@odf/shared/dashboards/data-resiliency/data-resiliency-activity';
 import {
   useCustomPrometheusPoll,
@@ -62,6 +62,8 @@ import './activity-card.scss';
 export const getOCSSubscription = (
   subscriptions: K8sResourceKind[]
 ): SubscriptionKind =>
+  // SAFETY: _.find returns K8sResourceKind | undefined; subscriptionResource
+  // watches SubscriptionKind items, so the match is a SubscriptionKind.
   _.find(
     subscriptions,
     (item) => item?.spec?.name === OCS_OPERATOR
@@ -139,7 +141,7 @@ const OngoingActivity = () => {
       DATA_RESILIENCY_QUERY(managedByOCS)[
         StorageDashboardQuery.RESILIENCY_PROGRESS
       ],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 

@@ -15,6 +15,7 @@ import { StorageDashboard, CAPACITY_QUERIES } from '../queries';
 
 const ObjectCapacityCard: React.FC = () => {
   const { t } = useCustomTranslation();
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [data, error, loading] = useCustomPrometheusPoll({
     query: CAPACITY_QUERIES[StorageDashboard.USED_CAPACITY_OBJECT],
     endpoint: 'api/v1/query' as any,

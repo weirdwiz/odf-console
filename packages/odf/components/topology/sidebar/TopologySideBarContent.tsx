@@ -73,6 +73,7 @@ const DetailsTabComponent: React.FC<GenericTabComponentProps> = ({
     }
   }, [kind]);
 
+  // SAFETY: The receiving library accepts resource; its published type does not expose this supported value.
   return <Component resource={resource as any} />;
 };
 
@@ -93,6 +94,7 @@ const ResourceTabComponent: React.FC<GenericTabComponentProps> = ({
     }
   }, [kind]);
 
+  // SAFETY: The receiving library accepts resource; its published type does not expose this supported value.
   return <Component resource={resource as any} odfNamespace={odfNamespace} />;
 };
 
@@ -113,6 +115,7 @@ const ObserveTabComponent: React.FC<GenericTabComponentProps> = ({
     }
   }, [kind]);
 
+  // SAFETY: The receiving library accepts resource; its published type does not expose this supported value.
   return <Component resource={resource as any} odfNamespace={odfNamespace} />;
 };
 
@@ -145,6 +148,7 @@ const TopologySideBarContent: React.FC<TopologySideBarContentProps> = ({
 
   const { ref, height } = useAutoExpand();
 
+  // SAFETY: resource comes from the owner of the NodeKind contract used at this boundary.
   return !inFlight && reference !== null ? (
     <div
       className="odf-topology__sidebar"

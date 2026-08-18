@@ -37,6 +37,7 @@ export const Conditions: React.FC<ConditionsProps> = ({
     }
   };
 
+  // SAFETY: conditions contains only entries produced for the Array<K8sResourceCondition | ClusterServiceVersionCondition> contract.
   const rows = (
     conditions as Array<K8sResourceCondition | ClusterServiceVersionCondition>
   )?.map?.(

@@ -4,6 +4,7 @@ import {
   NooBaaSystemModel,
   StorageClusterKind,
 } from '@odf/shared';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,
@@ -65,7 +66,7 @@ export const useGetOCSHealth: UseGetOCSHealth = (storageCluster) => {
 
   const [noobaaHealthStatus, noobaaQueryLoadError] = useCustomPrometheusPoll({
     query: HEALTH_QUERY[Health.NOOBAA],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 

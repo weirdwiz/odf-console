@@ -168,6 +168,7 @@ const DeleteLUNModal: React.FC<DeleteLUNModalProps> = ({
       });
 
       // API may return ListKind { items: [...] } or a raw array
+      // SAFETY: localDisksResponse comes from the owner of the ListKind<LocalDiskKind> contract used at this boundary.
       const localDisksList = Array.isArray(localDisksResponse)
         ? localDisksResponse
         : ((localDisksResponse as ListKind<LocalDiskKind>)?.items ?? []);

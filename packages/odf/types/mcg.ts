@@ -1,5 +1,8 @@
 import { K8sResourceCondition } from '@odf/shared/types';
-import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  K8sResourceCommon,
+  K8sResourceKind,
+} from '@openshift-console/dynamic-plugin-sdk';
 import {
   NamespacePolicyType,
   NS_NOOBAA_TYPE_MAP,
@@ -8,11 +11,26 @@ import {
   SpecType,
 } from '../constants';
 
+export type ProviderSecretReference = {
+  name: string;
+  namespace: string;
+};
+
+type BackingStoreProviderConfig = {
+  endpoint: string;
+  numVolumes: number;
+  pvcName: string;
+  secret: ProviderSecretReference;
+  storageClass: string;
+  subPath: string;
+  targetBlobContainer: string;
+  targetBucket: string;
+  [key: string]: string | number | ProviderSecretReference;
+};
+
 export type BackingStoreKind = K8sResourceCommon & {
   spec: {
-    [key in SpecProvider]: {
-      [key: string]: any;
-    };
+    [key in SpecProvider]: BackingStoreProviderConfig;
   } & {
     type: SpecType;
   };
@@ -22,9 +40,8 @@ export type BackingStoreKind = K8sResourceCommon & {
 };
 
 export type MCGPayload = K8sResourceCommon & {
-  spec: {
+  spec: NonNullable<K8sResourceKind['spec']> & {
     type: string;
-    [key: string]: any;
   };
 };
 
@@ -37,7 +54,16 @@ export type NsSpecType =
 export type NamespaceStoreKind = K8sResourceCommon & {
   spec: {
     [key in NsSpecProvider]: {
-      [key: string]: string;
+      endpoint?: string;
+      numVolumes?: number;
+      pvcName?: string;
+      region?: string;
+      secret?: ProviderSecretReference;
+      storageClass?: string;
+      subPath?: string;
+      targetBlobContainer?: string;
+      targetBucket?: string;
+      [key: string]: string | number | ProviderSecretReference;
     };
   } & {
     type: NsSpecType;

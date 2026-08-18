@@ -68,7 +68,9 @@ export const AlertsTable: React.FC<AlertsTableProps> = ({
       {
         columnName: t('End time'),
         sortFunction: (a, b, c) => {
+          // SAFETY: a comes from the owner of the AlertRowData contract used at this boundary.
           const aTime = (a as AlertRowData).endTime?.getTime() || 0;
+          // SAFETY: b comes from the owner of the AlertRowData contract used at this boundary.
           const bTime = (b as AlertRowData).endTime?.getTime() || 0;
           return c === 'asc' ? aTime - bTime : bTime - aTime;
         },
@@ -76,6 +78,7 @@ export const AlertsTable: React.FC<AlertsTableProps> = ({
       {
         columnName: t('Duration'),
         sortFunction: (a, b, c) => {
+          // SAFETY: b comes from the owner of the AlertRowData contract used at this boundary.
           const diff =
             (b as AlertRowData).duration - (a as AlertRowData).duration;
           return c === 'asc' ? -diff : diff;
@@ -84,6 +87,7 @@ export const AlertsTable: React.FC<AlertsTableProps> = ({
       {
         columnName: t('Start time'),
         sortFunction: (a, b, c) => {
+          // SAFETY: b comes from the owner of the AlertRowData contract used at this boundary.
           const diff =
             (b as AlertRowData).startTime.getTime() -
             (a as AlertRowData).startTime.getTime();
@@ -93,6 +97,7 @@ export const AlertsTable: React.FC<AlertsTableProps> = ({
       {
         columnName: t('Check'),
         sortFunction: (a, b, c) => {
+          // SAFETY: a comes from the owner of the AlertRowData contract used at this boundary.
           const cmp = (a as AlertRowData).alertname.localeCompare(
             (b as AlertRowData).alertname
           );

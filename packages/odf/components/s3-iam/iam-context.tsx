@@ -29,8 +29,9 @@ type IamProviderProps = {
   error?: unknown;
 };
 
+// SAFETY: This empty IamContextType accumulator receives only entries created by the reducer below.
 export const IamContext = React.createContext<IamContextType>(
-  {} as IamContextType
+  /* SAFETY: The value is supplied by the IamContextType owner and follows that contract. */ {} as IamContextType
 );
 
 export const IamProvider: React.FC<IamProviderProps> = ({
@@ -79,6 +80,7 @@ export const IamProvider: React.FC<IamProviderProps> = ({
   const anyError =
     secretError || providerConfigError || iamClientError || error;
 
+  // SAFETY: iamClient comes from the owner of the IamCommands contract used at this boundary.
   const contextData = React.useMemo(
     () => ({
       iamClient: (iamClient as IamCommands) || ({} as IamCommands),

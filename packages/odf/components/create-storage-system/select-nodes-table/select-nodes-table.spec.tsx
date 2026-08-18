@@ -2,23 +2,20 @@ import * as React from 'react';
 import { createWizardNodeState } from '@odf/core/components/utils';
 import { cephStorageLabel } from '@odf/core/constants';
 import { useNodesData } from '@odf/core/hooks';
+import * as TestDependency1 from '@odf/core/hooks';
 import { useListPageFilter } from '@openshift-console/dynamic-plugin-sdk';
+import * as TestDependency2 from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router';
 import { createFakeNodesData } from '../../../../../jest/helpers';
 import { NodesTable } from '../../nodes-table/NodesTable';
 import { SelectNodesTable } from './select-nodes-table';
 
-jest.mock('@odf/core/hooks', () => ({
-  ...jest.requireActual('@odf/core/hooks'),
-  useNodesData: jest.fn(),
-}));
-// Mock needed due to sdk @console/internal declarations.
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  ListPageFilter: jest.fn(() => null),
-  useListPageFilter: jest.fn(),
-}));
+jest.spyOn(TestDependency1, 'useNodesData').mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency2, 'ListPageFilter')
+  .mockImplementation(jest.fn(() => null));
+jest.spyOn(TestDependency2, 'useListPageFilter').mockImplementation(jest.fn());
 const onRowSelected = jest.fn();
 
 const systemNamespace = 'openshift-storage';
@@ -26,7 +23,9 @@ const cpu = 12;
 const memory = 32 * 1000 * 1000 * 1000;
 const nodes = createFakeNodesData(3, cpu, memory);
 const selectedNodes = createWizardNodeState(nodes);
+// SAFETY: The jest.Mock test value defines the members exercised by this test.
 (useNodesData as jest.Mock).mockReturnValue([nodes, true, null]);
+// SAFETY: The jest.Mock test value defines the members exercised by this test.
 (useListPageFilter as jest.Mock).mockReturnValue([nodes, nodes, jest.fn()]);
 
 describe('Select Nodes Table', () => {
@@ -97,7 +96,9 @@ describe('Select Nodes Table', () => {
           }
         : node
     );
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useNodesData as jest.Mock).mockReturnValue([labeledNodes, true, null]);
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useListPageFilter as jest.Mock).mockReturnValue([
       labeledNodes,
       labeledNodes,

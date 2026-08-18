@@ -107,6 +107,7 @@ export const FileUploadComponent: React.FC<FileUploadComponentProps> = observer(
       setUploadStatus(UploadStatus.UPLOAD_COMPLETE);
     };
 
+    // SAFETY: The receiving library accepts { webkitdirectory: 'true' }; its published type does not expose this supported value.
     return (
       <div className="odf-upload">
         {(uploadStatus === UploadStatus.UPLOAD_START ||

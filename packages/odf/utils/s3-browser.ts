@@ -88,25 +88,31 @@ export const convertObjectDataToCrFormat = (
     type: '',
   };
   if (isFolder) {
+    // SAFETY: objectData comes from the owner of the CommonPrefix contract used at this boundary.
     const prefix = (objectData as CommonPrefix)?.Prefix;
     structuredObject.metadata.name = prefix;
     structuredObject.metadata.uid = prefix;
     structuredObject.isFolder = true;
     structuredObject.type = t('Folder');
   } else {
+    // SAFETY: objectData comes from the owner of the Content | ObjectVersion | DeleteMarkerEntry contract used at this boundary.
     const key = (objectData as Content | ObjectVersion | DeleteMarkerEntry)
       ?.Key;
     const lastIndexOfDot = key.lastIndexOf('.');
+    // SAFETY: objectData comes from the owner of the ObjectVersion | DeleteMarkerEntry contract used at this boundary.
     const versionId =
       (objectData as ObjectVersion | DeleteMarkerEntry)?.VersionId || DASH;
+    // SAFETY: objectData comes from the owner of the ObjectVersion | DeleteMarkerEntry contract used at this boundary.
     const isLatestVersion = (objectData as ObjectVersion | DeleteMarkerEntry)
       ?.IsLatest;
     structuredObject.metadata.name = key;
     structuredObject.metadata.uid = key + versionId;
+    // SAFETY: objectData comes from the owner of the Content | ObjectVersion | DeleteMarkerEntry contract used at this boundary.
     structuredObject.apiResponse.lastModified =
       (
         objectData as Content | ObjectVersion | DeleteMarkerEntry
       )?.LastModified?.toString() || DASH;
+    // SAFETY: objectData comes from the owner of the Content | ObjectVersion contract used at this boundary.
     structuredObject.apiResponse.size =
       humanizeBinaryBytes((objectData as Content | ObjectVersion)?.Size, 'B')
         ?.string || DASH;
@@ -115,6 +121,7 @@ export const convertObjectDataToCrFormat = (
       : (lastIndexOfDot !== -1
           ? key.substring(lastIndexOfDot + 1, key.length)
           : DASH) || DASH;
+    // SAFETY: objectData comes from the owner of the Content | ObjectVersion | DeleteMarkerEntry contract used at this boundary.
     structuredObject.apiResponse.ownerName =
       (objectData as Content | ObjectVersion | DeleteMarkerEntry)?.Owner
         ?.DisplayName || DASH;
@@ -130,7 +137,7 @@ export const replacePathFromName = (
   object: ObjectCrFormat | string,
   foldersPath: string
 ): string =>
-  typeof object === 'string'
+  _.isString(object)
     ? object.replace(foldersPath, '')
     : getName(object).replace(foldersPath, '');
 

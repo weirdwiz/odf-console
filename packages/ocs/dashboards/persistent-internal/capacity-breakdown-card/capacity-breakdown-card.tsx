@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useODFNamespaceSelector } from '@odf/core/redux';
 import { useGetInternalClusterDetails } from '@odf/core/redux/utils';
 import { namespaceResource } from '@odf/core/resources';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import { BreakdownCardBody } from '@odf/shared/dashboards/breakdown-card/breakdown-body';
 import { getSelectOptions } from '@odf/shared/dashboards/breakdown-card/breakdown-dropdown';
 import ResourceDropdown from '@odf/shared/dropdown/ResourceDropdown';
@@ -156,20 +157,20 @@ const BreakdownCard: React.FC = () => {
   const [modelByUsed, modelUsedError, modelUsedLoading] =
     useCustomPrometheusPoll({
       query: queries[modelByUsedQueryMap[metricType]],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
   const [modelTotalUsed, modelTotalError, modalTotalLoading] =
     useCustomPrometheusPoll({
       query: queries[modelByTotalQueryMap[metricType]],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
   const [cephUsedMetric, cephError, cephLoading] = useCustomPrometheusPoll({
     query: CEPH_CAPACITY_BREAKDOWN_QUERIES(scQueryfilter, ocsCluster)[
       StorageDashboardQuery.CEPH_CAPACITY_USED
     ],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 
@@ -189,7 +190,11 @@ const BreakdownCard: React.FC = () => {
   const cephUsed: string = cephUsedMetric?.data?.result?.[0]?.value?.[1];
 
   const handleMetricsChange: SelectProps['onSelect'] = (_e, breakdown) => {
-    setMetricType(breakdown as any);
+    // SAFETY: PF Select onSelect types value as `any`; all option IDs in
+    // dropdownOptions are BreakdownCardFields or BreakdownCardFieldsWithParams.
+    setMetricType(
+      breakdown as BreakdownCardFields | BreakdownCardFieldsWithParams
+    );
     setBreakdownSelect(!isOpenBreakdownSelect);
   };
 

@@ -5,10 +5,11 @@ import {
   getStatusGroups,
   InventoryStatusGroup,
 } from './Inventory';
+import * as TestDependency1 from './Node';
 
-jest.mock('./Node', () => ({
-  nodeStatus: (resource) => resource.status,
-}));
+jest
+  .spyOn(TestDependency1, 'nodeStatus')
+  .mockImplementation((resource) => resource.status);
 
 describe('tests for getStatusGroups utility function', () => {
   const resources = [
@@ -52,6 +53,7 @@ describe('tests for getNodeStatusGroups utility function', () => {
   ];
 
   test('correctly calls the groups resources by status for node status', () => {
+    // SAFETY: The any test value defines the members exercised by this test.
     const groups = getNodeStatusGroups(resources as any);
     expect(groups).toEqual({
       [InventoryStatusGroup.UNKNOWN]: { statusIDs: [], count: 1 },
@@ -78,6 +80,7 @@ describe('tests for getPVCStatusGroups utility function', () => {
   ];
 
   test('correctly calls the groups resources by status for pvc status', () => {
+    // SAFETY: The any test value defines the members exercised by this test.
     const groups = getPVCStatusGroups(resources as any);
     expect(groups).toEqual({
       [InventoryStatusGroup.UNKNOWN]: { statusIDs: [], count: 0 },
@@ -109,6 +112,7 @@ describe('tests for getPVStatusGroups utility function', () => {
   ];
 
   test('correctly calls the groups resources by status for pv status', () => {
+    // SAFETY: The any test value defines the members exercised by this test.
     const groups = getPVStatusGroups(resources as any);
     expect(groups).toEqual({
       [InventoryStatusGroup.UNKNOWN]: { statusIDs: [], count: 0 },

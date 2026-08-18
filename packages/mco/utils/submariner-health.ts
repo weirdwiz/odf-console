@@ -114,13 +114,13 @@ const isSubmarinerHealthy = ({
 
 const getClusterSubmarinerStatus = (
   addon: SubmarinerAddOnKind | undefined,
-  loadError: unknown
+  cause: unknown
 ): SubmarinerStatus => {
-  if (loadError && isNotFoundError(loadError)) {
+  if (cause && isNotFoundError(cause)) {
     return SubmarinerStatus.NotInstalled;
   }
 
-  if (loadError) {
+  if (cause) {
     return SubmarinerStatus.Degraded;
   }
 
@@ -220,12 +220,16 @@ const extractCidrsFromNetworkClaimValue = (
   }
 
   try {
-    const parsed = JSON.parse(value) as {
-      clusterNetwork?: unknown;
-      serviceNetwork?: unknown;
-    };
-    const clusterCidrs = asStringArray(parsed.clusterNetwork);
-    const serviceCidrs = asStringArray(parsed.serviceNetwork);
+    const parsed = JSON.parse(value);
+    if (!(parsed instanceof Object)) {
+      return null;
+    }
+    const clusterCidrs = asStringArray(
+      'clusterNetwork' in parsed ? parsed.clusterNetwork : undefined
+    );
+    const serviceCidrs = asStringArray(
+      'serviceNetwork' in parsed ? parsed.serviceNetwork : undefined
+    );
 
     if (!clusterCidrs.length && !serviceCidrs.length) {
       return null;
@@ -299,7 +303,7 @@ const getBrokerGlobalnetFlag = (
 export const evaluateGlobalnetPrePair = (
   brokers: SubmarinerBrokerKind[] | undefined,
   brokersLoaded: boolean,
-  brokersError: unknown,
+  cause: unknown,
   clusters: ManagedClusterNetworkInfo[],
   submarinerClusters: SubmarinerClusterKind[] | undefined,
   submarinerClustersLoaded: boolean,
@@ -317,7 +321,7 @@ export const evaluateGlobalnetPrePair = (
     return GlobalnetStatus.Checking;
   }
 
-  if (brokersError && !isNotFoundError(brokersError)) {
+  if (cause && !isNotFoundError(cause)) {
     return GlobalnetStatus.LoadError;
   }
 
@@ -329,11 +333,17 @@ export const evaluateGlobalnetPrePair = (
     )
   );
 
-  if (networkCidrs.length !== 2 || networkCidrs.some((cidrs) => !cidrs)) {
+  if (
+    networkCidrs.length !== 2 ||
+    !networkCidrs.every(
+      (cidrs): cidrs is ClusterNetworkCidrs =>
+        cidrs !== undefined && cidrs !== null
+    )
+  ) {
     return GlobalnetStatus.CidrUnread;
   }
 
-  const [left, right] = networkCidrs as ClusterNetworkCidrs[];
+  const [left, right] = networkCidrs;
   const clusterOverlap = evaluateCidrListsOverlap(
     left.clusterCidrs,
     right.clusterCidrs
@@ -354,7 +364,7 @@ export const evaluateGlobalnetPrePair = (
     clusterOverlap === CidrOverlapResult.Overlap ||
     serviceOverlap === CidrOverlapResult.Overlap;
   const broker = getBrokerGlobalnetFlag(
-    isNotFoundError(brokersError) ? undefined : brokers
+    isNotFoundError(cause) ? undefined : brokers
   );
 
   if (hasOverlap) {

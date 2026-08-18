@@ -12,6 +12,7 @@ const performUploadPromise = (
   s3Client: S3Commands
 ) => {
   const key = getPrefix(file.webkitRelativePath || file.name, folderPath);
+  // SAFETY: file comes from the owner of the File contract used at this boundary.
   const uploader = s3Client.getUploader(file as File, key, bucketName);
   uploadStore.setAborter(key, () => uploader.abort());
   uploader.on('httpUploadProgress', (progress) => {

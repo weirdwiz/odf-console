@@ -67,6 +67,7 @@ const CreateVectorIndexForm: React.FC = () => {
   const [metadataKeys, setMetadataKeys] = React.useState<string[]>([]);
   const { s3VectorsClient } = React.useContext(S3VectorsContext);
 
+  // SAFETY: s3Provider comes from the owner of the S3ProviderType contract used at this boundary.
   const breadcrumbs = [
     {
       name: t('Vector buckets'),
@@ -96,6 +97,7 @@ const CreateVectorIndexForm: React.FC = () => {
     useS3VectorIndexFormValidation();
   const resolver = useYupValidationResolver(vectorIndexSchema);
 
+  // SAFETY: The receiving library accepts formSettings; its published type does not expose this supported value.
   const {
     control,
     handleSubmit,
@@ -113,6 +115,7 @@ const CreateVectorIndexForm: React.FC = () => {
     let newValue: number;
     switch (funcType) {
       case 'onChange': {
+        // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
         const value = (event?.target as HTMLInputElement)?.value;
         const numValue = parseInt(value, 10);
         newValue = isNaN(numValue)
@@ -147,11 +150,13 @@ const CreateVectorIndexForm: React.FC = () => {
         },
       });
     } catch (error) {
+      // SAFETY: error comes from the owner of the Error contract used at this boundary.
       setErrorMessage((error as Error)?.message || JSON.stringify(error));
       setInProgress(false);
       return;
     }
     setInProgress(false);
+    // SAFETY: s3Provider comes from the owner of the S3ProviderType contract used at this boundary.
     navigate(
       getVectorBucketOverviewBaseRoute(
         vectorBucketName,
@@ -162,6 +167,7 @@ const CreateVectorIndexForm: React.FC = () => {
   const numberOfTagsAdded = metadataKeys.length;
   const remainingKeys = MAX_METADATA_KEYS - numberOfTagsAdded;
 
+  // SAFETY: The receiving library accepts control; its published type does not expose this supported value.
   return (
     <>
       <PageHeading breadcrumbs={breadcrumbs} title={t('Create vector index')}>

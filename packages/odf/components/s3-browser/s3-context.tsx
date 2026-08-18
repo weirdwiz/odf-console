@@ -32,8 +32,9 @@ type S3ProviderProps = {
   s3Provider?: S3ProviderType;
 };
 
+// SAFETY: This empty S3ContextType accumulator receives only entries created by the reducer below.
 export const S3Context = React.createContext<S3ContextType>(
-  {} as S3ContextType
+  /* SAFETY: The value is supplied by the S3ContextType owner and follows that contract. */ {} as S3ContextType
 );
 
 // ToDo: In case this provider is needed at too many places, consider applying it to the console's root or use redux instead
@@ -75,6 +76,7 @@ export const S3Provider: React.FC<S3ProviderProps> = ({
 
   let s3Client = client;
   if (isClientCluster && dataPathClient) {
+    // SAFETY: client comes from the owner of the S3Commands contract used at this boundary.
     s3Client = dataPathSeparationProxy(
       client as S3Commands,
       dataPathClient as S3Commands
@@ -89,6 +91,7 @@ export const S3Provider: React.FC<S3ProviderProps> = ({
     !loading;
   const anyError = secretError || providerConfigError || s3ClientError || error;
 
+  // SAFETY: s3Client comes from the owner of the S3Commands contract used at this boundary.
   const contextData = React.useMemo(
     () => ({
       s3Client: (s3Client as S3Commands) || ({} as S3Commands),

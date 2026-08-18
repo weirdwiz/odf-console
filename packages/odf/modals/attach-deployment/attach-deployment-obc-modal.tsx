@@ -79,6 +79,7 @@ const AttachDeploymentToOBCModal: React.FC<AttachDeploymentToOBCModalProps> = (
 
   const Header = <ModalHeader>{t('Attach OBC to a Deployment')}</ModalHeader>;
 
+  // SAFETY: The receiving library accepts errorMessage; its published type does not expose this supported value.
   return (
     <Modal
       header={Header}

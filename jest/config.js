@@ -2,6 +2,8 @@
 const config = {
   collectCoverageFrom: ['<rootDir>/packages/**/*.{ts,tsx}', '!**/*.d.ts'],
   moduleNameMapper: {
+    '^(?:@openshift-console/dynamic-plugin-sdk/lib/api/|\\./)common-types$':
+      '<rootDir>/jest/mocks/console-common-types.ts',
     '^@console/shared/src/components/layout/PaneBody$':
       '<rootDir>/jest/mocks/console-pane-body.tsx',
     '^@console': 'identity-obj-proxy',

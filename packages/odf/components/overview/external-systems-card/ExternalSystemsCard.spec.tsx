@@ -1,42 +1,42 @@
 import * as React from 'react';
 import { FileSystemKind } from '@odf/core/types/scale';
 import { useWatchStorageClusters } from '@odf/shared/hooks/useWatchStorageClusters';
+import * as TestDependency1 from '@odf/shared/hooks/useWatchStorageClusters';
 import { StorageClusterKind } from '@odf/shared/types';
+import * as TestDependency3 from '@odf/shared/useCustomTranslationHook';
 import {
   useFlag,
   useK8sWatchResource,
 } from '@openshift-console/dynamic-plugin-sdk';
+import * as TestDependency2 from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen, within } from '@testing-library/react';
 import { BrowserRouter } from 'react-router';
 import { ExternalSystemsCard } from './ExternalSystemsCard';
 
-jest.mock('@odf/shared/hooks/useWatchStorageClusters', () => ({
-  useWatchStorageClusters: jest.fn(),
+jest
+  .spyOn(TestDependency1, 'useWatchStorageClusters')
+  .mockImplementation(jest.fn());
+jest.spyOn(TestDependency2, 'useFlag').mockImplementation(jest.fn());
+jest
+  .spyOn(TestDependency2, 'useK8sWatchResource')
+  .mockImplementation(jest.fn());
+jest.spyOn(TestDependency3, 'useCustomTranslation').mockImplementation(() => ({
+  t: (key: string) => key,
 }));
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  useFlag: jest.fn(),
-  useK8sWatchResource: jest.fn(),
-}));
-
-jest.mock('@odf/shared/useCustomTranslationHook', () => ({
-  useCustomTranslation: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
-const mockWatchClusters = (overrides: Record<string, unknown> = {}) => {
+const mockWatchClusters = <Overrides extends object>(overrides?: Overrides) => {
+  // SAFETY: The jest.Mock test value defines the members exercised by this test.
   (useWatchStorageClusters as jest.Mock).mockReturnValue({
     storageClusters: { data: [], loaded: true, loadError: null },
     flashSystemClusters: { data: [], loaded: true, loadError: null },
     remoteClusters: { data: [], loaded: true, loadError: null },
     sanClusters: { data: [], loaded: true, loadError: null },
-    ...overrides,
+    ...(overrides ?? {}),
   });
 };
 
 const mockFileSystems = (fileSystems: FileSystemKind[] = []) => {
+  // SAFETY: The jest.Mock test value defines the members exercised by this test.
   (useK8sWatchResource as jest.Mock).mockReturnValue([
     fileSystems,
     true,
@@ -146,6 +146,7 @@ const cnsaFilesystem = (
   return base;
 };
 
+// SAFETY: The StorageClusterKind test value defines the members exercised by this test.
 const externalCephCluster = (name: string, phase: string): StorageClusterKind =>
   ({
     metadata: { name, namespace: 'openshift-storage' },
@@ -172,6 +173,7 @@ const renderCard = () =>
 describe('ExternalSystemsCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useFlag as jest.Mock).mockReturnValue(true);
     mockWatchClusters();
     mockFileSystems();
@@ -191,6 +193,7 @@ describe('ExternalSystemsCard', () => {
       remoteClusters: { data: [], loaded: false, loadError: null },
       sanClusters: { data: [], loaded: false, loadError: null },
     });
+    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     (useK8sWatchResource as jest.Mock).mockReturnValue([[], false, undefined]);
 
     renderCard();
@@ -224,6 +227,7 @@ describe('ExternalSystemsCard', () => {
     const sanRow = screen
       .getByText('Storage Area Network LUN groups')
       .closest('dt');
+    // SAFETY: The HTMLElement test value defines the members exercised by this test.
     const description = sanRow?.nextElementSibling as HTMLElement;
     expect(within(description).getAllByText('1')).toHaveLength(2);
   });

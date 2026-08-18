@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { STATUS_QUERIES, StorageDashboard } from '../../queries';
-import { StatusCard } from './status-card';
+import { StatusCard, statusCardDependencies } from './status-card';
 
 let testCaseId = 1;
 
@@ -203,32 +203,28 @@ const csvStatus = {
 const MockHealthBody: React.FC = ({ children }) => (
   <div className="co-status-card__health-body">{children}</div>
 );
-
-jest.mock(
-  '@odf/shared/hooks/custom-prometheus-poll/custom-prometheus-poll-hook',
-  () => ({
-    useCustomPrometheusPoll: jest.fn((props: { query: string }) => {
-      if (props.query === STATUS_QUERIES[StorageDashboard.SYSTEM_HEALTH]) {
-        return [storageSystemStatus, undefined, false];
-      } else if (props.query === STATUS_QUERIES[StorageDashboard.HEALTH]) {
-        if (testCaseId === 2) {
-          healthStatus.data.result[0].value[1] = '1';
-        }
-        return [healthStatus, undefined, false];
-      } else if (props.query === STATUS_QUERIES[StorageDashboard.CSV_STATUS]) {
-        if (testCaseId === 2) {
-          csvStatus.data.result[0].value[1] = '0';
-        }
-        return [csvStatus, undefined, false];
+jest
+  .spyOn(statusCardDependencies, 'useCustomPrometheusPoll')
+  .mockImplementation(
+  jest.fn((props: { query: string }) => {
+    if (props.query === STATUS_QUERIES[StorageDashboard.SYSTEM_HEALTH]) {
+      return [storageSystemStatus, undefined, false];
+    } else if (props.query === STATUS_QUERIES[StorageDashboard.HEALTH]) {
+      if (testCaseId === 2) {
+        healthStatus.data.result[0].value[1] = '1';
       }
-    }),
+      return [healthStatus, undefined, false];
+    } else if (props.query === STATUS_QUERIES[StorageDashboard.CSV_STATUS]) {
+      if (testCaseId === 2) {
+        csvStatus.data.result[0].value[1] = '0';
+      }
+      return [csvStatus, undefined, false];
+    }
   })
 );
-
-jest.mock('@openshift-console/dynamic-plugin-sdk-internal', () => ({
-  // HealthBody import is causing error
-  HealthBody: (props) => <MockHealthBody {...props} />,
-}));
+jest
+  .spyOn(statusCardDependencies, 'HealthBody')
+  .mockImplementation((props) => <MockHealthBody {...props} />);
 
 describe('Test ODF cluster status from different clusters and namespaces', () => {
   test('All healthy case testing', async () => {

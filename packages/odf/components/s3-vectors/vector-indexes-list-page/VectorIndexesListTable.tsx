@@ -93,7 +93,9 @@ const EmptyRowMessage: React.FC = () => {
   );
 };
 
-const VectorIndexTableRow: React.FC<RowComponentType<K8sResourceCommon>> = ({
+const VectorIndexTableRow: React.FC<
+  RowComponentType<K8sResourceCommon, RowExtraPropsType>
+> = ({
   row: indexRow,
   rowIndex,
   extraProps,
@@ -107,7 +109,7 @@ const VectorIndexTableRow: React.FC<RowComponentType<K8sResourceCommon>> = ({
     s3VectorsClient,
     triggerRefresh,
     setDeleteResponse,
-  }: RowExtraPropsType = extraProps;
+  } = extraProps;
   const indexResourceName = getName(indexRow);
   const indexName = indexResourceName || DASH;
   const creationTimestamp = getCreationTimestamp(indexRow);
@@ -163,8 +165,10 @@ export const VectorIndexesListTable: React.FC<VectorIndexesListTableProps> = ({
 }) => {
   const { t } = useCustomTranslation();
   const launcher = useModalWrapper();
+  // SAFETY: s3VectorsClient.providerType comes from the owner of the S3ProviderType contract used at this boundary.
   const providerType = s3VectorsClient.providerType as S3ProviderType;
 
+  // SAFETY: allVectorIndexes contains only entries produced for the [] contract.
   return (
     <ComposableTable
       rows={filteredVectorIndexes ?? []}

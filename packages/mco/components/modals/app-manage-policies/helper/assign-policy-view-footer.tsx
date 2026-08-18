@@ -34,9 +34,8 @@ export const isValidLabelInput = (labels: string[] = []): boolean =>
         // "key" or "key=value" is supported
         return (
           !!requirement &&
-          [Operator.Equals, Operator.Exists].includes(
-            requirement?.operator as Operator
-          )
+          (requirement.operator === Operator.Equals ||
+            requirement.operator === Operator.Exists)
         );
       })
     : false;
@@ -141,7 +140,7 @@ export const AssignPolicyViewFooter: React.FC<AssignPolicyViewFooterProps> = ({
   const [requestInProgress, setRequestInProgress] = React.useState(false);
   const { activeStep, goToNextStep, goToPrevStep } = useWizardContext();
 
-  const stepName = activeStep.name as string;
+  const stepName = String(activeStep.name ?? '');
 
   const canJumpToNext = canJumpToNextStep(stepName, state, appType, t);
   const validationError = isValidationEnabled && !canJumpToNext;

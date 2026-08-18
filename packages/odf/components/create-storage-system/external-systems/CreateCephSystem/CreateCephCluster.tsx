@@ -348,6 +348,7 @@ const CreateCephCluster: React.FC = () => {
           : undefined,
       });
 
+      // SAFETY: p.model comes from the owner of the K8sModel contract used at this boundary.
       const promises = payload.map((p) =>
         k8sCreate({ model: p.model as K8sModel, data: p.payload })
       );

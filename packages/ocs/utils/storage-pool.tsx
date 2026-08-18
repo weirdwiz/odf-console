@@ -60,11 +60,11 @@ export const getPerPoolMetrics = (
 ): { [poolName: string]: string } =>
   // {"pool-1" : size_bytes, "pool-2" : size_bytes, ...}
   !error && !isLoading
-    ? metrics?.data?.result?.reduce(
+    ? metrics?.data?.result?.reduce<Record<string, string>>(
         (arr, obj) => ({ ...arr, [obj.metric?.name]: obj.value[1] }),
-        {} as { [poolName: string]: string }
+        {}
       )
-    : ({} as { [poolName: string]: string });
+    : {};
 
 export const isDefaultPool = (pool: StoragePool): boolean => {
   if (pool?.type === PoolType.FILESYSTEM) {
@@ -208,17 +208,16 @@ export const getStoragePoolsFromFilesystem = (
       status: { phase: fs.status?.phase },
       shortName: dataPool.name ?? POOL_FS_DEFAULT,
       type: PoolType.FILESYSTEM,
-    } as StoragePool;
+    } satisfies StoragePool;
   });
 };
 
 export const getStoragePoolsFromBlockPools = (
   blockPools: StoragePoolKind[]
 ): StoragePool[] => {
-  return blockPools?.map((pool) => {
-    pool['type'] = PoolType.BLOCK;
-    return pool as StoragePool;
-  });
+  return blockPools?.map(
+    (pool) => ({ ...pool, type: PoolType.BLOCK }) satisfies StoragePool
+  );
 };
 
 export const getExistingFsPoolNames = (fsData: CephFilesystemKind): string[] =>

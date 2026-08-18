@@ -43,6 +43,7 @@ const VectorBucketsListPageBody: React.FC<VectorBucketsListPageBodyProps> = ({
   const [allVectorBuckets, filteredVectorBuckets, onFilterChange] =
     useListPageFilter(vectorBuckets);
 
+  // SAFETY: loadError comes from the owner of the Error contract used at this boundary.
   return (
     <ListPageBody>
       <Flex className="pf-v6-u-mt-md">
@@ -96,6 +97,7 @@ const VectorBucketsListPageContent: React.FC = () => {
   const { s3VectorsClient, logout, setSecretRef } =
     React.useContext(S3VectorsContext);
   const launcher = useModalWrapper();
+  // SAFETY: s3VectorsClient.providerType comes from the owner of the S3ProviderType contract used at this boundary.
   const providerType = s3VectorsClient.providerType as S3ProviderType;
   return (
     <>

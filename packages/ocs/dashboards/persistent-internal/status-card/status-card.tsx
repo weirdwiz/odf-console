@@ -10,6 +10,7 @@ import {
 import { odfDocBasePath } from '@odf/shared/constants/doc';
 import { healthStateMapping } from '@odf/shared/dashboards/status-card/states';
 import { DOC_VERSION as odfDocVersion } from '@odf/shared/hooks';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,
@@ -81,6 +82,8 @@ const CephAlerts: React.FC<{ docVersion: string }> = ({ docVersion }) => {
         filteredAlerts?.map((alert) => (
           <AlertItem
             key={alertURL(alert, alert?.rule?.id)}
+            // SAFETY: AlertStates enum from dynamic-plugin-sdk vs -internal
+            // are structurally identical but TS treats them as incompatible.
             alert={alert as any}
             documentationLink={getDocumentationLink(alert, docVersion)}
           />
@@ -137,7 +140,7 @@ export const StatusCard: React.FC = () => {
   const [resiliencyProgress, resiliencyProgressError] = useCustomPrometheusPoll(
     {
       query: resiliencyProgressQuery(managedByOCS),
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     }
   );

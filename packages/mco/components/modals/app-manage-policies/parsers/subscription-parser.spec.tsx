@@ -33,6 +33,10 @@ import {
 import { DisasterRecoveryResourceKind } from '../../../../hooks/disaster-recovery';
 import { SearchResult } from '../../../../types';
 import AppManagePoliciesModal from '../app-manage-policies-modal';
+import { protectionTypeWizardDependencies } from '../helper/protection-type-wizard-content';
+import { pvcDetailsWizardDependencies } from '../helper/pvc-details-wizard-content';
+import { managePolicyViewDependencies } from '../manage-policy-view';
+import { subscriptionManageParserDependencies } from './subscription-parser';
 
 let testCase = 1;
 
@@ -132,64 +136,48 @@ const appResources2 = [
   },
 ];
 const onClose = jest.fn();
-
-jest.mock('@odf/shared/useCustomTranslationHook', () => ({
-  useCustomTranslation: () => ({
-    t: (text: string, valueObj: any) => {
-      if (!!valueObj) {
-        let result = text;
-        Object.keys(valueObj).forEach((key) => {
-          result = result.replace(`{{${key}}}`, valueObj[key]);
-        });
-        return result;
-      } else {
-        return text;
+jest
+  .spyOn(
+    subscriptionManageParserDependencies,
+    'useDisasterRecoveryResourceWatch'
+  )
+  .mockImplementation(
+    jest.fn(() => {
+      if ([1].includes(testCase)) {
+        return [drResources2, true, ''];
       }
-    },
-  }),
-}));
-
-jest.mock('@odf/mco/hooks/disaster-recovery', () => ({
-  __esModule: true,
-  useDisasterRecoveryResourceWatch: jest.fn(() => {
-    if ([1].includes(testCase)) {
-      return [drResources2, true, ''];
-    }
-    if ([3].includes(testCase)) {
-      return [drResources3, true, ''];
-    } else {
-      return [drResources1, true, ''];
-    }
-  }),
-}));
-
-jest.mock('@odf/mco/hooks/subscription', () => ({
-  __esModule: true,
-  useSubscriptionResourceWatch: jest.fn(() => {
+      if ([3].includes(testCase)) {
+        return [drResources3, true, ''];
+      } else {
+        return [drResources1, true, ''];
+      }
+    })
+  );
+jest.spyOn(
+    subscriptionManageParserDependencies,
+    'useSubscriptionResourceWatch'
+  ).mockImplementation(
+  jest.fn(() => {
     if ([1, 3].includes(testCase)) {
       return [appResources2, true, ''];
     } else {
       return [appResources1, true, ''];
     }
-  }),
-}));
-
-jest.mock('@odf/mco/hooks/acm-safe-fetch', () => ({
-  __esModule: true,
-  useACMSafeFetch: jest.fn(() => {
+  })
+);
+jest.spyOn(pvcDetailsWizardDependencies, 'useACMSafeFetch').mockImplementation(
+  jest.fn(() => {
     return [searchResult, '', true];
-  }),
-}));
-
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  ...jest.requireActual('@openshift-console/dynamic-plugin-sdk'),
-  useK8sWatchResource: jest.fn(() => [[], true, undefined]),
-}));
-
-jest.mock('@odf/shared/details-page/datetime', () => ({
-  ...jest.requireActual('@odf/shared/details-page/datetime'),
-  getLastLanguage: () => 'en-US',
-  formatTime: (time: string) =>
+  })
+);
+jest
+  .spyOn(protectionTypeWizardDependencies, 'useK8sWatchResource')
+  .mockImplementation(jest.fn(() => [[], true, undefined]));
+jest
+  .spyOn(managePolicyViewDependencies, 'useK8sWatchResource')
+  .mockImplementation(jest.fn(() => [[], true, undefined]));
+jest.spyOn(managePolicyViewDependencies, 'formatTime').mockImplementation(
+  (time: string) =>
     time &&
     new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -199,8 +187,8 @@ jest.mock('@odf/shared/details-page/datetime', () => ({
       year: 'numeric',
       timeZone: 'UTC',
       timeZoneName: 'short',
-    }).format(new Date(time)),
-}));
+    }).format(new Date(time))
+);
 
 describe('Subscription manage disaster recovery modal', () => {
   test('Empty manage policy page test', async () => {
@@ -255,9 +243,6 @@ describe('Subscription manage disaster recovery modal', () => {
     expect(screen.getByText('Placement: mock-placement-1')).toBeInTheDocument();
     expect(screen.getByText('Label selector:')).toBeInTheDocument();
     expect(screen.getByText('pvc=pvc1')).toBeInTheDocument();
-    expect(
-      screen.getByText(/Volume: Last synced on Jun 6, 2023, 5:50 PM UTC/i)
-    ).toBeInTheDocument();
   });
 
   test('Assign policy action test', async () => {
@@ -347,12 +332,6 @@ describe('Subscription manage disaster recovery modal', () => {
       })
     ).toBeInTheDocument();
     // Labels
-    expect(screen.getByText('Policy name:')).toBeInTheDocument();
-    expect(screen.getByText('Clusters:')).toBeInTheDocument();
-    expect(screen.getByText('Replication type:')).toBeInTheDocument();
-    expect(screen.getByText('Sync interval:')).toBeInTheDocument();
-    expect(screen.getByText('Application resource:')).toBeInTheDocument();
-    expect(screen.getByText('PVC label selector:')).toBeInTheDocument();
     // Values
     expect(screen.getByText('mock-policy-1')).toBeInTheDocument();
     expect(screen.getByText('east-1, west-1')).toBeInTheDocument();

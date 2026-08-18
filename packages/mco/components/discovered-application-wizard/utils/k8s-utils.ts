@@ -22,6 +22,8 @@ import {
   ProtectionMethodType,
 } from './reducer';
 
+export const discoveredApplicationK8sDependencies = { k8sCreate };
+
 export const convertRecipeParamsToList = (
   params: Record<string, string> = {}
 ): Record<string, string[]> =>
@@ -136,14 +138,14 @@ export const createPromise = (
 
   const promises: Promise<K8sResourceKind>[] = [];
   promises.push(
-    k8sCreate({
+    discoveredApplicationK8sDependencies.k8sCreate({
       model: ACMPlacementModel,
       data: getPlacementKindObj(placementName),
     })
   );
 
   promises.push(
-    k8sCreate({
+    discoveredApplicationK8sDependencies.k8sCreate({
       model: DRPlacementControlModel,
       data: getDRPCKindObj({
         name,

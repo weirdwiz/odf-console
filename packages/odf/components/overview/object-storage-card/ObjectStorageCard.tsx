@@ -45,6 +45,7 @@ const BUCKETS_PROVISIONED_QUERIES: [
 export const ObjectStorageCard: React.FC<CardProps> = ({ className }) => {
   const { t } = useCustomTranslation();
   const navigate = useNavigate();
+  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [nbBucketsData, nbBucketsError, nbBucketsLoading] =
     useCustomPrometheusPoll({
       query: ObjectStorageOverviewQueries.NOOBAA_BUCKETS_PROVISIONED,

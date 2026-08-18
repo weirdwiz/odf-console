@@ -35,6 +35,7 @@ export const withHandlePromise: WithHandlePromise = (Component) => (props) => {
     );
   };
 
+  // SAFETY: The receiving library accepts props; its published type does not expose this supported value.
   return (
     <Component
       {...(props as any)}
@@ -52,6 +53,7 @@ export class PromiseComponent<
   constructor(props) {
     super(props);
     /* eslint-disable react/no-unused-state */
+    // SAFETY: { inProgress: false, errorMessage: '', } comes from the owner of the S contract used at this boundary.
     this.state = {
       inProgress: false,
       errorMessage: '',

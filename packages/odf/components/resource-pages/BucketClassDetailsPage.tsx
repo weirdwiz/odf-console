@@ -138,6 +138,7 @@ const BucketClassDetailsPage: React.FC<{}> = () => {
     );
   }, [memoizedResource, t]);
 
+  // SAFETY: The receiving library accepts BCDetails; its published type does not expose this supported value.
   return (
     <DetailsPage
       loaded={loaded && isODFNsLoaded}

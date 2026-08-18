@@ -54,6 +54,8 @@ const getPlacementTags = (pvcSelectors: PVCSelectorType[]): TagsType =>
       ])
     : [['', [], 0]];
 
+export const pvcDetailsWizardDependencies = { useACMSafeFetch };
+
 const getLabelsFromSearchResult = (searchResult: SearchResult): string[] => {
   const pvcLabels =
     searchResult?.data.searchResult?.[0]?.related?.[0]?.items?.reduce(
@@ -71,17 +73,16 @@ const getLabelsFromSearchResult = (searchResult: SearchResult): string[] => {
 };
 
 const getLabelsFromTags = (tags: TagsType, currIndex: number): string[] =>
-  tags.reduce((acc, tag, index) => {
-    const labels: string[] =
-      (tag?.[NameValueEditorPair.Value] as string[]) || [];
+  tags.reduce<string[]>((acc, tag, index) => {
+    const labels = tag[NameValueEditorPair.Value];
     return currIndex !== index ? [...acc, ...labels] : acc;
-  }, []) as string[];
+  }, []);
 
 const getPlacementsFromTags = (tags: TagsType, currIndex: number): string[] =>
-  tags.reduce((acc, tag, index) => {
-    const placement: string = tag?.[NameValueEditorPair.Name] as string;
+  tags.reduce<string[]>((acc, tag, index) => {
+    const placement = tag[NameValueEditorPair.Name];
     return currIndex !== index ? [...acc, placement] : acc;
-  }, []) as string[];
+  }, []);
 
 const getPlacementDropdownOptions = (
   placementNames: string[],
@@ -123,15 +124,15 @@ const getPVCSelectors = (
   nameValuePairs: TagsType,
   protectedPlacementNames: string[]
 ): PVCSelectorType[] =>
-  nameValuePairs.reduce((acc, pair) => {
+  nameValuePairs.reduce<PVCSelectorType[]>((acc, pair) => {
     const pvcSelector = {
-      placementName: pair[NameValueEditorPair.Name] as string,
-      labels: pair[NameValueEditorPair.Value] as string[],
+      placementName: pair[NameValueEditorPair.Name],
+      labels: pair[NameValueEditorPair.Value],
     };
     return protectedPlacementNames.includes(pvcSelector.placementName)
       ? acc
       : [...acc, pvcSelector];
-  }, [] as PVCSelectorType[]);
+  }, []);
 
 const PairElement: React.FC<PairElementProps> = ({
   index,
@@ -278,7 +279,8 @@ export const PVCDetailsWizardContent: React.FC<
     () => queryAppWorkloadPVCs(pvcQueryFilter),
     [pvcQueryFilter]
   );
-  const [searchResult, error, loaded] = useACMSafeFetch(searchQuery);
+  const [searchResult, error, loaded] =
+    pvcDetailsWizardDependencies.useACMSafeFetch(searchQuery);
 
   // All labels
   const labels: string[] = React.useMemo(
@@ -343,7 +345,7 @@ export const PVCDetailsWizardContent: React.FC<
   );
 };
 
-type TagsType = (string | string[] | number)[][];
+type TagsType = [name: string, values: string[], index: number][];
 
 type ExtraProps = {
   unProtectedPlacementNames: string[];

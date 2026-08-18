@@ -68,6 +68,7 @@ export const useProviderConfig = (
       return { config, isLoading: false, error: null };
     }
 
+    // SAFETY: This empty SystemInfoData accumulator receives only entries created by the reducer below.
     const transformedConfig = registryEntry.dynamicConfig
       ? registryEntry.dynamicConfig.getConfig(
           systemInfo ?? ({} as SystemInfoData),

@@ -60,6 +60,11 @@ import {
   ReviewDRPolicyStep,
 } from './wizard-steps';
 
+export const createDRPolicyWizardDependencies = {
+  useFetchCsv,
+  useK8sWatchResource,
+};
+
 const convertS3ProfileToDetails = (
   profile: S3StoreProfile,
   clusterName: string
@@ -115,20 +120,20 @@ export const CreateDRPolicyWizard: React.FC<CreateDRPolicyWizardProps> = ({
   }, []);
 
   const [mirrorPeers, mirrorPeerLoaded, mirrorPeerLoadError] =
-    useK8sWatchResource<MirrorPeerKind[]>({
+    createDRPolicyWizardDependencies.useK8sWatchResource<MirrorPeerKind[]>({
       kind: referenceForModel(MirrorPeerModel),
       isList: true,
       namespaced: false,
     });
 
   const [drClusters, drClustersLoaded, drClustersLoadError] =
-    useK8sWatchResource<DRClusterKind[]>({
+    createDRPolicyWizardDependencies.useK8sWatchResource<DRClusterKind[]>({
       kind: referenceForModel(DRClusterModel),
       isList: true,
       namespaced: false,
     });
 
-  const [csv] = useFetchCsv({
+  const [csv] = createDRPolicyWizardDependencies.useFetchCsv({
     specName: ODFMCO_OPERATOR,
   });
   const odfMCOVersion = getMajorVersion(csv?.spec?.version);
@@ -147,7 +152,9 @@ export const CreateDRPolicyWizard: React.FC<CreateDRPolicyWizardProps> = ({
         (drCluster) =>
           getName(drCluster) === getName(state.clusters.selectedClusters[1])
       );
-      return [drCluster1, drCluster2].filter(Boolean) as DRClusterKind[];
+      return [drCluster1, drCluster2].filter(
+        (drCluster): drCluster is DRClusterKind => !!drCluster
+      );
     }
     return [];
   }, [
@@ -244,7 +251,8 @@ export const CreateDRPolicyWizard: React.FC<CreateDRPolicyWizardProps> = ({
         prefilledPairRef.current = '';
         setS3ErrorMessage(
           t('Failed to load S3 profile details: {{error}}', {
-            error: (error as Error)?.message || JSON.stringify(error),
+            error:
+              error instanceof Error ? error.message : JSON.stringify(error),
           })
         );
       }
@@ -281,7 +289,9 @@ export const CreateDRPolicyWizard: React.FC<CreateDRPolicyWizardProps> = ({
       onSuccess();
     } catch (error) {
       setIsLoading(false);
-      setCreateErrorMessage((error as Error)?.message || JSON.stringify(error));
+      setCreateErrorMessage(
+        error instanceof Error ? error.message : JSON.stringify(error)
+      );
     }
   };
 
@@ -362,7 +372,7 @@ export const CreateDRPolicyWizard: React.FC<CreateDRPolicyWizardProps> = ({
   }
 
   const stepNames = CreateDRPolicyStepNames(t);
-  const stepValidity: Record<CreateDRPolicyWizardSteps, boolean> = {
+  const stepValidity = {
     [CreateDRPolicyWizardSteps.Clusters]: validateClustersStepInputs(state),
     [CreateDRPolicyWizardSteps.Configure]: validateConfigureStepInputs(
       state,
@@ -375,7 +385,7 @@ export const CreateDRPolicyWizard: React.FC<CreateDRPolicyWizardProps> = ({
       allDRClustersExist,
       prePairValidationPassed
     ),
-  };
+  } satisfies Record<CreateDRPolicyWizardSteps, boolean>;
 
   return (
     <Wizard
@@ -383,11 +393,15 @@ export const CreateDRPolicyWizard: React.FC<CreateDRPolicyWizardProps> = ({
       navAriaLabel={t('Create DRPolicy steps')}
       isVisitRequired
       onStepChange={(_event, currentStep) => {
-        const nextStep = currentStep.id as CreateDRPolicyWizardSteps;
-        if (nextStep === CreateDRPolicyWizardSteps.Clusters) {
-          clearAcknowledgedStatus();
+        const nextStep = Object.values(CreateDRPolicyWizardSteps).find(
+          (wizardStep) => wizardStep === currentStep.id
+        );
+        if (nextStep) {
+          if (nextStep === CreateDRPolicyWizardSteps.Clusters) {
+            clearAcknowledgedStatus();
+          }
+          setStep(nextStep);
         }
-        setStep(nextStep);
       }}
       footer={
         <CreateDRPolicyWizardFooter

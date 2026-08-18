@@ -100,6 +100,7 @@ export const UtilizationItem: React.FC<UtilizationItemProps> = React.memo(
         />
       );
 
+    // SAFETY: humanizeValue comes from the owner of the Humanize contract used at this boundary.
     const chart = (
       <AreaChart
         ariaChartLinkLabel={t('View {{title}} metrics in query browser', {

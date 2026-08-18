@@ -115,10 +115,12 @@ export const CreateUserFormContent = () => {
   );
 
   const { userFormSchema, fieldRequirements } = useIamUserFormValidation();
+  // SAFETY: useYupValidationResolver( userFormSchema ) as unknown comes from the owner of the Resolver<FormData> contract used at this boundary.
   const resolver = useYupValidationResolver(
     userFormSchema
-  ) as unknown as Resolver<FormData>;
+  ) as Resolver<FormData>;
 
+  // SAFETY: The receiving library accepts formSettings; its published type does not expose this supported value.
   const {
     control,
     handleSubmit,
@@ -203,6 +205,7 @@ export const CreateUserFormContent = () => {
       });
 
       if (result?.accessKeyResponse) {
+        // SAFETY: { isOpen: true, extraProps: { AccessKeyId: result.accessKeyResponse.Ac comes from the owner of the CommonModalProps<AccessKeySecretKeyDisplayModalProps> contract used at this boundary.
         launchModal(AccessKeySecretKeyDisplayModal, {
           isOpen: true,
           extraProps: {
@@ -219,6 +222,7 @@ export const CreateUserFormContent = () => {
     }
   };
 
+  // SAFETY: The receiving library accepts control; its published type does not expose this supported value.
   return (
     <div>
       <div className="pf-v6-u-p-lg pf-v6-u-pb-sm">

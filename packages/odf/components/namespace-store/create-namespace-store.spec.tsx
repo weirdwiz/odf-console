@@ -1,6 +1,9 @@
 import * as React from 'react';
+import * as TestDependency2 from '@odf/core/redux';
 import { render } from '@testing-library/react';
+import * as TestDependency3 from 'react-router';
 import CreateNamespaceStore from './create-namespace-store';
+import * as TestDependency1 from './namespace-store-form';
 
 const odfNamespace = 'test-ns-1';
 const params = {
@@ -9,28 +12,23 @@ const params = {
 
 const mockNamespaceStoreForm = jest.fn();
 const MockNamespaceStoreForm: React.FC = () => null;
-jest.mock('./namespace-store-form', () => (props) => {
+jest.spyOn(TestDependency1, 'default').mockImplementation((props) => {
   mockNamespaceStoreForm(props);
   return <MockNamespaceStoreForm />;
 });
-
-jest.mock('@odf/core/redux', () => ({
-  useODFNamespaceSelector: () => ({
+jest
+  .spyOn(TestDependency2, 'useODFNamespaceSelector')
+  .mockImplementation(() => ({
     odfNamespace,
     isODFNsLoaded: true,
     odfNsLoadError: null,
     isNsSafe: true,
     isFallbackSafe: true,
-  }),
+  }));
+jest.spyOn(TestDependency3, 'useParams').mockImplementation(() => ({
+  ns: params.ns,
 }));
-
-jest.mock('react-router', () => ({
-  ...jest.requireActual('react-router'),
-  useParams: () => ({
-    ns: params.ns,
-  }),
-  useNavigate: () => null,
-}));
+jest.spyOn(TestDependency3, 'useNavigate').mockImplementation(() => null);
 
 describe('CreateNamespaceStore test', () => {
   it('shows the correct heading texts', () => {

@@ -32,8 +32,8 @@ const AWSDetails: React.FC<ProviderDetailsProps> = ({ resource }) => {
         <DetailsItem field={t('Secret')}>
           <ResourceLink
             kind={SecretModel.kind}
-            name={secret.name}
-            namespace={secret.namespace}
+            name={secret?.name}
+            namespace={secret?.namespace}
           />
         </DetailsItem>
       </FlexItem>
@@ -58,8 +58,8 @@ const AzureBlobDetails: React.FC<ProviderDetailsProps> = ({ resource }) => {
         <DetailsItem field={t('Secret')}>
           <ResourceLink
             kind={SecretModel.kind}
-            name={secret.name}
-            namespace={secret.namespace}
+            name={secret?.name}
+            namespace={secret?.namespace}
           />
         </DetailsItem>
       </FlexItem>
@@ -90,8 +90,8 @@ const S3CompatibleDetails: React.FC<ProviderDetailsProps> = ({ resource }) => {
         <DetailsItem field={t('Secret')}>
           <ResourceLink
             kind={SecretModel.kind}
-            name={secret.name}
-            namespace={secret.namespace}
+            name={secret?.name}
+            namespace={secret?.namespace}
           />
         </DetailsItem>
       </FlexItem>
@@ -120,8 +120,8 @@ const IBMDetails: React.FC<ProviderDetailsProps> = ({ resource }) => {
         <DetailsItem field={t('Secret')}>
           <ResourceLink
             kind={SecretModel.kind}
-            name={secret.name}
-            namespace={secret.namespace}
+            name={secret?.name}
+            namespace={secret?.namespace}
           />
         </DetailsItem>
       </FlexItem>
@@ -134,7 +134,9 @@ const IBMDetails: React.FC<ProviderDetailsProps> = ({ resource }) => {
 
 const GCPDetails: React.FC<ProviderDetailsProps> = ({ resource }) => {
   const { t } = useCustomTranslation();
+  // SAFETY: ProviderDetails selects GCPDetails only for the BackingStore-only Google provider type.
   const secret = (resource as BackingStoreKind).spec.googleCloudStorage.secret;
+  // SAFETY: ProviderDetails selects GCPDetails only for the BackingStore-only Google provider type.
   const targetBucket = (resource as BackingStoreKind).spec.googleCloudStorage
     .targetBucket;
 
@@ -147,8 +149,8 @@ const GCPDetails: React.FC<ProviderDetailsProps> = ({ resource }) => {
         <DetailsItem field={t('Secret')}>
           <ResourceLink
             kind={SecretModel.kind}
-            name={secret.name}
-            namespace={secret.namespace}
+            name={secret?.name}
+            namespace={secret?.namespace}
           />
         </DetailsItem>
       </FlexItem>
@@ -161,7 +163,9 @@ const GCPDetails: React.FC<ProviderDetailsProps> = ({ resource }) => {
 
 const PVCDetails: React.FC<ProviderDetailsProps> = ({ resource }) => {
   const { t } = useCustomTranslation();
+  // SAFETY: ProviderDetails selects PVCDetails only for the BackingStore-only PVC provider type.
   const numVolumes = (resource as BackingStoreKind).spec.pvPool.numVolumes;
+  // SAFETY: ProviderDetails selects PVCDetails only for the BackingStore-only PVC provider type.
   const storageClass = (resource as BackingStoreKind).spec.pvPool.storageClass;
 
   return (

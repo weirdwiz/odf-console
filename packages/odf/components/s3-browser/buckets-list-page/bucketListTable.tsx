@@ -156,7 +156,9 @@ const EmptyRowMessage: React.FC = () => {
   return <Bullseye className="pf-v6-u-mt-xl">{t('No buckets found')}</Bullseye>;
 };
 
-const BucketsTableRow: React.FC<RowComponentType<BucketCrFormat>> = ({
+const BucketsTableRow: React.FC<
+  RowComponentType<BucketCrFormat, RowExtraPropsType>
+> = ({
   row: bucket,
   rowIndex,
   extraProps,
@@ -173,7 +175,7 @@ const BucketsTableRow: React.FC<RowComponentType<BucketCrFormat>> = ({
     triggerRefresh,
     setEmptyBucketResponse,
     launcher,
-  }: RowExtraPropsType = extraProps;
+  } = extraProps;
 
   const { s3Client } = React.useContext(S3Context);
 
@@ -184,6 +186,7 @@ const BucketsTableRow: React.FC<RowComponentType<BucketCrFormat>> = ({
     ]);
   };
 
+  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
   const providerType = s3Client.providerType as S3ProviderType;
 
   return (
@@ -243,6 +246,7 @@ export const BucketsListTable: React.FC<BucketsListTableProps> = ({
   );
   const launcher = useModalWrapper();
 
+  // SAFETY: allBuckets contains only entries produced for the [] contract.
   return (
     <ComposableTable
       rows={filteredBuckets}

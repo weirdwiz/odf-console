@@ -25,6 +25,7 @@ export const AzureConfigure: React.FC<KMSConfigureProps> = ({
   className,
 }) => {
   const { t } = useCustomTranslation();
+  // SAFETY: useDeepCompareMemoize( state.kms.providerState, true ) comes from the owner of the AzureConfig contract used at this boundary.
   const azureState = useDeepCompareMemoize(
     state.kms.providerState,
     true

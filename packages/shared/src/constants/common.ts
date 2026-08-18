@@ -4,6 +4,11 @@ import {
   StorageSizeUnitName,
 } from '@odf/shared/types';
 
+declare const PLUGIN_BUILD_I18N_NS: string;
+declare const PLUGIN_BUILD_NAME: string;
+declare const PLUGIN_BUILD_VERSION: string;
+declare const OPENSHIFT_CI: string;
+
 export const DASH = '-';
 export const WILDCARD = '*';
 export const AVAILABLE = 'Available';
@@ -27,14 +32,29 @@ export const DEFAULT_NS = 'default';
 export const RACK_LABEL = 'topology.rook.io/rack';
 export const NOOBA_EXTERNAL_PG_SECRET_NAME = 'noobaa-external-pg';
 export const NOOBAA_EXTERNAL_PG_TLS_SECRET_NAME = 'noobaa-external-pg-tls';
-export const PLUGIN_I18N_NS =
-  typeof PLUGIN_BUILD_I8N_NS === 'undefined' ? '' : PLUGIN_BUILD_I8N_NS;
-export const PLUGIN_NAME =
-  typeof PLUGIN_BUILD_NAME === 'undefined' ? '' : PLUGIN_BUILD_NAME;
-export const PLUGIN_VERSION =
-  typeof PLUGIN_BUILD_VERSION === 'undefined' ? '' : PLUGIN_BUILD_VERSION;
-export const PLUGIN_OPENSHIFT_CI =
-  typeof OPENSHIFT_CI === 'undefined' ? '' : OPENSHIFT_CI;
+const readBuildConstants = () => {
+  try {
+    return {
+      i18nNamespace: PLUGIN_BUILD_I18N_NS,
+      name: PLUGIN_BUILD_NAME,
+      version: PLUGIN_BUILD_VERSION,
+      openshiftCI: OPENSHIFT_CI,
+    };
+  } catch {
+    return {
+      i18nNamespace: '',
+      name: '',
+      version: '',
+      openshiftCI: '',
+    };
+  }
+};
+
+const buildConstants = readBuildConstants();
+export const PLUGIN_I18N_NS = buildConstants.i18nNamespace;
+export const PLUGIN_NAME = buildConstants.name;
+export const PLUGIN_VERSION = buildConstants.version;
+export const PLUGIN_OPENSHIFT_CI = buildConstants.openshiftCI;
 
 // Plugins' build names as set in package.json file.
 export const CLIENT_PLUGIN_BUILD_NAME = 'client';

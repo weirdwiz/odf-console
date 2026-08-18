@@ -718,6 +718,7 @@ export const StorageSystemListPage: React.FC = () => {
     }, {});
   }, [isFDF, filesystems, filesystemsLoaded]);
 
+  // SAFETY: data contains only entries produced for the StorageSystemKind[] contract.
   const normalizedMetrics = React.useMemo(
     () => ({
       normalizedMetrics: normalizeMetrics(
@@ -764,6 +765,7 @@ export const StorageSystemListPage: React.FC = () => {
   const isLSOInstalled =
     lsoCSVLoaded && !lsoCSVLoadError && isCSVSucceeded(lsoCSV);
 
+  // SAFETY: filteredData contains only entries produced for the StorageSystemKind[] contract.
   return (
     <>
       <ListPageHeader title={t('External systems')}>

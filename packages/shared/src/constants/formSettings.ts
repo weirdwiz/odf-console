@@ -1,6 +1,6 @@
 import { UseFormProps } from 'react-hook-form';
 
-export const formSettings: UseFormProps = {
+export const formSettings = {
   mode: 'onBlur',
   reValidateMode: 'onChange',
   context: undefined,
@@ -9,4 +9,4 @@ export const formSettings: UseFormProps = {
   shouldUnregister: false,
   shouldUseNativeValidation: false,
   delayError: undefined,
-};
+} satisfies UseFormProps;

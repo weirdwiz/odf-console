@@ -1,13 +1,13 @@
 /* External Ceph Stoarge State */
 
 export type RHCSState = {
-  fileData: string;
-  errorMessage: string;
-  isLoading: boolean;
-  fileName: string;
+  fileData?: string;
+  errorMessage?: string;
+  isLoading?: boolean;
+  fileName?: string;
 };
 
-export type ExternalCephState = RHCSState | {};
+export type ExternalCephState = RHCSState;
 
 export type ExternalCephStateValues = ValuesOfUnion<ExternalCephState>;
 

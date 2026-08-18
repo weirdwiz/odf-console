@@ -5,7 +5,7 @@ import {
 } from '@odf/core/redux';
 import { useGetClusterDetails } from '@odf/core/redux/utils';
 import { secretResource } from '@odf/core/resources';
-import { OCS_OPERATOR } from '@odf/shared/constants';
+import { OCS_OPERATOR, PrometheusEndpoint } from '@odf/shared/constants';
 import { BreakdownCardBody } from '@odf/shared/dashboards/breakdown-card/breakdown-body';
 import { LabelPadding } from '@odf/shared/dashboards/breakdown-card/breakdown-chart';
 import { getGroupedSelectOptions } from '@odf/shared/dashboards/breakdown-card/breakdown-dropdown';
@@ -143,17 +143,17 @@ const ServiceTypeALL: React.FC<ServiceTypeProps> = ({
 }) => {
   const [rgw, rgwLoadError, rgwLoading] = useCustomPrometheusPoll({
     query: prometheusQueries?.[0],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [noobaa, noobaaLoadError, noobaaLoading] = useCustomPrometheusPoll({
     query: prometheusQueries?.[1],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [object, objectLoadError, objectLoading] = useCustomPrometheusPoll({
     query: prometheusQueries?.[2],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 
@@ -195,13 +195,13 @@ const ServiceTypeMCG: React.FC<ServiceTypeProps> = ({
 }) => {
   const [byUsed, byUsedError, byUsedLoading] = useCustomPrometheusPoll({
     query: prometheusQueries?.[0],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
   const [totalUsed, totalUsedError, totalUsedLoading] = useCustomPrometheusPoll(
     {
       query: prometheusQueries?.[1],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     }
   );
@@ -244,13 +244,13 @@ const ServiceTypeRGW: React.FC<ServiceTypeProps> = ({
   const [totalUsed, totalUsedError, totalUsedLoading] = useCustomPrometheusPoll(
     {
       query: prometheusQueries?.[0],
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     }
   );
   const [used, usedError, usedLoading] = useCustomPrometheusPoll({
     query: prometheusQueries?.[1],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 
@@ -335,6 +335,8 @@ const BreakdownCard: React.FC = () => {
     };
   }, [serviceType, metricType, rgwPrefix, managedByOCS]);
 
+  // SAFETY: isFunctionThenApply returns `any`; breakdownQueryMapMCG entries
+  // resolve to objects whose values are Prometheus PromQL query strings.
   const prometheusQueries = React.useMemo(
     () => Object.values(queries) as string[],
     [queries]
@@ -390,6 +392,8 @@ const BreakdownCard: React.FC = () => {
   };
 
   const handleMetricsChange: SelectProps['onSelect'] = (_e, breakdown) => {
+    // SAFETY: PF Select onSelect types value as `any`; all option IDs in
+    // breakdownItems are CapacityBreakdown.Metrics enum members.
     setMetricType(breakdown as CapacityBreakdown.Metrics);
     setBreakdownSelect(!isOpenBreakdownSelect);
   };

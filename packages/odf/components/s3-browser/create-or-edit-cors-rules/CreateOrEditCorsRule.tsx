@@ -40,14 +40,19 @@ const getRuleConfig = (state: RuleState): CORSRule => {
   const exposedHeaders = state.exposedHeaders;
   const maxAge = state.maxAge;
 
-  return {
-    ID: state.name,
-    ...(!!allowedHeaders.length ? { AllowedHeaders: allowedHeaders } : {}),
-    AllowedMethods: allowedMethods,
-    AllowedOrigins: allowedOrigins,
-    ...(!!exposedHeaders.length ? { ExposeHeaders: exposedHeaders } : {}),
-    ...(!!maxAge ? { MaxAgeSeconds: maxAge } : {}),
-  };
+  return (() => {
+    const value = {
+      ID: state.name,
+      AllowedMethods: allowedMethods,
+      AllowedOrigins: allowedOrigins,
+    };
+    if (!!allowedHeaders.length)
+      Object.assign(value, { AllowedHeaders: allowedHeaders });
+    if (!!exposedHeaders.length)
+      Object.assign(value, { ExposeHeaders: exposedHeaders });
+    if (!!maxAge) Object.assign(value, { MaxAgeSeconds: maxAge });
+    return value;
+  })();
 };
 
 const createNewRule = (
@@ -161,6 +166,7 @@ const CreateOrEditCorsForm: React.FC<IsEditProp> = ({ isEdit }) => {
           latestRules = await s3Client.getBucketCors({ Bucket: bucketName });
         } catch (err) {
           if (isNoCorsRuleError(err)) {
+            // SAFETY: { CORSRules: [] } comes from the owner of the GetBucketCorsCommandOutput contract used at this boundary.
             latestRules = { CORSRules: [] } as GetBucketCorsCommandOutput;
           } else {
             throw err;

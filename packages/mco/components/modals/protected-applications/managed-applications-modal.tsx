@@ -13,9 +13,11 @@ import { useNavigate } from 'react-router';
 import { Button, ButtonVariant, Icon } from '@patternfly/react-core';
 import { ArrowRightIcon } from '@patternfly/react-icons';
 
+export const managedApplicationsModalDependencies = { useNavigate };
+
 const ManagedApplicationsModal: React.FC<CommonModalProps> = (props) => {
   const { t } = useCustomTranslation();
-  const navigate = useNavigate();
+  const navigate = managedApplicationsModalDependencies.useNavigate();
 
   const { isOpen, closeModal } = props;
 

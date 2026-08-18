@@ -16,8 +16,11 @@ export const CreateDRPolicyWizardFooter: React.FC<
   const { t } = useCustomTranslation();
   const { activeStep, goToNextStep, goToPrevStep } = useWizardContext();
 
-  const isClustersStep = activeStep.id === CreateDRPolicyWizardSteps.Clusters;
-  const isReviewStep = activeStep.id === CreateDRPolicyWizardSteps.Review;
+  const activeStepId = Object.values(CreateDRPolicyWizardSteps).find(
+    (wizardStep) => wizardStep === activeStep.id
+  );
+  const isClustersStep = activeStepId === CreateDRPolicyWizardSteps.Clusters;
+  const isReviewStep = activeStepId === CreateDRPolicyWizardSteps.Review;
 
   return (
     <>
@@ -37,8 +40,7 @@ export const CreateDRPolicyWizardFooter: React.FC<
           variant={ButtonVariant.primary}
           onClick={isReviewStep ? onCreate : goToNextStep}
           isDisabled={
-            !stepValidity[activeStep.id as CreateDRPolicyWizardSteps] ||
-            isLoading
+            !activeStepId || !stepValidity[activeStepId] || isLoading
           }
           isLoading={isReviewStep && isLoading}
           className="pf-v6-u-mr-lg"

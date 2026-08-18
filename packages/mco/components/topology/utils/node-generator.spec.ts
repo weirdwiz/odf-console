@@ -808,19 +808,31 @@ describe('generateClusterNodesModel', () => {
         {
           name: 'payments-app',
           namespace: 'finance',
+          drPolicy: 'finance-policy',
           status: 'Protected',
-          pav: { metadata: { name: 'payments-app', namespace: 'finance' } },
-        } as any,
+          pav: {
+            apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+            kind: 'ProtectedApplicationView',
+            metadata: { name: 'payments-app', namespace: 'finance' },
+            spec: { drpcRef: { name: 'payments-app' } },
+            status: { drInfo: { drpolicyRef: { name: 'finance-policy' } } },
+          },
+        },
       ],
       'west-cluster': [
         {
           name: 'inventory-app',
           namespace: 'warehouse',
+          drPolicy: 'warehouse-policy',
           status: 'Protected',
           pav: {
+            apiVersion: 'multicluster.odf.openshift.io/v1alpha1',
+            kind: 'ProtectedApplicationView',
             metadata: { name: 'inventory-app', namespace: 'warehouse' },
+            spec: { drpcRef: { name: 'inventory-app' } },
+            status: { drInfo: { drpolicyRef: { name: 'warehouse-policy' } } },
           },
-        } as any,
+        },
       ],
     };
 
@@ -837,8 +849,8 @@ describe('generateClusterNodesModel', () => {
         }
       });
       model.edges?.forEach((edge) => {
-        expect(nodeIds.has(edge.source as string)).toBe(true);
-        expect(nodeIds.has(edge.target as string)).toBe(true);
+        if (edge.source) expect(nodeIds.has(edge.source)).toBe(true);
+        if (edge.target) expect(nodeIds.has(edge.target)).toBe(true);
       });
     };
 
