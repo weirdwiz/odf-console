@@ -251,7 +251,7 @@ const BucketClassEditModal: React.FC<BucketClassEditModalProps> = (props) => {
         setError(err);
       });
   };
-  // SAFETY: The receiving library accepts error; its published type does not expose this supported value.
+  // SAFETY: The component prop expects Error; the caught value may be a broader type.
   return (
     <Modal
       title={t('Edit BucketClass Resource')}

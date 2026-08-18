@@ -42,10 +42,9 @@ describe('Setting Ceph RBD StorageClass as default, during installation', () => 
     };
 
     const { container, rerender } = render(<Wrapper />);
-    // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
-    const checkbox = container.querySelector(
+    const checkbox = container.querySelector<HTMLInputElement>(
       '[data-test="set-rbd-sc-default"]'
-    ) as HTMLInputElement;
+    )!;
 
     expect(
       screen.getByText('Use Ceph RBD as the default StorageClass')
@@ -80,10 +79,9 @@ describe('Setting Ceph RBD StorageClass as default, during installation', () => 
     };
 
     const { container, rerender } = render(<Wrapper />);
-    // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
-    const checkbox = container.querySelector(
+    const checkbox = container.querySelector<HTMLInputElement>(
       '[data-test="set-rbd-sc-default"]'
-    ) as HTMLInputElement;
+    )!;
 
     expect(
       screen.getByText('Use Ceph RBD as the default StorageClass')

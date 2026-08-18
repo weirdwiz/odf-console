@@ -6,22 +6,22 @@ export const isIPRegistered = (address, registeredIPs) => {
   return registeredIPs?.includes(address);
 };
 
-// SAFETY: _.get( value, 'data.management_address' ) comes from the owner of the SecretKind['data']['management_address'] contract used at this boundary.
+// SAFETY: _.get returns unknown; the Secret data field is typed as a string index signature.
 export const getSecretManagementAddress = <A extends SecretKind = SecretKind>(
   value: A
 ) =>
-  /* SAFETY: The value is supplied by the SecretKind['data']['management_address'] owner and follows that contract. */ _.get(
+  /* SAFETY: _.get returns unknown; Secret data field has a string index signature. */ _.get(
     value,
     'data.management_address'
   ) as SecretKind['data']['management_address'];
 
-// SAFETY: _.get( value, 'spec.secret.name' ) comes from the owner of the IBMFlashSystemKind['spec']['secret']['name'] contract used at this boundary.
+// SAFETY: _.get returns unknown; the FlashSystem spec structure is known from the CRD.
 export const getFlashSystemSecretName = <
   A extends IBMFlashSystemKind = IBMFlashSystemKind,
 >(
   value: A
 ) =>
-  /* SAFETY: The value is supplied by the IBMFlashSystemKind['spec']['secret']['name'] owner and follows that contract. */ _.get(
+  /* SAFETY: _.get returns unknown; FlashSystem spec.secret.name is string per CRD. */ _.get(
     value,
     'spec.secret.name'
   ) as IBMFlashSystemKind['spec']['secret']['name'];

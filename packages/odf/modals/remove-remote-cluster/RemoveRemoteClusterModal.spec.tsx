@@ -23,14 +23,10 @@ jest.spyOn(TestDependency3, 'k8sDelete').mockImplementation(jest.fn());
 jest.spyOn(TestDependency3, 'k8sGet').mockImplementation(jest.fn());
 jest.spyOn(TestDependency3, 'k8sList').mockImplementation(jest.fn());
 
-// SAFETY: The jest.Mock test value defines the members exercised by this test.
-const mockIsRemoteClusterDeletable = useIsRemoteClusterDeletable as jest.Mock;
-// SAFETY: The jest.Mock test value defines the members exercised by this test.
-const mockK8sDelete = k8sDelete as jest.Mock;
-// SAFETY: The jest.Mock test value defines the members exercised by this test.
-const mockK8sGet = k8sGet as jest.Mock;
-// SAFETY: The jest.Mock test value defines the members exercised by this test.
-const mockK8sList = k8sList as jest.Mock;
+const mockIsRemoteClusterDeletable = jest.mocked(useIsRemoteClusterDeletable);
+const mockK8sDelete = jest.mocked(k8sDelete);
+const mockK8sGet = jest.mocked(k8sGet);
+const mockK8sList = jest.mocked(k8sList);
 
 const remoteCluster: RemoteClusterKind = {
   apiVersion: 'scale.spectrum.ibm.com/v1beta1',

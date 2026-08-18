@@ -93,7 +93,7 @@ const VectorBucketOverview: React.FC<{}> = () => {
     vectorBucketName,
     null
   );
-  // SAFETY: vectorBucketName comes from the owner of the string contract used at this boundary.
+  // SAFETY: useParams() returns string | undefined; the route guarantees this param is present.
   const breadcrumbs = React.useMemo(
     () => [
       {
@@ -134,7 +134,7 @@ const VectorBucketOverview: React.FC<{}> = () => {
       s3VectorsClient
     );
 
-  // SAFETY: providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   return (
     <S3VectorsProvider loading={isLoading}>
       <VectorBucketOverviewContent

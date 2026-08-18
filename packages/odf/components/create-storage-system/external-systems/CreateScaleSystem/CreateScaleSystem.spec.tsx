@@ -193,8 +193,7 @@ describe('CreateScaleSystem', () => {
     jest.clearAllMocks();
     mockWatchedValue = '';
     mockFormValues = {};
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useKernelDevelEligibility as jest.Mock).mockReturnValue({
+    jest.mocked(useKernelDevelEligibility).mockReturnValue({
       areSelectedNodesEligible: true,
       isLoading: false,
       error: '',
@@ -347,9 +346,8 @@ describe('CreateScaleSystem', () => {
         tenantId: 'tenant',
       };
       await user.click(screen.getByLabelText('Enable data encryption'));
-      // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
       await user.upload(
-        container.querySelectorAll('input[type="file"]')[1] as HTMLInputElement,
+        container.querySelectorAll<HTMLInputElement>('input[type="file"]')[1],
         new File(['certificate'], 'ca.crt')
       );
 
@@ -386,8 +384,7 @@ describe('CreateScaleSystem', () => {
 
     it('requires at least three selected nodes', async () => {
       mockWatchedValue = 'valid';
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useKernelDevelEligibility as jest.Mock).mockReturnValue({
+      jest.mocked(useKernelDevelEligibility).mockReturnValue({
         areSelectedNodesEligible: true,
         isLoading: false,
         error: '',
@@ -419,10 +416,8 @@ describe('CreateScaleSystem', () => {
       const user = userEvent.setup();
       const { container } = render(<CreateScaleSystem />);
 
-      // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
-      const fileInput = container.querySelector(
-        'input[type="file"]'
-      ) as HTMLInputElement;
+      const fileInput =
+        container.querySelector<HTMLInputElement>('input[type="file"]')!;
       const testFile = new File(
         [
           '-----BEGIN CERTIFICATE-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...\n-----END CERTIFICATE-----',
@@ -614,22 +609,19 @@ describe('CreateScaleSystem', () => {
       expect(duration).toBeLessThan(2500);
     });
 
-    // SAFETY: The any test value defines the members exercised by this test.
     it('should not cause memory leaks with file uploads', async () => {
       const user = userEvent.setup();
       const { container } = render(<CreateScaleSystem />);
 
-      // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
-      const fileInput = container.querySelector(
-        'input[type="file"]'
-      ) as HTMLInputElement;
+      const fileInput =
+        container.querySelector<HTMLInputElement>('input[type="file"]')!;
 
       // Create a large file to test memory handling
       const largeFile = new File(['x'.repeat(1000000)], 'large-file.txt', {
         type: 'text/plain',
       });
 
-      // SAFETY: The any test value defines the members exercised by this test.
+      // SAFETY: performance.memory is a Chrome-only non-standard API not in lib.dom.d.ts.
       const startMemory = (performance as any).memory?.usedJSHeapSize || 0;
 
       // Upload file multiple times
@@ -639,12 +631,13 @@ describe('CreateScaleSystem', () => {
       }
 
       // Force garbage collection if available
+      // SAFETY: global.gc is exposed only when Node runs with --expose-gc; not in @types/node.
       if ((global as any).gc) {
-        // SAFETY: The any test value defines the members exercised by this test.
+        // SAFETY: global.gc is exposed only when Node runs with --expose-gc; not in @types/node.
         (global as any).gc();
       }
 
-      // SAFETY: The any test value defines the members exercised by this test.
+      // SAFETY: performance.memory is a Chrome-only non-standard API not in lib.dom.d.ts.
       const endMemory = (performance as any).memory?.usedJSHeapSize || 0;
       const memoryIncrease = endMemory - startMemory;
 

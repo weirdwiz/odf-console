@@ -56,7 +56,7 @@ export const setOCSFlags = async (setFlag: SetFeatureFlag) => {
   let setFlagFalse = true;
   const ocsDetector = async () => {
     try {
-      // SAFETY: (await k8sList<K8sResourceCommon>({ model: StorageClusterModel, queryP contains only entries produced for the StorageClusterKind[] contract.
+      // SAFETY: k8sList returns K8sResourceCommon[]; the model guarantees StorageClusterKind shape.
       const storageClusters: StorageClusterKind[] =
         (await k8sList<K8sResourceCommon>({
           model: StorageClusterModel,
@@ -121,7 +121,7 @@ export const detectSSAR = (setFlag: SetFeatureFlag) => {
     const fn = async (setFeatureFlag: SetFeatureFlag) => {
       try {
         ssar['spec'] = { resourceAttributes: ssarObj.resourceAttributes };
-        // SAFETY: (await k8sCreate({ model: SelfSubjectAccessReviewModel, data: ssar, }) comes from the owner of the SelfSubjectAccessReviewKind contract used at this boundary.
+        // SAFETY: k8sCreate returns K8sResourceCommon; the model guarantees SelfSubjectAccessReviewKind shape.
         const result: SelfSubjectAccessReviewKind = (await k8sCreate({
           model: SelfSubjectAccessReviewModel,
           data: ssar,
@@ -146,7 +146,7 @@ export const detectComponents: FeatureDetector = async (
   // ToDo (Sanjal): Remove this once CI is upgraded to ODF 4.21 or above
   const noobaaDetectorCI = async () => {
     try {
-      // SAFETY: (await k8sList({ model: StorageClassModel, queryParams: { ns: null },  contains only entries produced for the StorageClassResourceKind[] contract.
+      // SAFETY: k8sList returns K8sResourceCommon[]; the model guarantees StorageClassResourceKind shape.
       const storageClasses = (await k8sList({
         model: StorageClassModel,
         queryParams: { ns: null },
@@ -165,7 +165,7 @@ export const detectComponents: FeatureDetector = async (
 
   const noobaaDetectorProd = async () => {
     try {
-      // SAFETY: (await consoleFetchJSON( '${ODF_PROXY_ROOT_PATH}/provider-proxy/info/f comes from the owner of the FeatureFlagResponse contract used at this boundary.
+      // SAFETY: consoleFetchJSON returns unknown; the endpoint returns a FeatureFlagResponse payload.
       const response = (await consoleFetchJSON(
         `${ODF_PROXY_ROOT_PATH}/provider-proxy/info/featureflags?flags=${nooBaaFlagName}`
       )) as FeatureFlagResponse;

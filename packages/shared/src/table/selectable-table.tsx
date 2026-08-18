@@ -114,7 +114,6 @@ export const SelectableTable: SelectableTableProps = <
     columnIndex,
   });
 
-  // SAFETY: col?.columnName comes from the owner of the string contract used at this boundary.
   return (
     <StatusBox
       loadError={loadError}
@@ -151,7 +150,10 @@ export const SelectableTable: SelectableTableProps = <
               <Th
                 {...(!!col?.thProps ? col.thProps : {})}
                 {...(!!col?.sortFunction ? { sort: getSortParams(index) } : {})}
+                // SAFETY: columnName is string | ReactNode; key requires
+                // string; all callers pass string columnName values.
                 key={col?.columnName as string}
+                // SAFETY: Same narrowing as key above.
                 aria-label={col?.columnName as string}
               >
                 {col?.columnName}

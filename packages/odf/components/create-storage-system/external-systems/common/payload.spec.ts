@@ -13,16 +13,18 @@ import {
 const LABEL_PATH = '/metadata/labels/scale.spectrum.ibm.com~1daemon-selector';
 const NODE_ROLE_LABEL_PATH = '/metadata/labels/node-role';
 
-// SAFETY: The Patch[] test value defines the members exercised by this test.
+/** Extract the patches argument (index 3) from a k8sPatchByName mock call. */
+// SAFETY: k8sPatchByName is called with (model, name, ns, patches); index 3 is always Patch[].
+const patchesFromCall = (call: unknown[]): Patch[] => call[3] as Patch[];
+
 const getDaemonPatchCalls = () =>
-  mockK8sPatchByName.mock.calls.filter((call) =>
-    (call[3] as Patch[]).some((op) => op.path === LABEL_PATH)
+  mockK8sPatchByName.mock.calls.filter((call: unknown[]) =>
+    patchesFromCall(call).some((op) => op.path === LABEL_PATH)
   );
 
-// SAFETY: The Patch[] test value defines the members exercised by this test.
 const getNodeRolePatchCalls = () =>
-  mockK8sPatchByName.mock.calls.filter((call) =>
-    (call[3] as Patch[]).some((op) => op.path === NODE_ROLE_LABEL_PATH)
+  mockK8sPatchByName.mock.calls.filter((call: unknown[]) =>
+    patchesFromCall(call).some((op) => op.path === NODE_ROLE_LABEL_PATH)
   );
 
 const mockK8sPatchByName = jest.fn().mockResolvedValue({});
@@ -66,9 +68,8 @@ describe('payload', () => {
       const execute = labelNodes(nodes);
       await execute();
 
-      getDaemonPatchCalls().forEach((call) => {
-        // SAFETY: The Patch[] test value defines the members exercised by this test.
-        (call[3] as Patch[]).forEach((op) => {
+      getDaemonPatchCalls().forEach((call: unknown[]) => {
+        patchesFromCall(call).forEach((op) => {
           expect(op.op).toBe('add');
         });
       });

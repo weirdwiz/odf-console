@@ -94,7 +94,7 @@ const ODFDashboardPage: React.FC<{}> = () => {
   const { isODFNsLoaded, odfNsLoadError } = useODFNamespaceSelector();
   const { areFlagsLoaded, flagsLoadError } = useODFSystemFlagsSelector();
 
-  // SAFETY: isDashboardTab comes from the owner of the ExtensionTypeGuard<HorizontalNavTab> contract used at this boundary.
+  // SAFETY: The extension type guard is structurally compatible but uses a different generic signature.
   const [extensions, isLoaded, error] = useResolvedExtensions<HorizontalNavTab>(
     isDashboardTab as ExtensionTypeGuard<HorizontalNavTab>
   );

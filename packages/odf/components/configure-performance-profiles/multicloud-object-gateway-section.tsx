@@ -128,7 +128,7 @@ export const McgPerformanceSection: React.FC<McgPerformanceSectionProps> = ({
     [dispatch]
   );
 
-  // SAFETY: profile comes from the owner of the McgPerformanceProfile contract used at this boundary.
+  // SAFETY: PatternFly Select onSelect types value as string; the options use McgPerformanceProfile values.
   return (
     <div className="pf-v6-u-mb-lg">
       <Content component={ContentVariants.h3} className="pf-v6-u-mb-sm">

@@ -29,9 +29,9 @@ type S3VectorsProviderProps = {
   error?: unknown;
 };
 
-// SAFETY: This empty S3VectorsContextType accumulator receives only entries created by the reducer below.
+// SAFETY: createContext default is never consumed; S3VectorsProvider always provides the real value.
 export const S3VectorsContext = React.createContext<S3VectorsContextType>(
-  /* SAFETY: The value is supplied by the S3VectorsContextType owner and follows that contract. */ {} as S3VectorsContextType
+  /* SAFETY: createContext default never consumed; S3VectorsProvider always wraps children. */ {} as S3VectorsContextType
 );
 
 export const S3VectorsProvider: React.FC<S3VectorsProviderProps> = ({
@@ -80,7 +80,7 @@ export const S3VectorsProvider: React.FC<S3VectorsProviderProps> = ({
   const anyError =
     secretError || providerConfigError || s3VectorsClientError || error;
 
-  // SAFETY: s3VectorsClient comes from the owner of the S3VectorsCommands contract used at this boundary.
+  // SAFETY: S3VectorsContext provides S3VectorsCommands client; the component types it as the broader ClientCommandType.
   const contextData = React.useMemo(
     () => ({
       s3VectorsClient:

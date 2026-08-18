@@ -74,10 +74,7 @@ describe('ConfigureDFSelections', () => {
       <ConfigureDFSelections closeModal={mockCloseModal} />
     );
 
-    // SAFETY: The Element test value defines the members exercised by this test.
-    const storageClusterCard = container.querySelector(
-      '#storage-cluster'
-    ) as Element;
+    const storageClusterCard = container.querySelector('#storage-cluster')!;
     await user.click(storageClusterCard);
 
     expect(mockNavigate).toHaveBeenCalledWith(
@@ -92,10 +89,7 @@ describe('ConfigureDFSelections', () => {
       <ConfigureDFSelections closeModal={mockCloseModal} />
     );
 
-    // SAFETY: The Element test value defines the members exercised by this test.
-    const externalSystemCard = container.querySelector(
-      '#external-system'
-    ) as Element;
+    const externalSystemCard = container.querySelector('#external-system')!;
     await user.click(externalSystemCard);
 
     expect(mockCloseModal).toHaveBeenCalled();
@@ -107,8 +101,7 @@ describe('ConfigureDFSelections', () => {
       <ConfigureDFSelections closeModal={mockCloseModal} />
     );
 
-    // SAFETY: The Element test value defines the members exercised by this test.
-    const mcgCard = container.querySelector('#object-storage') as Element;
+    const mcgCard = container.querySelector('#object-storage')!;
     await user.click(mcgCard);
 
     expect(mockNavigate).toHaveBeenCalledWith(
@@ -263,10 +256,7 @@ describe('Integration Tests', () => {
     const user = userEvent.setup();
     render(<StorageClusterCreateModal closeModal={mockCloseModal} />);
 
-    // SAFETY: The Element test value defines the members exercised by this test.
-    const storageClusterCard = document.body.querySelector(
-      '#storage-cluster'
-    ) as Element;
+    const storageClusterCard = document.body.querySelector('#storage-cluster')!;
     expect(storageClusterCard).not.toBeNull();
     await user.click(storageClusterCard);
 
@@ -281,8 +271,7 @@ describe('Integration Tests', () => {
     render(<StorageClusterCreateModal closeModal={mockCloseModal} />);
 
     // Click MCG card
-    // SAFETY: The Element test value defines the members exercised by this test.
-    const mcgCard = document.body.querySelector('#object-storage') as Element;
+    const mcgCard = document.body.querySelector('#object-storage')!;
     await user.click(mcgCard);
 
     expect(mockNavigate).toHaveBeenCalledWith(

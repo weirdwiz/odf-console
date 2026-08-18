@@ -218,56 +218,43 @@ describe('StorageClusterCard', () => {
       .mockImplementation(() => mockNavigate);
 
     // Default mocks
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useODFNamespaceSelector as jest.Mock).mockReturnValue({
+    jest.mocked(useODFNamespaceSelector).mockReturnValue({
       odfNamespace: 'openshift-storage',
       isNsSafe: true,
     });
 
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([
-      [mockStorageCluster],
-      true,
-      undefined,
-    ]);
+    jest
+      .mocked(useK8sWatchResource)
+      .mockReturnValue([[mockStorageCluster], true, undefined]);
 
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useFetchCsv as jest.Mock).mockReturnValue([mockCSV, true, undefined]);
+    jest.mocked(useFetchCsv).mockReturnValue([mockCSV, true, undefined]);
 
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useGetOCSHealth as jest.Mock).mockReturnValue({
+    jest.mocked(useGetOCSHealth).mockReturnValue({
       healthState: HealthState.OK,
       message: 'Healthy',
     });
 
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useRawCapacity as jest.Mock).mockReturnValue([
+    jest.mocked(useRawCapacity).mockReturnValue([
       mockPrometheusMetric('10995116277760'), // 10 TiB
       mockPrometheusMetric('5497558138880'), // 5 TiB
       false,
       undefined,
     ]);
 
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
-      createPrometheusResponse('0'),
-      undefined,
-    ]);
+    jest
+      .mocked(useCustomPrometheusPoll)
+      .mockReturnValue([createPrometheusResponse('0'), undefined]);
 
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (getDataResiliencyState as jest.Mock).mockReturnValue({
+    jest.mocked(getDataResiliencyState).mockReturnValue({
       state: HealthState.OK,
       message: 'Healthy',
     });
 
     // Mock useSafeK8sWatchResource for subscription
     const { useSafeK8sWatchResource } = require('@odf/core/hooks');
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useSafeK8sWatchResource as jest.Mock).mockReturnValue([
-      mockSubscription,
-      true,
-      undefined,
-    ]);
+    jest
+      .mocked(useSafeK8sWatchResource)
+      .mockReturnValue([mockSubscription, true, undefined]);
   });
 
   afterEach(() => {
@@ -286,12 +273,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should render loading state when storage clusters are not loaded', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useK8sWatchResource as jest.Mock).mockReturnValue([
-        [],
-        false,
-        undefined,
-      ]);
+      jest.mocked(useK8sWatchResource).mockReturnValue([[], false, undefined]);
 
       render(
         <BrowserRouter>
@@ -305,12 +287,9 @@ describe('StorageClusterCard', () => {
     });
 
     it('should render error state when storage clusters fail to load', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useK8sWatchResource as jest.Mock).mockReturnValue([
-        [],
-        true,
-        new Error('Failed to load'),
-      ]);
+      jest
+        .mocked(useK8sWatchResource)
+        .mockReturnValue([[], true, new Error('Failed to load')]);
 
       render(
         <BrowserRouter>
@@ -324,8 +303,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should render error state when no storage cluster is found', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useK8sWatchResource as jest.Mock).mockReturnValue([[], true, undefined]);
+      jest.mocked(useK8sWatchResource).mockReturnValue([[], true, undefined]);
 
       render(
         <BrowserRouter>
@@ -355,8 +333,7 @@ describe('StorageClusterCard', () => {
 
   describe('Health Status', () => {
     it('should display healthy cluster status', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useGetOCSHealth as jest.Mock).mockReturnValue({
+      jest.mocked(useGetOCSHealth).mockReturnValue({
         healthState: HealthState.OK,
         message: 'Healthy',
       });
@@ -373,8 +350,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display warning cluster status', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useGetOCSHealth as jest.Mock).mockReturnValue({
+      jest.mocked(useGetOCSHealth).mockReturnValue({
         healthState: HealthState.WARNING,
         message: 'Warning',
       });
@@ -389,8 +365,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display error cluster status', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useGetOCSHealth as jest.Mock).mockReturnValue({
+      jest.mocked(useGetOCSHealth).mockReturnValue({
         healthState: HealthState.ERROR,
         message: 'Error',
       });
@@ -407,8 +382,7 @@ describe('StorageClusterCard', () => {
 
   describe('Resiliency Status', () => {
     it('should display healthy ceph resiliency', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (getDataResiliencyState as jest.Mock).mockReturnValue({
+      jest.mocked(getDataResiliencyState).mockReturnValue({
         state: HealthState.OK,
         message: 'Healthy',
       });
@@ -425,8 +399,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display warning ceph resiliency', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (getDataResiliencyState as jest.Mock).mockImplementation(() => {
+      jest.mocked(getDataResiliencyState).mockImplementation(() => {
         return {
           state: HealthState.WARNING,
           message: 'Rebuilding',
@@ -443,8 +416,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display error object resiliency', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (getDataResiliencyState as jest.Mock).mockImplementation(() => {
+      jest.mocked(getDataResiliencyState).mockImplementation(() => {
         return {
           state: HealthState.ERROR,
           message: 'Failed',
@@ -462,8 +434,7 @@ describe('StorageClusterCard', () => {
 
     it('should handle different states for ceph and object resiliency', () => {
       let callCount = 0;
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (getDataResiliencyState as jest.Mock).mockImplementation(() => {
+      jest.mocked(getDataResiliencyState).mockImplementation(() => {
         callCount++;
         // First call returns WARNING, second call returns OK
         if (callCount === 1) {
@@ -498,8 +469,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display DASH when CSV is not loaded', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useFetchCsv as jest.Mock).mockReturnValue([null, false, undefined]);
+      jest.mocked(useFetchCsv).mockReturnValue([null, false, undefined]);
 
       render(
         <BrowserRouter>
@@ -512,12 +482,9 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display DASH when CSV has error', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useFetchCsv as jest.Mock).mockReturnValue([
-        null,
-        true,
-        new Error('CSV error'),
-      ]);
+      jest
+        .mocked(useFetchCsv)
+        .mockReturnValue([null, true, new Error('CSV error')]);
 
       render(
         <BrowserRouter>
@@ -540,12 +507,9 @@ describe('StorageClusterCard', () => {
 
     it('should display DASH when subscription is not loaded', () => {
       const { useSafeK8sWatchResource } = require('@odf/core/hooks');
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useSafeK8sWatchResource as jest.Mock).mockReturnValue([
-        null,
-        false,
-        undefined,
-      ]);
+      jest
+        .mocked(useSafeK8sWatchResource)
+        .mockReturnValue([null, false, undefined]);
 
       render(
         <BrowserRouter>
@@ -558,12 +522,9 @@ describe('StorageClusterCard', () => {
 
     it('should display DASH when subscription has error', () => {
       const { useSafeK8sWatchResource } = require('@odf/core/hooks');
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useSafeK8sWatchResource as jest.Mock).mockReturnValue([
-        null,
-        true,
-        new Error('Subscription error'),
-      ]);
+      jest
+        .mocked(useSafeK8sWatchResource)
+        .mockReturnValue([null, true, new Error('Subscription error')]);
 
       render(
         <BrowserRouter>
@@ -589,13 +550,9 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display "No capacity data available" when capacity is loading', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useRawCapacity as jest.Mock).mockReturnValue([
-        null,
-        null,
-        true,
-        undefined,
-      ]);
+      jest
+        .mocked(useRawCapacity)
+        .mockReturnValue([null, null, true, undefined]);
 
       render(
         <BrowserRouter>
@@ -609,13 +566,9 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display "No capacity data available" when capacity has error', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useRawCapacity as jest.Mock).mockReturnValue([
-        null,
-        null,
-        false,
-        new Error('Capacity error'),
-      ]);
+      jest
+        .mocked(useRawCapacity)
+        .mockReturnValue([null, null, false, new Error('Capacity error')]);
 
       render(
         <BrowserRouter>
@@ -629,13 +582,14 @@ describe('StorageClusterCard', () => {
     });
 
     it('should display "No capacity data available" when total capacity is zero', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useRawCapacity as jest.Mock).mockReturnValue([
-        mockPrometheusMetric('0'),
-        mockPrometheusMetric('0'),
-        false,
-        undefined,
-      ]);
+      jest
+        .mocked(useRawCapacity)
+        .mockReturnValue([
+          mockPrometheusMetric('0'),
+          mockPrometheusMetric('0'),
+          false,
+          undefined,
+        ]);
 
       render(
         <BrowserRouter>
@@ -650,8 +604,7 @@ describe('StorageClusterCard', () => {
 
     it('should calculate capacity ratio correctly for general state', () => {
       // 2 TiB used out of 10 TiB total = 20% (under 80% warning threshold)
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useRawCapacity as jest.Mock).mockReturnValue([
+      jest.mocked(useRawCapacity).mockReturnValue([
         mockPrometheusMetric('10995116277760'), // 10 TiB
         mockPrometheusMetric('2199023255552'), // 2 TiB
         false,
@@ -671,8 +624,7 @@ describe('StorageClusterCard', () => {
 
     it('should handle warning threshold capacity ratio (80-85%)', () => {
       // 8.3 TiB used out of 10 TiB total = 83%
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useRawCapacity as jest.Mock).mockReturnValue([
+      jest.mocked(useRawCapacity).mockReturnValue([
         mockPrometheusMetric('10995116277760'), // 10 TiB
         mockPrometheusMetric('9125805605683'), // 8.3 TiB
         false,
@@ -692,8 +644,7 @@ describe('StorageClusterCard', () => {
 
     it('should handle danger threshold capacity ratio (>85%)', () => {
       // 9.5 TiB used out of 10 TiB total = 95%
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useRawCapacity as jest.Mock).mockReturnValue([
+      jest.mocked(useRawCapacity).mockReturnValue([
         mockPrometheusMetric('10995116277760'), // 10 TiB
         mockPrometheusMetric('10445360463872'), // 9.5 TiB
         false,
@@ -712,8 +663,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle edge case with zero used capacity', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useRawCapacity as jest.Mock).mockReturnValue([
+      jest.mocked(useRawCapacity).mockReturnValue([
         mockPrometheusMetric('10995116277760'), // 10 TiB
         mockPrometheusMetric('0'), // 0 used
         false,
@@ -732,8 +682,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle edge case with full capacity', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useRawCapacity as jest.Mock).mockReturnValue([
+      jest.mocked(useRawCapacity).mockReturnValue([
         mockPrometheusMetric('10995116277760'), // 10 TiB
         mockPrometheusMetric('10995116277760'), // 10 TiB used (100%)
         false,
@@ -782,8 +731,7 @@ describe('StorageClusterCard', () => {
 
   describe('Namespace Handling', () => {
     it('should handle different namespace correctly', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useODFNamespaceSelector as jest.Mock).mockReturnValue({
+      jest.mocked(useODFNamespaceSelector).mockReturnValue({
         odfNamespace: 'custom-namespace',
         isNsSafe: true,
       });
@@ -796,12 +744,9 @@ describe('StorageClusterCard', () => {
         },
       };
 
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useK8sWatchResource as jest.Mock).mockReturnValue([
-        [customStorageCluster],
-        true,
-        undefined,
-      ]);
+      jest
+        .mocked(useK8sWatchResource)
+        .mockReturnValue([[customStorageCluster], true, undefined]);
 
       render(
         <BrowserRouter>
@@ -813,8 +758,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle unsafe namespace', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useODFNamespaceSelector as jest.Mock).mockReturnValue({
+      jest.mocked(useODFNamespaceSelector).mockReturnValue({
         odfNamespace: 'openshift-storage',
         isNsSafe: false,
       });
@@ -848,12 +792,9 @@ describe('StorageClusterCard', () => {
         },
       ];
 
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useK8sWatchResource as jest.Mock).mockReturnValue([
-        clusters,
-        true,
-        undefined,
-      ]);
+      jest
+        .mocked(useK8sWatchResource)
+        .mockReturnValue([clusters, true, undefined]);
 
       render(
         <BrowserRouter>
@@ -869,8 +810,7 @@ describe('StorageClusterCard', () => {
   describe('Prometheus Errors', () => {
     it('should handle ceph resiliency prometheus error', () => {
       let callCount = 0;
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useCustomPrometheusPoll as jest.Mock).mockImplementation(() => {
+      jest.mocked(useCustomPrometheusPoll).mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
           return [null, new Error('Prometheus error')];
@@ -889,8 +829,7 @@ describe('StorageClusterCard', () => {
 
     it('should handle object resiliency prometheus error', () => {
       let callCount = 0;
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useCustomPrometheusPoll as jest.Mock).mockImplementation(() => {
+      jest.mocked(useCustomPrometheusPoll).mockImplementation(() => {
         callCount++;
         if (callCount === 2) {
           return [null, new Error('Prometheus error')];
@@ -908,11 +847,9 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle both resiliency prometheus errors', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
-        null,
-        new Error('Prometheus error'),
-      ]);
+      jest
+        .mocked(useCustomPrometheusPoll)
+        .mockReturnValue([null, new Error('Prometheus error')]);
 
       render(
         <BrowserRouter>
@@ -939,12 +876,9 @@ describe('StorageClusterCard', () => {
 
   describe('Edge Cases', () => {
     it('should handle null storage cluster gracefully', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useK8sWatchResource as jest.Mock).mockReturnValue([
-        [null],
-        true,
-        undefined,
-      ]);
+      jest
+        .mocked(useK8sWatchResource)
+        .mockReturnValue([[null], true, undefined]);
 
       render(
         <BrowserRouter>
@@ -958,12 +892,9 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle storage cluster without metadata', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useK8sWatchResource as jest.Mock).mockReturnValue([
-        [{ kind: 'StorageCluster' }],
-        true,
-        undefined,
-      ]);
+      jest
+        .mocked(useK8sWatchResource)
+        .mockReturnValue([[{ kind: 'StorageCluster' }], true, undefined]);
 
       render(
         <BrowserRouter>
@@ -975,8 +906,7 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle empty CSV response', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useFetchCsv as jest.Mock).mockReturnValue([{}, true, undefined]);
+      jest.mocked(useFetchCsv).mockReturnValue([{}, true, undefined]);
 
       render(
         <BrowserRouter>
@@ -989,12 +919,9 @@ describe('StorageClusterCard', () => {
 
     it('should handle empty subscription response', () => {
       const { useSafeK8sWatchResource } = require('@odf/core/hooks');
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useSafeK8sWatchResource as jest.Mock).mockReturnValue([
-        {},
-        true,
-        undefined,
-      ]);
+      jest
+        .mocked(useSafeK8sWatchResource)
+        .mockReturnValue([{}, true, undefined]);
 
       render(
         <BrowserRouter>
@@ -1006,13 +933,9 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle missing capacity data gracefully', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useRawCapacity as jest.Mock).mockReturnValue([
-        null,
-        null,
-        false,
-        undefined,
-      ]);
+      jest
+        .mocked(useRawCapacity)
+        .mockReturnValue([null, null, false, undefined]);
 
       render(
         <BrowserRouter>
@@ -1026,13 +949,14 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle invalid capacity metric format', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useRawCapacity as jest.Mock).mockReturnValue([
-        { metric: {}, value: null },
-        { metric: {}, value: null },
-        false,
-        undefined,
-      ]);
+      jest
+        .mocked(useRawCapacity)
+        .mockReturnValue([
+          { metric: {}, value: null },
+          { metric: {}, value: null },
+          false,
+          undefined,
+        ]);
 
       render(
         <BrowserRouter>
@@ -1067,15 +991,13 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle all data loaded with mixed health states', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useGetOCSHealth as jest.Mock).mockReturnValue({
+      jest.mocked(useGetOCSHealth).mockReturnValue({
         healthState: HealthState.WARNING,
         message: 'Warning',
       });
 
       let callCount = 0;
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (getDataResiliencyState as jest.Mock).mockImplementation(() => {
+      jest.mocked(getDataResiliencyState).mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
           return { state: HealthState.ERROR, message: 'Error' };
@@ -1095,21 +1017,14 @@ describe('StorageClusterCard', () => {
     });
 
     it('should handle partial data loading state', () => {
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useK8sWatchResource as jest.Mock).mockReturnValue([
-        [mockStorageCluster],
-        true,
-        undefined,
-      ]);
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useFetchCsv as jest.Mock).mockReturnValue([null, false, undefined]);
+      jest
+        .mocked(useK8sWatchResource)
+        .mockReturnValue([[mockStorageCluster], true, undefined]);
+      jest.mocked(useFetchCsv).mockReturnValue([null, false, undefined]);
       const { useSafeK8sWatchResource } = require('@odf/core/hooks');
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useSafeK8sWatchResource as jest.Mock).mockReturnValue([
-        null,
-        false,
-        undefined,
-      ]);
+      jest
+        .mocked(useSafeK8sWatchResource)
+        .mockReturnValue([null, false, undefined]);
 
       render(
         <BrowserRouter>
@@ -1133,13 +1048,14 @@ describe('StorageClusterCard', () => {
       ).not.toBeInTheDocument();
 
       // Update capacity to show no data
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
-      (useRawCapacity as jest.Mock).mockReturnValue([
-        mockPrometheusMetric('0'),
-        mockPrometheusMetric('0'),
-        false,
-        undefined,
-      ]);
+      jest
+        .mocked(useRawCapacity)
+        .mockReturnValue([
+          mockPrometheusMetric('0'),
+          mockPrometheusMetric('0'),
+          false,
+          undefined,
+        ]);
 
       rerender(
         <BrowserRouter>

@@ -22,8 +22,26 @@ jest.spyOn(TestDependency2, 'useK8sList').mockImplementation(() => [
 ]);
 
 const defaultNs = 'test-namespace';
-// SAFETY: The State test value defines the members exercised by this test.
-const defaultState = { scProvisioner: '' } as State;
+
+const makeState = (overrides: Partial<State> = {}): State => ({
+  name: '',
+  scName: '',
+  scProvisioner: '',
+  sizeValue: '',
+  sizeUnit: '',
+  progress: false,
+  error: '',
+  payload: { apiVersion: '', kind: '' },
+  bucketClass: '',
+  replicationRuleFormData: [],
+  logReplicationInfo: {
+    logLocation: '',
+    logPrefix: '',
+  },
+  ...overrides,
+});
+
+const defaultState = makeState();
 const defaultSc = 'test-storageclass';
 
 describe('useObcFormSchema tests', () => {
@@ -157,11 +175,11 @@ describe('useObcFormSchema tests', () => {
     const obcName = 'valid-name';
     const expected = 'bucketclass is a required field';
     const spy = jest.spyOn(selectors, 'getName');
-    // SAFETY: The State test value defines the members exercised by this test.
     const { result } = renderHook(() =>
-      useObcFormSchema(defaultNs, {
-        scProvisioner: NOOBAA_PROVISIONER,
-      } as State)
+      useObcFormSchema(
+        defaultNs,
+        makeState({ scProvisioner: NOOBAA_PROVISIONER })
+      )
     );
     await expect(
       result.current.obcFormSchema.validate({

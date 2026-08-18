@@ -30,15 +30,17 @@ const useClickOutside = (
   callback: () => void
 ) => {
   useEffect(() => {
-    // SAFETY: event.target comes from the owner of the Node contract used at this boundary.
     const handleClickOutside = (event: MouseEvent) => {
       // Dropdown and its toggle button are 2 separate elements at the same
       // nesting level, so we check that we're interacting outside both.
+      // SAFETY: MouseEvent.target is EventTarget; document mousedown always
+      // produces a DOM Node, which is what Node.contains() expects.
+      const target = event.target as Node;
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
+        !dropdownRef.current.contains(target) &&
         dropdownToggleRef.current &&
-        !dropdownToggleRef.current.contains(event.target as Node)
+        !dropdownToggleRef.current.contains(target)
       ) {
         callback();
       }
@@ -214,7 +216,8 @@ const KebabComponent = <ExtraProps extends KebabExtraProps>({
   ) => {
     setOpen(false);
     const modalComponentProps = { extraProps, isOpen: true };
-    // SAFETY: value comes from the owner of the string contract used at this boundary.
+    // SAFETY: PF Dropdown onSelect types value as string | number,
+    // but all DropdownItem values above are string keys.
     const actionKey = value as string;
     const modalComponent =
       customKebabItemsMap[actionKey]?.component || defaultModalMap[actionKey];
@@ -240,10 +243,13 @@ const KebabComponent = <ExtraProps extends KebabExtraProps>({
 
   const dropdownItems = React.useMemo(() => {
     const defaultResolved = defaultKebabItems(t, resourceLabel);
-    // SAFETY: key comes from the owner of the ModalKeys contract used at this boundary.
     const filteredDefaultItems = hideItems
       ? Object.keys(defaultResolved)
-          .filter((key) => !hideItems.includes(key as ModalKeys))
+          .filter(
+            // SAFETY: Object.keys returns string[]; ModalKeys is a string
+            // enum, so the cast lets Array<ModalKeys>.includes accept it.
+            (key) => !hideItems.includes(key as ModalKeys)
+          )
           .reduce((obj, key) => {
             obj[key] = defaultResolved[key];
             return obj;
@@ -252,9 +258,10 @@ const KebabComponent = <ExtraProps extends KebabExtraProps>({
     const customResolved: CustomKebabItemsMap = customKebabItemsMap
       ? customKebabItemsMap
       : {};
-    // SAFETY: k comes from the owner of the ModalKeys contract used at this boundary.
     const { overrides, custom } = Object.entries(customResolved).reduce(
       (acc, [k, obj]) => {
+        // SAFETY: k is a string from Object.entries; ModalKeys is a string
+        // enum, so the cast lets Array<ModalKeys>.includes accept it.
         if (hideItems?.includes(k as ModalKeys)) {
           return acc;
         }
@@ -271,6 +278,8 @@ const KebabComponent = <ExtraProps extends KebabExtraProps>({
           </DropdownItem>
         );
 
+        // SAFETY: k is a string from Object.entries; ModalKeys is a
+        // string enum, so the cast is safe for the includes check.
         if (
           [
             ModalKeys.EDIT_LABELS,
@@ -286,7 +295,10 @@ const KebabComponent = <ExtraProps extends KebabExtraProps>({
         return acc;
       },
       {
+        // SAFETY: The accumulator is populated by the reducer; the empty
+        // object seeds the Record<string, ReactNode> shape.
         overrides: {} as Record<string, React.ReactNode>,
+        // SAFETY: Same as overrides above.
         custom: {} as Record<string, React.ReactNode>,
       }
     );

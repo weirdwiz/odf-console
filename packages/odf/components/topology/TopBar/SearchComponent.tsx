@@ -106,7 +106,7 @@ const SearchBar: React.FC = () => {
     };
   }, [controller, onClear]);
 
-  // SAFETY: The receiving library accepts onChange; its published type does not expose this supported value.
+  // SAFETY: The callback signature is compatible but the generic type parameter differs.
   return (
     <SearchInput
       isNextNavigationButtonDisabled={resultsCount === currentResult + 1}

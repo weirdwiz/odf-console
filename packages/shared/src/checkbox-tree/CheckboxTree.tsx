@@ -49,11 +49,10 @@ export const CheckboxTree: React.FC<CheckboxTreeProps> = ({
   treeViewProps,
 }) => {
   const onCheck = (
-    event: React.ChangeEvent,
+    event: React.ChangeEvent<HTMLInputElement>,
     treeViewItem: TreeViewDataItem
   ) => {
-    // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
-    const checked = (event.target as HTMLInputElement).checked;
+    const checked = event.target.checked;
 
     const checkedItemTree = options
       .map((opt) => Object.assign({}, opt))

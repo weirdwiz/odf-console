@@ -23,7 +23,8 @@ import {
 } from '@patternfly/react-core';
 import '../../../../style.scss';
 
-// SAFETY: HealthBodyBase comes from the owner of the React.FC<React.PropsWithChildren<{}>> contract used at this boundary.
+// SAFETY: HealthBodyBase from dynamic-plugin-sdk-internal omits children
+// from its type; the cast adds PropsWithChildren so JSX children compile.
 const HealthBody = HealthBodyBase as React.FC<React.PropsWithChildren<{}>>;
 
 const clientResource: WatchK8sResource = {

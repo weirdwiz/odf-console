@@ -37,7 +37,7 @@ const getObjectURL: GetObjectURL = async (
     Key: getName(object),
     ...(showVersioning && { VersionId: getObjectVersionId(object) }),
   });
-  // SAFETY: responseStream.Body comes from the owner of the ReadableStream contract used at this boundary.
+  // SAFETY: S3 GetObject response.Body is a ReadableStream in browser context; the SDK types it as a union.
   let blob = await new Response(responseStream.Body as ReadableStream).blob();
   blob = blob.slice(
     0,

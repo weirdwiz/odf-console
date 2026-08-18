@@ -101,7 +101,7 @@ export const GCPEndpointType: React.FC<GCPEndPointTypeProps> = (props) => {
     const file = event.target.files[0];
     const reader = new FileReader();
     reader.onload = (ev) => {
-      // SAFETY: _.get(ev, 'target.result') comes from the owner of the string contract used at this boundary.
+      // SAFETY: FileReader.result is string | ArrayBuffer | null; readAsText was used so result is string.
       const data = _.get(ev, 'target.result') as string;
       setFileData(data);
       setInputData(file.name);

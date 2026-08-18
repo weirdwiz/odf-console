@@ -145,7 +145,7 @@ const AttachStorage = () => {
       const hasFlexibleScaling = checkFlexibleScaling(storageCluster);
       const isArbiterEnabled: boolean = checkArbiterCluster(storageCluster);
 
-      // SAFETY: getCephNodes(nodesData, namespace) contains only entries produced for the NodeData[] contract.
+      // SAFETY: getCephNodes filters NodeData items; the return uses the generic K8sResourceCommon type.
       const replica = getDeviceSetReplica(
         isArbiterEnabled,
         hasFlexibleScaling,

@@ -18,7 +18,7 @@ export const launchClusterExpansionModal = async (_alert, launchModal) => {
       ns: alert?.annotations?.target_namespace,
     });
     */
-    // SAFETY: (await k8sList({ model: StorageClusterModel, queryParams: { ns: DEFAUL contains only entries produced for the StorageClusterKind[] contract.
+    // SAFETY: k8sList returns K8sResourceCommon[]; the model guarantees StorageClusterKind shape.
     const storageClusters = (await k8sList({
       model: StorageClusterModel,
       queryParams: { ns: DEFAULT_STORAGE_NAMESPACE },

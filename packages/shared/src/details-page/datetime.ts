@@ -89,15 +89,9 @@ export const utcDateTimeFormatter = new Intl.DateTimeFormat(
   }
 );
 
-// SAFETY: The receiving library accepts Intl; its published type does not expose this supported value.
-export const relativeTimeFormatter =
-  /* SAFETY: The value is supplied by the any owner and follows that contract. */ (
-    Intl as any
-  ).RelativeTimeFormat
-    ? new /* SAFETY: The value is supplied by the any owner and follows that contract. */ (
-        Intl as any
-      ).RelativeTimeFormat(getLastLanguage() || undefined)
-    : null;
+export const relativeTimeFormatter = Intl.RelativeTimeFormat
+  ? new Intl.RelativeTimeFormat(getLastLanguage() || undefined)
+  : null;
 
 export const getDuration = (ms: number) => {
   if (!ms || ms < 0) {

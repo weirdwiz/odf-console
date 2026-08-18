@@ -35,7 +35,8 @@ export const withHandlePromise: WithHandlePromise = (Component) => (props) => {
     );
   };
 
-  // SAFETY: The receiving library accepts props; its published type does not expose this supported value.
+  // SAFETY: WithHandlePromise returns React.FC<any>; the cast ensures
+  // the spread passes all original P-typed props to Component.
   return (
     <Component
       {...(props as any)}
@@ -53,7 +54,8 @@ export class PromiseComponent<
   constructor(props) {
     super(props);
     /* eslint-disable react/no-unused-state */
-    // SAFETY: { inProgress: false, errorMessage: '', } comes from the owner of the S contract used at this boundary.
+    // SAFETY: S extends PromiseComponentState; subclass-specific fields
+    // use their own defaults. The base shape is seeded here.
     this.state = {
       inProgress: false,
       errorMessage: '',

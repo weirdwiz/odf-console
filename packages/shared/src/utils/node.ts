@@ -55,11 +55,8 @@ export const getNodeZone = (node: NodeKind): string =>
 
 export const getRack = (node: NodeKind) => node.metadata.labels?.[RACK_LABEL];
 
-// SAFETY: node?.status?.nodeInfo comes from the owner of the { architecture?: string } | undefined contract used at this boundary.
 export const getNodeArchitecture = (node: NodeKind): string =>
-  /* SAFETY: The value is supplied by the { architecture?: string } | undefined owner and follows that contract. */ (
-    node?.status?.nodeInfo as { architecture?: string } | undefined
-  )?.architecture ?? '';
+  node?.status?.nodeInfo?.architecture ?? '';
 
 export const OCS_CLUSTER_NODE_LABEL_PREFIX = 'cluster.ocs.openshift.io/';
 

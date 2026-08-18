@@ -214,10 +214,10 @@ export const getNamespaceStoreType = (
   ns: NamespaceStoreKind
 ): StoreProviders => {
   let type: StoreProviders = null;
-  // SAFETY: v comes from the owner of the string contract used at this boundary.
+  // SAFETY: Object.entries returns SpecProvider values; bracket access on spec requires string.
   Object.entries(NS_PROVIDERS_NOOBAA_MAP).forEach(([k, v]) => {
     if (ns?.spec?.[v as string]) {
-      // SAFETY: k comes from the owner of the StoreProviders contract used at this boundary.
+      // SAFETY: Object.entries returns StoreProviders keys; TS types them as string.
       type = k as StoreProviders;
     }
   });
@@ -254,7 +254,7 @@ export const getMCGStoreType = (
   let type: StoreProviders = null;
   _.forEach(PROVIDERS_NOOBAA_MAP, (v, k) => {
     if (bs?.spec?.[v]) {
-      // SAFETY: k comes from the owner of the StoreProviders contract used at this boundary.
+      // SAFETY: Object.entries returns StoreProviders keys; TS types them as string.
       type = k as StoreProviders;
     }
   });

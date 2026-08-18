@@ -263,18 +263,16 @@ const AddCapacityModal: React.FC<StorageClusterActionModalProps> = ({
     name: ocsClusterName,
     namespace: ocsClusterNs,
   });
-  // SAFETY: 'api/v1/query' comes from the owner of the PrometheusEndpoint contract used at this boundary.
   const [cephTotal, totalError, totalLoading] = useCustomPrometheusPoll({
-    endpoint: 'api/v1/query' as PrometheusEndpoint,
+    endpoint: PrometheusEndpoint.QUERY,
     query:
       CAPACITY_INFO_QUERIES(ocsClusterName)[
         StorageDashboardQuery.RAW_CAPACITY_TOTAL
       ],
     basePath: usePrometheusBasePath(),
   });
-  // SAFETY: 'api/v1/query' comes from the owner of the PrometheusEndpoint contract used at this boundary.
   const [cephUsed, usedError, usedLoading] = useCustomPrometheusPoll({
-    endpoint: 'api/v1/query' as PrometheusEndpoint,
+    endpoint: PrometheusEndpoint.QUERY,
     query:
       CAPACITY_INFO_QUERIES(ocsClusterName)[
         StorageDashboardQuery.RAW_CAPACITY_USED
@@ -309,7 +307,7 @@ const AddCapacityModal: React.FC<StorageClusterActionModalProps> = ({
 
   const hasFlexibleScaling = checkFlexibleScaling(storageCluster);
   const isArbiterEnabled: boolean = checkArbiterCluster(storageCluster);
-  // SAFETY: getCephNodes(nodesData, ocsClusterNs) contains only entries produced for the NodeData[] contract.
+  // SAFETY: getCephNodes filters NodeData items; the return uses the generic K8sResourceCommon type.
   const replica = getDeviceSetReplica(
     isArbiterEnabled,
     hasFlexibleScaling,
@@ -323,9 +321,8 @@ const AddCapacityModal: React.FC<StorageClusterActionModalProps> = ({
   /** Name of the installation storageClass which will be the pre-selected value for the dropdown */
   const installStorageClass =
     deviceSets?.[0]?.dataPVCTemplate?.spec?.storageClassName;
-  // SAFETY: nodesData contains only entries produced for the [] contract.
   const nodesError: boolean =
-    nodesLoadError || !(nodesData as []).length || !nodesLoaded;
+    nodesLoadError || !nodesData.length || !nodesLoaded;
 
   const preSelectionFilter = React.useCallback(
     (storageClasses: StorageClassResourceKind[]) =>
@@ -477,7 +474,7 @@ const AddCapacityModal: React.FC<StorageClusterActionModalProps> = ({
     }
   };
   const Header = <ModalHeader>{t('Add Capacity')}</ModalHeader>;
-  // SAFETY: The receiving library accepts t; its published type does not expose this supported value.
+  // SAFETY: react-i18next Trans component accepts TFunction but its prop type uses a narrower internal signature.
   return (
     <Modal
       header={Header}

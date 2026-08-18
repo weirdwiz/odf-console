@@ -130,8 +130,9 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
   }, [fullOptions, filterValue, isCreatable, hasInlineFilter]);
 
   React.useEffect(() => {
-    let derivedValidated = validated === 'error' ? 'danger' : validated;
-    // SAFETY: derivedValidated comes from the owner of the MenuToggleStatus contract used at this boundary.
+    const derivedValidated = validated === 'error' ? 'danger' : validated;
+    // SAFETY: After mapping 'error' to 'danger' and excluding 'default',
+    // the remaining values ('danger'|'success'|'warning') match MenuToggleStatus.
     setStatus(
       derivedValidated && derivedValidated !== 'default'
         ? (derivedValidated as MenuToggleStatus)

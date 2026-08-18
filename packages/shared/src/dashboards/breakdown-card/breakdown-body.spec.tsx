@@ -36,7 +36,6 @@ jest
   .mockImplementation(() => <div data-test-id="mocked-breakdown-chart" />);
 
 describe('tests for BreakdownCardBody', () => {
-  // SAFETY: The any test value defines the members exercised by this test.
   const defaultProps: BreakdownBodyProps = {
     isLoading: false,
     hasLoadError: false,
@@ -45,6 +44,8 @@ describe('tests for BreakdownCardBody', () => {
     capacityUsed: '50',
     capacityAvailable: '50',
     metricModel: PersistentVolumeClaimModel,
+    // SAFETY: mockHumanize returns a partial HumanizeResult (only .string);
+    // the full Humanize type requires value + unit too.
     humanize: mockHumanize as any,
   };
 

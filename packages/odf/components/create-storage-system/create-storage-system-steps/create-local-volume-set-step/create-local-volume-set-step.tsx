@@ -100,7 +100,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   };
 
   const handleNext = () => {
-    // SAFETY: activeStep.id comes from the owner of the number contract used at this boundary.
+    // SAFETY: PatternFly WizardStepType.id is string or number; this wizard uses only number IDs.
     const stepId = activeStep.id as number;
     dispatch({
       type: 'wizard/setStepIdReached',
@@ -182,7 +182,7 @@ export const LSOInstallAlert = () => {
   const { t } = useCustomTranslation();
   const navigate = useNavigate();
 
-  // SAFETY: The receiving library accepts t; its published type does not expose this supported value.
+  // SAFETY: react-i18next Trans component accepts TFunction but its prop type uses a narrower internal signature.
   return (
     <Alert
       variant="info"

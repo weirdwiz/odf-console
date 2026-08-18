@@ -20,7 +20,8 @@ export const detectObObcCrds: FeatureDetector = async (
 
   const detector = async () => {
     try {
-      // SAFETY: (await k8sList({ model: CustomResourceDefinitionModel, queryParams: {  contains only entries produced for the CustomResourceDefinitionKind[] contract.
+      // SAFETY: k8sList returns K8sResourceCommon[] | {...}; the CRD model
+      // ensures the result is CustomResourceDefinitionKind[] at runtime.
       const crds = (await k8sList({
         model: CustomResourceDefinitionModel,
         queryParams: { ns: null },

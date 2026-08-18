@@ -95,20 +95,11 @@ const EmptyRowMessage: React.FC = () => {
 
 const UsersTableRow: React.FC<
   RowComponentType<IamUserCrFormat, RowExtraPropsType>
-> = ({
-  row: user,
-  rowIndex,
-  extraProps,
-}) => {
+> = ({ row: user, rowIndex, extraProps }) => {
   const { t } = useCustomTranslation();
   const columnNames = getColumnNames(t);
-  const {
-    launcher,
-    favorites,
-    setFavorites,
-    triggerRefresh,
-    iamClient,
-  } = extraProps;
+  const { launcher, favorites, setFavorites, triggerRefresh, iamClient } =
+    extraProps;
 
   const userName = user.UserName || DASH;
 
@@ -176,7 +167,7 @@ export const UsersListTable: React.FC<UsersListTableProps> = ({
   );
   const launcher = useModalWrapper();
 
-  // SAFETY: allUsers contains only entries produced for the [] contract.
+  // SAFETY: The table component generic expects a narrower tuple; the source array is structurally compatible.
   return (
     <ComposableTable
       rows={filteredUsers}

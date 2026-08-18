@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
 import * as TestDependency1 from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -6,6 +7,7 @@ import userEvent from '@testing-library/user-event';
 import { StorageClassRowGenerator } from '../../modals/ResourceDistributionModal/ResourceDistributionModal';
 import {
   ResourceDistributionTable,
+  RowGeneratorProps,
   SelectedResources,
 } from './ResourceDistributionTable';
 
@@ -58,7 +60,8 @@ jest.spyOn(TestDependency1, 'useListPageFilter').mockImplementation(
 
 describe('Resource distribution table component renders correctly for a storage class', () => {
   it('Renders basic features correctly', () => {
-    // SAFETY: The any test value defines the members exercised by this test.
+    // SAFETY: StorageClassRowGenerator narrows K8sResourceCommon to StorageClassResourceKind;
+    // ResourceDistributionTableProps.RowGenerator requires the wider base type.
     render(
       <ResourceDistributionTable
         columns={['Name', 'Provisioner', 'Deletion policy']}
@@ -66,7 +69,11 @@ describe('Resource distribution table component renders correctly for a storage 
         selectedResources={selectedResources}
         setSelectedResources={jest.fn()}
         resources={resources}
-        RowGenerator={StorageClassRowGenerator as any}
+        RowGenerator={
+          StorageClassRowGenerator as React.FC<
+            RowGeneratorProps<K8sResourceCommon>
+          >
+        }
         resourceType={'storageClass'}
       />
     );
@@ -81,7 +88,6 @@ describe('Resource distribution table component renders correctly for a storage 
   });
   it('Selection invokes setSelectedResources with correct parameters', async () => {
     const setSelectedResourcesMock = jest.fn();
-    // SAFETY: The any test value defines the members exercised by this test.
     render(
       <ResourceDistributionTable
         columns={['Name', 'Provisioner', 'Deletion policy']}
@@ -89,7 +95,13 @@ describe('Resource distribution table component renders correctly for a storage 
         selectedResources={selectedResources}
         setSelectedResources={setSelectedResourcesMock}
         resources={resources}
-        RowGenerator={StorageClassRowGenerator as any}
+        // SAFETY: StorageClassRowGenerator narrows K8sResourceCommon to StorageClassResourceKind;
+        // ResourceDistributionTableProps.RowGenerator requires the wider base type.
+        RowGenerator={
+          StorageClassRowGenerator as React.FC<
+            RowGeneratorProps<K8sResourceCommon>
+          >
+        }
         resourceType={'storageClass'}
       />
     );

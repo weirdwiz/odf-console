@@ -85,7 +85,7 @@ export const getRowActions = (
   ruleHash: number,
   navigateToListPage = false
 ): IAction[] => {
-  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   const providerType = s3Client.providerType as S3ProviderType;
   const searchParam = getSearchParam(ruleName, ruleHash);
   const editRuleLink = `${getBucketOverviewBaseRoute(bucketName, providerType)}/permissions/cors/edit?${searchParam}`;
@@ -224,7 +224,7 @@ const RuleRow: React.FC<RowProps<CORSRule, CustomData>> = ({
     return null;
   }, [ruleName, corsRuleObj]);
 
-  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   const providerType = s3Client.providerType as S3ProviderType;
   const detailsPagePath = `${getBucketOverviewBaseRoute(bucketName, providerType)}/permissions/cors/details?${getSearchParam(ruleName, ruleHash)}`;
 
@@ -289,7 +289,7 @@ const CORSRulesListContent: React.FC = () => {
   // in case of "noRuleExistsError" error, cache could still have older "data", hence clearing that.
   const corsRules: CORSRule[] = noRuleExistsError ? [] : data?.CORSRules || [];
   const loaded = !isLoading;
-  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   const providerType = s3Client.providerType as S3ProviderType;
   const createCorsRuleLink = `${getBucketOverviewBaseRoute(bucketName, providerType)}/permissions/cors/create/~new`;
 

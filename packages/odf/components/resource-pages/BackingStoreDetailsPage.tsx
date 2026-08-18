@@ -76,7 +76,7 @@ const BackingStoreDetailsPage: React.FC<{}> = () => {
     );
   }, [memoizedResource]);
 
-  // SAFETY: The receiving library accepts BSDetails; its published type does not expose this supported value.
+  // SAFETY: The detail page component is structurally compatible but the generic resource type differs.
   return (
     <DetailsPage
       loaded={loaded && isODFNsLoaded}

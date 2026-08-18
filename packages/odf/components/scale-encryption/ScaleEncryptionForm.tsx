@@ -304,7 +304,7 @@ export const ScaleEncryptionForm: React.FC<ScaleEncryptionFormProps> = ({
             setCertificateFileName(file.name);
             setCertificateReadError('');
             const reader = new FileReader();
-            // SAFETY: event.target?.result comes from the owner of the string contract used at this boundary.
+            // SAFETY: FileReader.result is string | ArrayBuffer | null; readAsText was used so result is string.
             reader.onload = (event) =>
               onCertificateChange(btoa(event.target?.result as string));
             reader.onerror = () =>

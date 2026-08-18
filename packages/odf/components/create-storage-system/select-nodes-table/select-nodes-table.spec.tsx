@@ -23,10 +23,8 @@ const cpu = 12;
 const memory = 32 * 1000 * 1000 * 1000;
 const nodes = createFakeNodesData(3, cpu, memory);
 const selectedNodes = createWizardNodeState(nodes);
-// SAFETY: The jest.Mock test value defines the members exercised by this test.
-(useNodesData as jest.Mock).mockReturnValue([nodes, true, null]);
-// SAFETY: The jest.Mock test value defines the members exercised by this test.
-(useListPageFilter as jest.Mock).mockReturnValue([nodes, nodes, jest.fn()]);
+jest.mocked(useNodesData).mockReturnValue([nodes, true, null]);
+jest.mocked(useListPageFilter).mockReturnValue([nodes, nodes, jest.fn()]);
 
 describe('Select Nodes Table', () => {
   it('shows a skeleton while nodes are loading', () => {
@@ -96,14 +94,10 @@ describe('Select Nodes Table', () => {
           }
         : node
     );
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useNodesData as jest.Mock).mockReturnValue([labeledNodes, true, null]);
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useListPageFilter as jest.Mock).mockReturnValue([
-      labeledNodes,
-      labeledNodes,
-      jest.fn(),
-    ]);
+    jest.mocked(useNodesData).mockReturnValue([labeledNodes, true, null]);
+    jest
+      .mocked(useListPageFilter)
+      .mockReturnValue([labeledNodes, labeledNodes, jest.fn()]);
     onRowSelected.mockClear();
 
     render(

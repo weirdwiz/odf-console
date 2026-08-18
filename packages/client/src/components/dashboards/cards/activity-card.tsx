@@ -41,7 +41,9 @@ const ClientOperatorUpgradeActivity: React.FC = () => {
   );
 };
 
-// SAFETY: _.find( subscriptions, (item) => item?.spec?.name === CLIENT_OPERATOR  comes from the owner of the SubscriptionKind contract used at this boundary.
+// SAFETY: _.find returns K8sResourceKind | undefined; the predicate matches
+// a Subscription with spec.name === CLIENT_OPERATOR, so the result is
+// SubscriptionKind when found.
 const getClientOperatorSubscription = (
   subscriptions: K8sResourceKind[]
 ): SubscriptionKind =>

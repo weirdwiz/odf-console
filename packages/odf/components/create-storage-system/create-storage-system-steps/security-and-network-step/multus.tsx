@@ -248,7 +248,7 @@ export const MultusDropdown: React.FC<MultusDropdownProps> = ({
       if (!textInput) {
         return selectOptions;
       } else {
-        // SAFETY: item.props.id comes from the owner of the string contract used at this boundary.
+        // SAFETY: PatternFly types item.props.id as string or number; this component uses only string IDs.
         return selectOptions.filter((item) =>
           (item.props.id as string).toLowerCase().includes(textInput)
         );

@@ -185,7 +185,7 @@ const ObjectVersions: React.FC<ObjectVersionsProps> = ({
   const [inProgress, setInProgress] = React.useState(false);
   const [error, setError] = React.useState(null);
   // used for storing API's response on performing delete operation on object version
-  // SAFETY: [] contains only entries produced for the ObjectCrFormat[] contract.
+  // SAFETY: Empty array matches ObjectCrFormat[] shape; used as initial/fallback value.
   const [deleteResponseSideBar, setDeleteResponseSideBar] =
     React.useState<ObjectsDeleteResponse>({
       selectedObjects: [] as ObjectCrFormat[],
@@ -210,7 +210,7 @@ const ObjectVersions: React.FC<ObjectVersionsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deleteResponseSideBar, objectKey]);
 
-  // SAFETY: objectVersions contains only entries produced for the [] contract.
+  // SAFETY: The table component generic expects a narrower tuple; the source array is structurally compatible.
   return (
     <>
       <Content className="pf-v6-u-my-sm">
@@ -427,7 +427,7 @@ const ObjectDetailsSidebarContent: React.FC<
     );
   }
 
-  // SAFETY: tabIndex comes from the owner of the number contract used at this boundary.
+  // SAFETY: PatternFly Tabs onSelect types eventKey as string or number; this component uses only number keys.
   return (
     <>
       <DrawerHead>

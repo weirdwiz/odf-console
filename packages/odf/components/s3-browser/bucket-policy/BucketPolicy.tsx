@@ -51,7 +51,7 @@ const BucketPolicyContent: React.FC<BucketPolicyContentProps> = ({
   const { bucketName } = useParams();
   const launcher = useModalWrapper();
 
-  // SAFETY: { triggerRefresh, title: t('Confirm delete bucket policy?'), deletePol comes from the owner of the DeleteBucketPolicyModalProps contract used at this boundary.
+  // SAFETY: Object literal provides all DeleteBucketPolicyModalProps fields; TS cannot verify through the launcher API.
   const launchDeleteModal = () =>
     launcher(DeleteBucketPolicyModal, {
       extraProps: {
@@ -64,7 +64,7 @@ const BucketPolicyContent: React.FC<BucketPolicyContentProps> = ({
       isOpen: true,
     });
 
-  // SAFETY: { triggerRefresh, setSuccess, savePolicy: async () => { await s3Client comes from the owner of the SaveBucketPolicyModalProps contract used at this boundary.
+  // SAFETY: Object literal provides all SaveBucketPolicyModalProps fields; TS cannot verify through the launcher API.
   const launchSaveModal = () =>
     launcher(SaveBucketPolicyModal, {
       extraProps: {

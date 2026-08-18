@@ -14,11 +14,10 @@ describe('NICSelectComponent', () => {
   const setNetworkType = jest.fn();
   const setUseClusterNetwork = jest.fn();
 
-  // SAFETY: The NetworkType test value defines the members exercised by this test.
   const defaultProps = {
     cephClusterCIDR: '192.168.100.0/24',
     setCephCIDR,
-    networkType: NetworkType.NIC as NetworkType,
+    networkType: NetworkType.NIC,
     setNetworkType,
     useClusterNetwork: true,
     setUseClusterNetwork,

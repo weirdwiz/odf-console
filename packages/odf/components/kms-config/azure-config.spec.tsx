@@ -40,10 +40,9 @@ describe('AzureConfigure component', () => {
     const { container } = render(
       <AzureConfigure state={state} dispatch={dispatch} />
     );
-    // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
-    const serviceName = container.querySelector(
+    const serviceName = container.querySelector<HTMLInputElement>(
       '[data-test="kms-service-name-text"]'
-    ) as HTMLInputElement;
+    )!;
     expect(serviceName).toBeInTheDocument();
     expect(screen.getByText('Connection name')).toBeInTheDocument();
     expect(serviceName.value).toBe('test-connection');
@@ -68,10 +67,9 @@ describe('AzureConfigure component', () => {
       },
     });
 
-    // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
-    const azureVaultURL = container.querySelector(
+    const azureVaultURL = container.querySelector<HTMLInputElement>(
       '[data-test="azure-vault-url-text"]'
-    ) as HTMLInputElement;
+    )!;
     expect(azureVaultURL).toBeInTheDocument();
     expect(screen.getByText('Azure Vault URL')).toBeInTheDocument();
     expect(azureVaultURL.value).toBe('https://test.com');
@@ -90,10 +88,9 @@ describe('AzureConfigure component', () => {
       },
     });
 
-    // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
-    const clientID = container.querySelector(
+    const clientID = container.querySelector<HTMLInputElement>(
       '[data-test="azure-client-id-text"]'
-    ) as HTMLInputElement;
+    )!;
     expect(clientID).toBeInTheDocument();
     expect(screen.getByText('Client ID')).toBeInTheDocument();
     expect(clientID.value).toBe('azure-client-id1');
@@ -110,10 +107,9 @@ describe('AzureConfigure component', () => {
       },
     });
 
-    // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
-    const tenantID = container.querySelector(
+    const tenantID = container.querySelector<HTMLInputElement>(
       '[data-test="azure-tenant-id-text"]'
-    ) as HTMLInputElement;
+    )!;
     expect(tenantID).toBeInTheDocument();
     expect(screen.getByText('Tenant ID')).toBeInTheDocument();
     expect(tenantID.value).toBe('azure-tenant-id1');

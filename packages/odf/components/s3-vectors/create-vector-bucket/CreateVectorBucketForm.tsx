@@ -39,7 +39,7 @@ const CreateVectorBucketForm: React.FC = () => {
 
   const [activeNamespace] = useActiveNamespace();
   const { s3VectorsClient } = React.useContext(S3VectorsContext);
-  // SAFETY: s3VectorsClient.providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   const providerType = s3VectorsClient.providerType as S3ProviderType;
 
   const [inProgress, setInProgress] = React.useState(false);
@@ -71,8 +71,9 @@ const CreateVectorBucketForm: React.FC = () => {
         subpath: subpathValue,
       });
     } catch (error) {
-      // SAFETY: error comes from the owner of the Error contract used at this boundary.
-      setErrorMessage((error as Error)?.message || JSON.stringify(error));
+      setErrorMessage(
+        error instanceof Error ? error.message : JSON.stringify(error)
+      );
       setInProgress(false);
       return;
     }

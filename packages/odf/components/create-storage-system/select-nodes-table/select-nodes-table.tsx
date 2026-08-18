@@ -58,7 +58,7 @@ const InternalNodeTable: React.FC<InternalNodeTableProps> = ({
     [onRowSelected]
   );
 
-  // SAFETY: node comes from the owner of the NodeKind contract used at this boundary.
+  // SAFETY: k8s watch returns K8sResourceCommon; the component expects the narrower NodeKind type.
   const isRowSelectable = React.useCallback(
     (node: NodeData) =>
       !disableLabeledNodes || !hasLabel(node as NodeKind, storageLabel),

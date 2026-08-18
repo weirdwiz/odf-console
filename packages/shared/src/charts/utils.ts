@@ -97,7 +97,8 @@ export const getRangeVectorStats: GetRangeStats = (
     : optionalParser(response);
   return results?.map((r, index) => {
     return r?.values?.map(([x, y]) => {
-      // SAFETY: { x: xMutator?.(x) ?? defaultXMutator(x), y: threshold ? threshold : ( comes from the owner of the DataPoint<Date> contract used at this boundary.
+      // SAFETY: The literal matches DataPoint<Date> structurally, but
+      // description's callback type is wider than DataPoint's field type.
       return {
         x: xMutator?.(x) ?? defaultXMutator(x),
         y: threshold ? threshold : (yMutator?.(y) ?? defaultYMutator(y)),

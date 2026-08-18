@@ -319,7 +319,7 @@ export const OBDetailsPage: React.FC<{}> = () => {
     );
   }, [resource]);
 
-  // SAFETY: The receiving library accepts OBDetails; its published type does not expose this supported value.
+  // SAFETY: The detail page component is structurally compatible but the generic resource type differs.
   return (
     <>
       {loaded ? (

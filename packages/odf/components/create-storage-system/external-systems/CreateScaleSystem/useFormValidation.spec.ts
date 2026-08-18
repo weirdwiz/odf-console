@@ -46,7 +46,9 @@ describe('useScaleSystemFormValidation', () => {
 
     it('should have field requirements for all input types', () => {
       const result = getHookResult();
-      const expectedFieldTypes = [
+      const fieldReqs = result.fieldRequirements;
+      type FieldKey = keyof typeof fieldReqs;
+      const expectedKeys: FieldKey[] = [
         'name',
         'hostname',
         'port',
@@ -54,17 +56,9 @@ describe('useScaleSystemFormValidation', () => {
         'password',
         'fileSystemName',
       ];
-
-      expectedFieldTypes.forEach((fieldType) => {
-        expect(result.fieldRequirements).toHaveProperty(fieldType);
-        // SAFETY: The keyof typeof result.fieldRequirements test value defines the members exercised by this test.
-        expect(
-          Array.isArray(
-            result.fieldRequirements[
-              fieldType as keyof typeof result.fieldRequirements
-            ]
-          )
-        ).toBe(true);
+      expectedKeys.forEach((key) => {
+        expect(fieldReqs).toHaveProperty(key);
+        expect(Array.isArray(fieldReqs[key])).toBe(true);
       });
     });
   });

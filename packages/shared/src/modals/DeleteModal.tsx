@@ -60,7 +60,9 @@ const DeleteModal: React.FC<CommonModalProps<DeleteModalExtraProps>> = ({
       requestInit: null,
     })
       .then((data) => {
-        // SAFETY: The receiving library accepts data; its published type does not expose this supported value.
+        // SAFETY: k8sList<ClusterServiceVersionKind> returns a union that
+        // includes extra metadata; findOwner only reads metadata fields,
+        // so the any cast is safe.
         const resourceOwner = findOwner(resource, data as any);
         setOwner(resourceOwner);
       })
@@ -77,7 +79,11 @@ const DeleteModal: React.FC<CommonModalProps<DeleteModalExtraProps>> = ({
       try {
         await cleanupBeforeDelete(resource);
       } catch (cleanupError) {
-        setError(cleanupError);
+        // SAFETY: catch blocks receive unknown; extract the message string.
+        setError(
+          (cleanupError as { message?: string })?.message ||
+            String(cleanupError)
+        );
         setLoading(false);
         return;
       }
@@ -112,7 +118,10 @@ const DeleteModal: React.FC<CommonModalProps<DeleteModalExtraProps>> = ({
         closeModal();
       })
       .catch((deleteError) => {
-        setError(deleteError);
+        // SAFETY: catch blocks receive unknown; extract the message string.
+        setError(
+          (deleteError as { message?: string })?.message || String(deleteError)
+        );
         setLoading(false);
       });
   };
@@ -133,7 +142,6 @@ const DeleteModal: React.FC<CommonModalProps<DeleteModalExtraProps>> = ({
   const isNamespaced: boolean = !!resource?.metadata?.namespace;
   const isPropagative = !!resourceModel.propagationPolicy;
 
-  // SAFETY: The receiving library accepts error; its published type does not expose this supported value.
   return (
     <Modal
       variant={ModalVariant.small}
@@ -211,7 +219,7 @@ const DeleteModal: React.FC<CommonModalProps<DeleteModalExtraProps>> = ({
         )}
         {error && (
           <Alert isInline variant="danger" title={t('An error occurred')}>
-            {(error as any)?.message}
+            {error}
           </Alert>
         )}
       </ModalBody>

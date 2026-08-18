@@ -14,6 +14,7 @@ import ResourceLink from '@odf/shared/resource-link/resource-link';
 import Table, { Column } from '@odf/shared/table/table';
 import { useCustomTranslation } from '@odf/shared/useCustomTranslationHook';
 import { getDashboardLink, getGVK, referenceFor } from '@odf/shared/utils';
+import { PrometheusEndpoint } from '@openshift-console/dynamic-plugin-sdk';
 import {
   UtilizationDurationDropdown,
   useUtilizationDuration,
@@ -141,25 +142,22 @@ const PerformanceCard: React.FC = () => {
 
   const [systems, systemLoaded, systemLoadError] = useWatchStorageSystems();
   const { duration } = useUtilizationDuration();
-  // SAFETY: The receiving library accepts 'api/v1/query_range'; its published type does not expose this supported value.
   const [latency, latencyError, latencyLoading] = useCustomPrometheusPoll({
     query: UTILIZATION_QUERY[StorageDashboard.LATENCY],
-    endpoint: 'api/v1/query_range' as any,
+    endpoint: PrometheusEndpoint.QUERY_RANGE,
     timespan: duration,
     basePath: usePrometheusBasePath(),
   });
-  // SAFETY: The receiving library accepts 'api/v1/query_range'; its published type does not expose this supported value.
   const [throughput, throughputError, throughputLoading] =
     useCustomPrometheusPoll({
       query: UTILIZATION_QUERY[StorageDashboard.THROUGHPUT],
-      endpoint: 'api/v1/query_range' as any,
+      endpoint: PrometheusEndpoint.QUERY_RANGE,
       timespan: duration,
       basePath: usePrometheusBasePath(),
     });
-  // SAFETY: The receiving library accepts 'api/v1/query_range'; its published type does not expose this supported value.
   const [iops, iopsError, iopsLoading] = useCustomPrometheusPoll({
     query: UTILIZATION_QUERY[StorageDashboard.IOPS],
-    endpoint: 'api/v1/query_range' as any,
+    endpoint: PrometheusEndpoint.QUERY_RANGE,
     timespan: duration,
     basePath: usePrometheusBasePath(),
   });
@@ -171,7 +169,7 @@ const PerformanceCard: React.FC = () => {
   const error =
     !!systemLoadError || !!throughputError || !!latencyError || !!iopsError;
 
-  // SAFETY: rawRows contains only entries produced for the [] contract.
+  // SAFETY: The table component generic expects a narrower tuple; the source array is structurally compatible.
   return (
     <Card>
       <div ref={ref}>

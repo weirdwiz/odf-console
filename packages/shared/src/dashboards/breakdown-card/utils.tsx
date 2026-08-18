@@ -43,8 +43,7 @@ export const addAvailable = (
   let newChartData: StackDataPoint[] = [...stats];
   if (stats.length > 5) {
     othersData = addOthers(stats, metricTotal, humanize, t);
-    // SAFETY: [...stats, othersData] contains only entries produced for the StackDataPoint[] contract.
-    newChartData = [...stats, othersData] as StackDataPoint[];
+    newChartData = [...stats, othersData];
   }
   if (capacityAvailable) {
     const availableInBytes = Number(capacityAvailable);
@@ -59,8 +58,7 @@ export const addAvailable = (
       id: 7,
       ns: '',
     };
-    // SAFETY: [...newChartData, availableData] contains only entries produced for the StackDataPoint[] contract.
-    newChartData = [...newChartData, availableData] as StackDataPoint[];
+    newChartData = [...newChartData, availableData];
   }
   return newChartData;
 };

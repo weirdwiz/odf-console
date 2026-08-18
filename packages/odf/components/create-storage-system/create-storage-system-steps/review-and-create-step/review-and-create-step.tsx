@@ -91,7 +91,7 @@ export const ReviewAndCreate: React.FC<ReviewAndCreateProps> = ({
   const isRhcs = !_.isEmpty(connectionDetails);
   // External IBM deployment without ODF
   const isStandaloneExternal = hasOCS && !_.isEmpty(createStorageClass);
-  // SAFETY: capacity comes from the owner of the string contract used at this boundary.
+  // SAFETY: Reducer stores capacity as string | number; this path only reaches with string values.
   const formattedCapacity = !isNoProvisioner
     ? `${Number.isFinite(capacity) ? capacity : getStorageSizeInTiBWithoutUnit(capacity as string)} ${StorageSizeUnitName.TiB}`
     : humanizeBinaryBytes(capacity).string;

@@ -114,7 +114,7 @@ export const ConnectionDetails: React.FC<ExternalComponentProps<RHCSState>> = ({
     setFormState('fileName', fName);
   };
 
-  // SAFETY: The receiving library accepts t; its published type does not expose this supported value.
+  // SAFETY: react-i18next Trans component accepts TFunction but its prop type uses a narrower internal signature.
   return (
     <ErrorHandler
       error={odfNsLoadError || podsLoadError || ocsCSVError || cmLoadError}

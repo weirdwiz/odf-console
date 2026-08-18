@@ -6,13 +6,14 @@ import { useCustomTranslation } from '../useCustomTranslationHook';
 import { LoadingInline } from './Loading';
 
 const injectDisabled = (children: React.ReactChild, disabled) => {
-  // SAFETY: c comes from the owner of the React.ReactElement contract used at this boundary.
   return React.Children.map(children, (c) => {
+    // SAFETY: React.Children.map yields ReactNode; _.isObject filters
+    // primitives, and .type === 'button' confirms it is a ReactElement.
     if (!_.isObject(c) || (c as React.ReactElement).type !== 'button') {
       return c;
     }
 
-    // SAFETY: c comes from the owner of the React.ReactElement contract used at this boundary.
+    // SAFETY: Guarded by the isObject + .type check above.
     return React.cloneElement(c as React.ReactElement, {
       disabled: (c as React.ReactElement).props.disabled || disabled,
     });
@@ -47,7 +48,12 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
   successMessage,
   inProgress = false,
 }) => {
-  // SAFETY: children comes from the owner of the React.ReactChild contract used at this boundary.
+  // SAFETY: injectDisabled expects the deprecated ReactChild type;
+  // children is ReactNode, so the cast narrows for that API.
+  const disabledChildren = injectDisabled(
+    children as React.ReactChild,
+    inProgress
+  );
   return (
     <div className={classNames(className, 'co-m-btn-bar')}>
       <AlertGroup
@@ -57,7 +63,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
       >
         {successMessage && <SuccessMessage message={successMessage} />}
         {errorMessage && <ErrorMessage message={errorMessage} />}
-        {injectDisabled(children as React.ReactChild, inProgress)}
+        {disabledChildren}
         {inProgress && <LoadingInline />}
         {infoMessage && <InfoMessage message={infoMessage} />}
       </AlertGroup>

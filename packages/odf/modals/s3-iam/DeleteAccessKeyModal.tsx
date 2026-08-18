@@ -27,7 +27,7 @@ type DeleteAccessKeyModalProps = {
   refreshTokens: () => void;
 };
 
-// SAFETY: The receiving library accepts t; its published type does not expose this supported value.
+// SAFETY: react-i18next Trans component accepts TFunction but its prop type uses a narrower internal signature.
 const getTextInputLabel = (t: TFunction) => (
   <Trans t={t as any} values={{ delete: t('delete') }}>
     <b>

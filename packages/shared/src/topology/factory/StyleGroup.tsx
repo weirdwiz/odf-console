@@ -93,7 +93,8 @@ const StyleGroup: React.FunctionComponent<StyleGroupProps> = ({
   const data = element.getData();
   const detailsLevel = useDetailsLevel();
 
-  // SAFETY: data.component comes from the owner of the AlertFiringComponent contract used at this boundary.
+  // SAFETY: Topology node data is untyped; the factory always sets
+  // data.component to an AlertFiringComponent enum value.
   const component = data.component as AlertFiringComponent;
 
   const { nodeDeploymentMap } = React.useContext(TopologyDataContext);

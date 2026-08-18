@@ -40,7 +40,9 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
   inProgress,
   children,
 }) => {
-  // SAFETY: children comes from the owner of the React.ReactChild contract used at this boundary.
+  // SAFETY: ButtonBar.injectDisabled expects the deprecated ReactChild
+  // type; children is ReactNode, so the cast narrows for that API.
+  const content = children as React.ReactChild;
   return (
     <ButtonBar
       className="modal-footer"
@@ -48,7 +50,7 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
       infoMessage={message}
       inProgress={inProgress}
     >
-      {children as React.ReactChild}
+      {content}
     </ButtonBar>
   );
 };

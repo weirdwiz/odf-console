@@ -25,7 +25,7 @@ export const HpcsConfigure: React.FC<KMSConfigureProps> = ({
 }) => {
   const { t } = useCustomTranslation();
 
-  // SAFETY: useDeepCompareMemoize( state.kms.providerState, true ) comes from the owner of the HpcsConfig contract used at this boundary.
+  // SAFETY: KMS wizard state stores KMSConfiguration union; the component narrows by current provider.
   const kms = useDeepCompareMemoize(
     state.kms.providerState,
     true

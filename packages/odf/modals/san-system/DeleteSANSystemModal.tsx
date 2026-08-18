@@ -68,7 +68,7 @@ const DeleteSANSystemModal: React.FC<DeleteSANSystemModalProps> = ({
       }
       closeModal();
     } catch (deleteError) {
-      // SAFETY: deleteError comes from the owner of the { message?: string } contract used at this boundary.
+      // SAFETY: The caught error may be Error or an object with message; the catch block types it as unknown.
       setError(
         deleteError instanceof Error
           ? deleteError.message

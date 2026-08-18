@@ -44,8 +44,7 @@ const ineligible = {
 
 describe('NodesSection', () => {
   it('renders the local cluster table when all-nodes selection is hidden', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useNodesData as jest.Mock).mockReturnValue([[], true, null]);
+    jest.mocked(useNodesData).mockReturnValue([[], true, null]);
 
     render(<SANNodesSection selectedNodes={[]} setSelectedNodes={jest.fn()} />);
 
@@ -76,8 +75,7 @@ describe('NodesSection', () => {
     ];
     const setSelectedNodes = jest.fn();
 
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useNodesData as jest.Mock).mockReturnValue([nodes, true, null]);
+    jest.mocked(useNodesData).mockReturnValue([nodes, true, null]);
 
     render(
       <ScaleNodesSection
@@ -112,8 +110,7 @@ describe('NodesSection', () => {
         spec: {},
       },
     ];
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useNodesData as jest.Mock).mockReturnValue([nodes, true, null]);
+    jest.mocked(useNodesData).mockReturnValue([nodes, true, null]);
 
     render(
       <ScaleNodesSection
@@ -162,8 +159,7 @@ describe('NodesSection', () => {
     ];
     const onSelectionChange = jest.fn();
 
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useNodesData as jest.Mock).mockReturnValue([nodes, true, null]);
+    jest.mocked(useNodesData).mockReturnValue([nodes, true, null]);
 
     const TestScaleNodesSection = () => {
       const [selectedNodes, setSelectedNodes] = React.useState<
@@ -231,8 +227,7 @@ describe('NodesSection', () => {
         'Kernel-devel packages are missing on some selected nodes. Please apply the Machine Config Operator (MCO) update to install them before continuing.',
     },
   ])('renders kernel-devel status: $message', ({ eligibility, message }) => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useNodesData as jest.Mock).mockReturnValue([[], true, null]);
+    jest.mocked(useNodesData).mockReturnValue([[], true, null]);
 
     render(
       <ScaleNodesSection
@@ -246,8 +241,7 @@ describe('NodesSection', () => {
   });
 
   it('renders verified kernel-devel status', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useNodesData as jest.Mock).mockReturnValue([[], true, null]);
+    jest.mocked(useNodesData).mockReturnValue([[], true, null]);
 
     render(
       <ScaleNodesSection
@@ -266,8 +260,7 @@ describe('NodesSection', () => {
   });
 
   it('passes the node loading state to the table', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useNodesData as jest.Mock).mockReturnValue([[], false, null]);
+    jest.mocked(useNodesData).mockReturnValue([[], false, null]);
 
     render(
       <ScaleNodesSection

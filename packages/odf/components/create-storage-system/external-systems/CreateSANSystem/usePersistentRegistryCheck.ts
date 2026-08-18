@@ -61,8 +61,7 @@ export const testRegistryConnection = async (
       }),
     });
   } catch (e) {
-    // SAFETY: e comes from the owner of the Error contract used at this boundary.
-    return { ok: false, error: (e as Error).message };
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
   return { ok: true, error: '' };
 };

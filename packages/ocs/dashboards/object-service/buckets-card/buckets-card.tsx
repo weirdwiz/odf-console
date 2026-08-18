@@ -6,8 +6,8 @@ import {
   NooBaaObjectBucketClaimModel,
   NooBaaObjectBucketModel,
 } from '@odf/shared';
-import { FieldLevelHelp } from '@odf/shared/generic/FieldLevelHelp';
 import { PrometheusEndpoint } from '@odf/shared/constants';
+import { FieldLevelHelp } from '@odf/shared/generic/FieldLevelHelp';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,

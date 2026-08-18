@@ -98,7 +98,7 @@ export const useSortPages: UseSortPages = ({
   }, [extensions, haveExtensionsResolved, staticPages]);
 };
 
-// SAFETY: The receiving library accepts tab.component; its published type does not expose this supported value.
+// SAFETY: The plugin extension component type differs from the resolved React component type.
 export const convertHorizontalNavTabToNavPage = (
   horizontalNavTabs: HorizontalNavProps[]
 ): NavPage[] =>
@@ -106,5 +106,5 @@ export const convertHorizontalNavTabToNavPage = (
     name: tab.name,
     href: tab.href,
     component:
-      /* SAFETY: The value is supplied by the any owner and follows that contract. */ tab.component as any,
+      /* SAFETY: Plugin extension component type differs from the resolved React component type. */ tab.component as any,
   }));

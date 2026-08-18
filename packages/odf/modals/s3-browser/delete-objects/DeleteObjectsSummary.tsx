@@ -70,11 +70,7 @@ const getHeaderColumns = (t: TFunction) => {
 
 const ObjectsSummaryTableRow: React.FC<
   RowComponentType<_Error, SummaryRowExtraProps>
-> = ({
-  row: object,
-  rowIndex,
-  extraProps,
-}) => {
+> = ({ row: object, rowIndex, extraProps }) => {
   const { t } = useCustomTranslation();
 
   const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
@@ -131,7 +127,7 @@ const DeleteObjectsSummary: React.FC<
 }) => {
   const { t } = useCustomTranslation();
 
-  // SAFETY: This empty DeleteObjectsMap accumulator receives only entries created by the reducer below.
+  // SAFETY: Empty accumulator; the reduce callback populates all required DeleteObjectsMap fields.
   const deleteObjectsMap: DeleteObjectsMap = React.useMemo(
     () =>
       selectedObjects.reduce((acc, object) => {
@@ -141,7 +137,7 @@ const DeleteObjectsSummary: React.FC<
     [selectedObjects]
   );
 
-  // SAFETY: ObjectsSummaryTableRow comes from the owner of the SummaryRowComponent contract used at this boundary.
+  // SAFETY: ObjectsSummaryTableRow satisfies the SummaryRowComponent interface; TS generic does not infer it.
   return (
     <Modal
       title={t('Object delete summary')}

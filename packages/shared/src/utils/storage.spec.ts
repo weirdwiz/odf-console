@@ -18,8 +18,9 @@ describe('getStorageSizeInTiBWithoutUnit', () => {
       ['2Ti', 2],
     ];
 
-    // SAFETY: The string test value defines the members exercised by this test.
     conversion.forEach(([input, output]) =>
+      // SAFETY: input is unknown (null, number, or string) to test error
+      // paths; the function signature requires string.
       expect(getStorageSizeInTiBWithoutUnit(input as string)).toBe(output)
     );
   });

@@ -82,7 +82,7 @@ const LowMonAlertModal: ModalComponent = ({ closeModal }) => {
       });
   };
 
-  // SAFETY: The receiving library accepts errorMessage; its published type does not expose this supported value.
+  // SAFETY: The component prop uses a generic string type; the value is a narrower template literal.
   return (
     <Modal
       onClose={closeModal}

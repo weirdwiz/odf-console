@@ -170,7 +170,8 @@ export const useUserSettingsLocalStorage = <T>(
   const updateData = React.useCallback<React.Dispatch<React.SetStateAction<T>>>(
     (action: React.SetStateAction<T>) => {
       const previousData = dataRef.current;
-      // SAFETY: action comes from the owner of the (prevState: T) => T contract used at this boundary.
+      // SAFETY: SetStateAction<T> is T | ((prev: T) => T); lodash isFunction
+      // narrows to Function but not to the specific (T) => T overload.
       const newState = isFunction(action)
         ? (action as (prevState: T) => T)(previousData)
         : action;

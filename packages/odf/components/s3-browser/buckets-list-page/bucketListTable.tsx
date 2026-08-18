@@ -158,11 +158,7 @@ const EmptyRowMessage: React.FC = () => {
 
 const BucketsTableRow: React.FC<
   RowComponentType<BucketCrFormat, RowExtraPropsType>
-> = ({
-  row: bucket,
-  rowIndex,
-  extraProps,
-}) => {
+> = ({ row: bucket, rowIndex, extraProps }) => {
   const { t } = useCustomTranslation();
   const columnNames = getColumnNames(t);
   const {
@@ -186,7 +182,7 @@ const BucketsTableRow: React.FC<
     ]);
   };
 
-  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   const providerType = s3Client.providerType as S3ProviderType;
 
   return (
@@ -246,7 +242,7 @@ export const BucketsListTable: React.FC<BucketsListTableProps> = ({
   );
   const launcher = useModalWrapper();
 
-  // SAFETY: allBuckets contains only entries produced for the [] contract.
+  // SAFETY: The table component generic expects a narrower tuple; the source array is structurally compatible.
   return (
     <ComposableTable
       rows={filteredBuckets}

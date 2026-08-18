@@ -428,7 +428,7 @@ export const OBCDetailsPage: React.FC<{}> = () => {
     },
   ];
 
-  // SAFETY: The receiving library accepts OBCDetails; its published type does not expose this supported value.
+  // SAFETY: The detail page component is structurally compatible but the generic resource type differs.
   return loaded ? (
     <DetailsPage
       breadcrumbs={breadcrumbs}

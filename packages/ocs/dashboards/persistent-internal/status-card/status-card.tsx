@@ -7,10 +7,10 @@ import {
   getCephHealthState,
   getDataResiliencyState,
 } from '@odf/ocs/utils';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import { odfDocBasePath } from '@odf/shared/constants/doc';
 import { healthStateMapping } from '@odf/shared/dashboards/status-card/states';
 import { DOC_VERSION as odfDocVersion } from '@odf/shared/hooks';
-import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,

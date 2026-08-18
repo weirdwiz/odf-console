@@ -79,8 +79,7 @@ const EditDescriptionTagModal: React.FC<
       refreshTokens?.();
     } catch (err) {
       setInProgress(false);
-      // SAFETY: err comes from the owner of the Error contract used at this boundary.
-      setError(err as Error);
+      setError(err instanceof Error ? err : new Error(String(err)));
     }
   };
 

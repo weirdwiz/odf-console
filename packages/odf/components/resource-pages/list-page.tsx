@@ -260,7 +260,7 @@ const bcKebabActions = (t: TFunction) => [
   },
 ];
 
-// SAFETY: obj comes from the owner of the BucketClassKind contract used at this boundary.
+// SAFETY: The list page only renders BucketClassKind items; the generic table row type is wider.
 const getBucketClassType = (obj: K8sResourceCommon, t: TFunction): string =>
   getBucketClassTypeDisplayText(obj as BucketClassKind, t);
 
@@ -268,7 +268,7 @@ const getNamespaceStoreProviderType = (
   obj: K8sResourceCommon,
   t: TFunction
 ): string => {
-  // SAFETY: obj comes from the owner of the NamespaceStoreKind contract used at this boundary.
+  // SAFETY: The list page only renders NamespaceStoreKind items; the generic table row type is wider.
   const provider = getNamespaceStoreType(obj as NamespaceStoreKind);
   return provider ? t(provider) : '';
 };
@@ -277,7 +277,7 @@ const getNamespaceStoreLabel = (
   obj: K8sResourceCommon,
   t: TFunction
 ): React.ReactNode => {
-  // SAFETY: obj comes from the owner of the NamespaceStoreKind contract used at this boundary.
+  // SAFETY: The list page only renders NamespaceStoreKind items; the generic table row type is wider.
   const ns = obj as NamespaceStoreKind;
   if (ns.spec?.archive) {
     return (
@@ -293,7 +293,7 @@ const getBackingStoreProviderType = (
   obj: K8sResourceCommon,
   t: TFunction
 ): string => {
-  // SAFETY: obj comes from the owner of the BackingStoreKind contract used at this boundary.
+  // SAFETY: The list page only renders BackingStoreKind items; the generic table row type is wider.
   const provider = getMCGStoreType(obj as BackingStoreKind);
   return provider ? t(provider) : '';
 };

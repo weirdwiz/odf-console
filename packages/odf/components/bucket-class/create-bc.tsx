@@ -70,7 +70,7 @@ const BucketClassWizardFooter: React.FC<BucketClassWizardFooterProps> = ({
 
   const [showErrorAlert, setShowErrorAlert] = React.useState(false);
 
-  // SAFETY: activeStep.id comes from the owner of the string contract used at this boundary.
+  // SAFETY: PatternFly WizardStepType.id is string | number; this wizard uses only string IDs.
   const currentStepId = activeStep.id as string;
 
   const backingStoreNextConditions = React.useCallback(() => {

@@ -73,7 +73,7 @@ const getFilterConfig = (
   } else if (filtersWOTagsLength === 1 && tags.length === 1) {
     ruleFilters = { And: { ...filtersWOTags, Tags: tags } };
   } else {
-    // SAFETY: { ...filtersWOTags, ...(!!tags.length ? { Tag: tags[0] } : {}), } comes from the owner of the LifecycleRuleFilter contract used at this boundary.
+    // SAFETY: Object literal matches LifecycleRuleFilter shape; TS cannot verify the conditional spread.
     ruleFilters = (() => {
       const value = { ...filtersWOTags };
       if (!!tags.length) Object.assign(value, { Tag: tags[0] });
@@ -254,7 +254,7 @@ const CreateOrEditLifecycleRuleWizard: React.FC<IsEditProp> = ({ isEdit }) => {
       });
     } catch (err) {
       if (isNoLifecycleRuleError(err)) {
-        // SAFETY: { Rules: [], } comes from the owner of the GetBucketLifecycleConfigurationCommandOutput contract used at this boundary.
+        // SAFETY: Empty Rules fallback; GetBucketLifecycleConfigurationCommandOutput has many optional fields not needed here.
         latestRules = {
           Rules: [],
         } as GetBucketLifecycleConfigurationCommandOutput;

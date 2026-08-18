@@ -41,12 +41,11 @@ export const LSOStorageClassDropdown = ({
   const [pvData, pvLoaded, pvLoadError] =
     useK8sWatchResource<K8sResourceCommon[]>(pvResource);
   const [nodesData, nodesLoaded, nodesLoadError] = useNodesData();
-  // SAFETY: nodesData contains only entries produced for the [] contract.
   const nodesError: boolean =
-    nodesLoadError || !(nodesData as []).length || !nodesLoaded;
+    nodesLoadError || !nodesData.length || !nodesLoaded;
   const hasFlexibleScaling = checkFlexibleScaling(storageCluster);
   const isArbiterEnabled: boolean = checkArbiterCluster(storageCluster);
-  // SAFETY: getCephNodes(nodesData, namespace) contains only entries produced for the NodeData[] contract.
+  // SAFETY: getCephNodes filters NodeData items; the return uses the generic K8sResourceCommon type.
   const replica = getDeviceSetReplica(
     isArbiterEnabled,
     hasFlexibleScaling,

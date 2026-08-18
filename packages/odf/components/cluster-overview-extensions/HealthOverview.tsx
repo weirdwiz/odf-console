@@ -26,7 +26,7 @@ export const getStorageSystemHealthState: PrometheusHealthHandler = (
 ) => {
   const isNoobaaOnly = _.isEmpty(ceph?.data);
   if (!isNoobaaOnly) {
-    // SAFETY: ceph.data contains only entries produced for the K8sResourceCommon[] contract.
+    // SAFETY: k8s watch data is already K8sResourceCommon[]; the assertion narrows the generic.
     return getCephsHealthState(
       {
         ceph: {
@@ -59,7 +59,7 @@ export const StoragePopover: React.FC<PrometheusHealthPopupProps> = ({
   });
   const cephData = k8sResult?.data;
   const isNoobaaOnly = _.isEmpty(cephData);
-  // SAFETY: cephData contains only entries produced for the K8sResourceCommon[] contract.
+  // SAFETY: k8s watch data is already K8sResourceCommon[]; the assertion narrows the generic.
   const cephHealthState: SubsystemHealth = getCephsHealthState(
     {
       ceph: {

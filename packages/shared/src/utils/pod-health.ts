@@ -4,10 +4,10 @@ import {
   SubsystemHealth,
 } from '@openshift-console/dynamic-plugin-sdk';
 
-// SAFETY: obj?.status?.phase comes from the owner of the PodPhase contract used at this boundary.
 export const getPodStatus = (obj: PodKind): PodPhase =>
-  /* SAFETY: The value is supplied by the PodPhase owner and follows that contract. */ (obj
-    ?.status?.phase as PodPhase) || PodPhase.Unknown;
+  // SAFETY: PodStatus.phase is typed as string; PodPhase enum uses the same
+  // string values, so the cast narrows for the enum-based switch below.
+  (obj?.status?.phase as PodPhase) || PodPhase.Unknown;
 
 export const getPodHealthState = (
   podPhase: PodPhase,

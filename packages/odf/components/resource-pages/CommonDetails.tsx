@@ -57,7 +57,7 @@ export const CommonDetails: React.FC<CommonDetailsSectionProps> = ({
 }) => {
   const { t } = useCustomTranslation();
 
-  // SAFETY: The receiving library accepts resource; its published type does not expose this supported value.
+  // SAFETY: The component prop uses a generic K8sResourceCommon; the resource is a narrower concrete type.
   return (
     <>
       <div className="odf-m-pane__body">

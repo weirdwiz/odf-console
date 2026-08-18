@@ -166,7 +166,7 @@ const CreateOrEditCorsForm: React.FC<IsEditProp> = ({ isEdit }) => {
           latestRules = await s3Client.getBucketCors({ Bucket: bucketName });
         } catch (err) {
           if (isNoCorsRuleError(err)) {
-            // SAFETY: { CORSRules: [] } comes from the owner of the GetBucketCorsCommandOutput contract used at this boundary.
+            // SAFETY: Empty CORSRules fallback; GetBucketCorsCommandOutput has many optional fields not needed here.
             latestRules = { CORSRules: [] } as GetBucketCorsCommandOutput;
           } else {
             throw err;

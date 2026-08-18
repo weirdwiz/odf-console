@@ -73,7 +73,7 @@ const DetailsTabComponent: React.FC<GenericTabComponentProps> = ({
     }
   }, [kind]);
 
-  // SAFETY: The receiving library accepts resource; its published type does not expose this supported value.
+  // SAFETY: The component prop uses a generic K8sResourceCommon; the resource is a narrower concrete type.
   return <Component resource={resource as any} />;
 };
 
@@ -94,7 +94,7 @@ const ResourceTabComponent: React.FC<GenericTabComponentProps> = ({
     }
   }, [kind]);
 
-  // SAFETY: The receiving library accepts resource; its published type does not expose this supported value.
+  // SAFETY: The component prop uses a generic K8sResourceCommon; the resource is a narrower concrete type.
   return <Component resource={resource as any} odfNamespace={odfNamespace} />;
 };
 
@@ -115,7 +115,7 @@ const ObserveTabComponent: React.FC<GenericTabComponentProps> = ({
     }
   }, [kind]);
 
-  // SAFETY: The receiving library accepts resource; its published type does not expose this supported value.
+  // SAFETY: The component prop uses a generic K8sResourceCommon; the resource is a narrower concrete type.
   return <Component resource={resource as any} odfNamespace={odfNamespace} />;
 };
 
@@ -148,7 +148,7 @@ const TopologySideBarContent: React.FC<TopologySideBarContentProps> = ({
 
   const { ref, height } = useAutoExpand();
 
-  // SAFETY: resource comes from the owner of the NodeKind contract used at this boundary.
+  // SAFETY: k8s watch returns K8sResourceCommon; the component expects the narrower NodeKind type.
   return !inFlight && reference !== null ? (
     <div
       className="odf-topology__sidebar"

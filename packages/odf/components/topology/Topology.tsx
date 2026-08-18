@@ -302,7 +302,7 @@ const TopologyViewComponent: React.FC = () => {
       newResourcesUIDs.includes(getUID(resource))
     );
 
-    // SAFETY: The receiving library accepts newResources.filter( (resource) => resource.kind === NodeModel.kind ); its published type does not expose this supported value.
+    // SAFETY: The filtered array is structurally compatible but TS cannot narrow the generic type.
     const newNodes: NodeKind[] = newResources.filter(
       (resource) => resource.kind === NodeModel.kind
     ) as any;
@@ -550,7 +550,7 @@ const Topology: React.FC = () => {
     [onStepInto, onStepOut]
   );
 
-  // SAFETY: The receiving library accepts stylesComponentFactory; its published type does not expose this supported value.
+  // SAFETY: PatternFly Topology component factory signature is compatible but uses internal types.
   const controller = useVisualizationSetup({
     componentFactory: stylesComponentFactory as any,
     eventListeners,
@@ -569,7 +569,7 @@ const Topology: React.FC = () => {
   const zones = memoizedNodes.map(getTopologyDomain);
 
   const topologyDataContextData = React.useMemo(() => {
-    // SAFETY: The receiving library accepts setSelectedElement; its published type does not expose this supported value.
+    // SAFETY: The callback signature is compatible but the generic type parameter differs.
     return {
       nodes: memoizedNodes,
       storageCluster: storageCluster,

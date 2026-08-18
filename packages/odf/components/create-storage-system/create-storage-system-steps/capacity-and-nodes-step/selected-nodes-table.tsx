@@ -119,7 +119,7 @@ export const SelectedNodesTable: React.FC<SelectedNodesTableProps> = ({
     [t]
   );
 
-  // SAFETY: The receiving library accepts SelectedNodesTableColumns; its published type does not expose this supported value.
+  // SAFETY: Table column definition is structurally compatible but the generic type parameter differs.
   const [columns] = useActiveColumns({
     columns: SelectedNodesTableColumns as any, // Todo(bipuladh): Update once sdk is updated
     showNamespaceOverride: false,

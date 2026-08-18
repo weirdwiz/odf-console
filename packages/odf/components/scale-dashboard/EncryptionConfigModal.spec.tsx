@@ -41,9 +41,8 @@ const fillAndSubmit = async () => {
     screen.getByLabelText(/Remote RKM/, { selector: 'input' }),
     'rkm.example.com'
   );
-  // SAFETY: The HTMLInputElement test value defines the members exercised by this test.
   await userEvent.upload(
-    document.querySelector('input[type="file"]') as HTMLInputElement,
+    document.querySelector<HTMLInputElement>('input[type="file"]')!,
     new File(['certificate'], 'ca.crt')
   );
   await userEvent.type(
@@ -62,8 +61,7 @@ const fillAndSubmit = async () => {
 describe('EncryptionConfigModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (enableScaleEncryption as jest.Mock).mockResolvedValue(undefined);
+    jest.mocked(enableScaleEncryption).mockResolvedValue(undefined);
   });
 
   it('submits the encryption configuration', async () => {
@@ -86,10 +84,9 @@ describe('EncryptionConfigModal', () => {
   });
 
   it('keeps the modal open when encryption fails', async () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (enableScaleEncryption as jest.Mock).mockRejectedValue(
-      new Error('EncryptionConfig creation failed')
-    );
+    jest
+      .mocked(enableScaleEncryption)
+      .mockRejectedValue(new Error('EncryptionConfig creation failed'));
     const { closeModal } = renderModal();
 
     await fillAndSubmit();

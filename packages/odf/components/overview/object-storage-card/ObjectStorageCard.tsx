@@ -9,7 +9,10 @@ import {
 import { useCustomTranslation } from '@odf/shared/useCustomTranslationHook';
 import { humanizeNumber } from '@odf/shared/utils/humanize';
 import { parseMetricData } from '@odf/shared/utils/metrics';
-import { QueryWithDescription } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  QueryWithDescription,
+  PrometheusEndpoint,
+} from '@openshift-console/dynamic-plugin-sdk';
 import { UtilizationDurationDropdown } from '@openshift-console/dynamic-plugin-sdk-internal';
 import classNames from 'classnames';
 import * as _ from 'lodash-es';
@@ -45,11 +48,10 @@ const BUCKETS_PROVISIONED_QUERIES: [
 export const ObjectStorageCard: React.FC<CardProps> = ({ className }) => {
   const { t } = useCustomTranslation();
   const navigate = useNavigate();
-  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [nbBucketsData, nbBucketsError, nbBucketsLoading] =
     useCustomPrometheusPoll({
       query: ObjectStorageOverviewQueries.NOOBAA_BUCKETS_PROVISIONED,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 

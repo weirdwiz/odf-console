@@ -137,12 +137,12 @@ export const StorageClusterResources: React.FC<{
   const { t } = useCustomTranslation();
   const clusterResources = useSafeK8sWatchResources(watchResources);
 
-  // SAFETY: (clusterResources?.nodes?.data ?? []) contains only entries produced for the NodeKind[] contract.
+  // SAFETY: k8s watch returns K8sResourceCommon[]; the model guarantees NodeKind shape.
   const nodes = (clusterResources?.nodes?.data ?? []) as NodeKind[];
   const nodesLoaded = clusterResources?.nodes?.loaded;
   const nodesLoadError = clusterResources?.nodes?.loadError;
 
-  // SAFETY: (clusterResources?.deployments?.data ?? []) contains only entries produced for the DeploymentKind[] contract.
+  // SAFETY: k8s watch returns K8sResourceCommon[]; the model guarantees DeploymentKind shape.
   const deployments = (clusterResources?.deployments?.data ??
     []) as DeploymentKind[];
   const deploymentsLoaded = clusterResources?.deployments?.loaded;

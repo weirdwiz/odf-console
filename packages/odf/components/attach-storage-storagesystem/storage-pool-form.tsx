@@ -40,7 +40,7 @@ const StoragePoolForm: React.FC<StoragePoolFormProps> = ({
   const [cephClusters, cephClustersLoaded, cephClustersLoadError] =
     useK8sWatchResource<CephClusterKind[]>(cephClusterResource);
 
-  // SAFETY: getCephClusterInNs( cephClusters, namespace ) comes from the owner of the CephClusterKind contract used at this boundary.
+  // SAFETY: getCephClusterInNs filters CephClusterKind items; the return is typed as the generic base.
   const cephCluster = getCephClusterInNs(
     cephClusters,
     namespace

@@ -9,7 +9,10 @@ import {
 } from '@odf/shared/hooks/custom-prometheus-poll';
 import useRefWidth from '@odf/shared/hooks/ref-width';
 import { humanizePercentage } from '@odf/shared/utils/humanize';
-import { PrometheusResponse } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  PrometheusResponse,
+  PrometheusEndpoint,
+} from '@openshift-console/dynamic-plugin-sdk';
 import {
   Chart,
   ChartAxis,
@@ -134,10 +137,9 @@ export const InfraHealthGraph: React.FC<InfraHealthGraphProps> = ({
     setZoomDomain(undefined);
     onZoomDomainChange?.(null);
   }, [onZoomDomainChange]);
-  // SAFETY: The receiving library accepts 'api/v1/query_range'; its published type does not expose this supported value.
   const [scoreResponse, scoreError, scoreLoading] = useCustomPrometheusPoll({
     query: HEALTH_SCORE_QUERY,
-    endpoint: 'api/v1/query_range' as any,
+    endpoint: PrometheusEndpoint.QUERY_RANGE,
     timespan: TWENTY_FOUR_HOURS,
     basePath: usePrometheusBasePath(),
   });

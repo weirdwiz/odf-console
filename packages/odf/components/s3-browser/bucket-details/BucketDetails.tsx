@@ -113,7 +113,7 @@ const S3BucketProperties: React.FC<{}> = ({}) => {
     [isVersioningEnabled, setIsVersioningChecked]
   );
 
-  // SAFETY: { mutate: versioningMutate, s3Client, bucketName, enableVersioning: ch comes from the owner of the SetVersioningModalModalProps contract used at this boundary.
+  // SAFETY: Object literal provides all SetVersioningModalModalProps fields; TS cannot verify through the launcher API.
   return (
     <div className="odf-m-pane__body">
       <SectionHeading text={t('Bucket properties')} />

@@ -29,18 +29,15 @@ const createdResource = ({ data }: { data: K8sResourceCommon }) =>
 describe('enableScaleEncryption', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (k8sCreate as jest.Mock).mockImplementation(createdResource);
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (k8sDelete as jest.Mock).mockResolvedValue(undefined);
+    jest.mocked(k8sCreate).mockImplementation(createdResource);
+    jest.mocked(k8sDelete).mockResolvedValue(undefined);
   });
 
   it('creates the encryption resources in dependency order', async () => {
     await enableScaleEncryption(input);
 
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     expect(
-      (k8sCreate as jest.Mock).mock.calls.map(([request]) => request.data)
+      jest.mocked(k8sCreate).mock.calls.map(([request]) => request.data)
     ).toEqual([
       expect.objectContaining({
         kind: 'ConfigMap',
@@ -66,8 +63,8 @@ describe('enableScaleEncryption', () => {
   });
 
   it('removes created dependencies when setup fails', async () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (k8sCreate as jest.Mock)
+    jest
+      .mocked(k8sCreate)
       .mockImplementationOnce(createdResource)
       .mockImplementationOnce(createdResource)
       .mockRejectedValueOnce(new Error('EncryptionConfig failed'));
@@ -76,11 +73,10 @@ describe('enableScaleEncryption', () => {
       'EncryptionConfig failed'
     );
 
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
     expect(
-      (k8sDelete as jest.Mock).mock.calls.map(
-        ([request]) => request.resource.metadata.name
-      )
+      jest
+        .mocked(k8sDelete)
+        .mock.calls.map(([request]) => request.resource.metadata.name)
     ).toEqual(['encryption-secret', 'encryption-config']);
   });
 });

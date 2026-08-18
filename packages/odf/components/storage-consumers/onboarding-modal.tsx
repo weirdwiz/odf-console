@@ -128,7 +128,7 @@ export const ClientOnBoardingModal: ClientOnBoardingModalProps = ({
   const secretName = storageConsumer.status?.onboardingTicketSecret?.name;
   const namespace = getNamespace(storageConsumer);
 
-  // SAFETY: SecretModel comes from the owner of the K8sKind contract used at this boundary.
+  // SAFETY: SecretModel is a K8sModel constant; k8sGet expects the compatible K8sKind type.
   const [secretResource, ,] = useK8sGet(
     SecretModel as K8sKind,
     secretName,

@@ -25,8 +25,7 @@ jest.spyOn(TestDependency3, 'useCustomTranslation').mockImplementation(() => ({
 }));
 
 const mockWatchClusters = <Overrides extends object>(overrides?: Overrides) => {
-  // SAFETY: The jest.Mock test value defines the members exercised by this test.
-  (useWatchStorageClusters as jest.Mock).mockReturnValue({
+  jest.mocked(useWatchStorageClusters).mockReturnValue({
     storageClusters: { data: [], loaded: true, loadError: null },
     flashSystemClusters: { data: [], loaded: true, loadError: null },
     remoteClusters: { data: [], loaded: true, loadError: null },
@@ -36,12 +35,9 @@ const mockWatchClusters = <Overrides extends object>(overrides?: Overrides) => {
 };
 
 const mockFileSystems = (fileSystems: FileSystemKind[] = []) => {
-  // SAFETY: The jest.Mock test value defines the members exercised by this test.
-  (useK8sWatchResource as jest.Mock).mockReturnValue([
-    fileSystems,
-    true,
-    undefined,
-  ]);
+  jest
+    .mocked(useK8sWatchResource)
+    .mockReturnValue([fileSystems, true, undefined]);
 };
 
 const lunGroup = (
@@ -146,7 +142,8 @@ const cnsaFilesystem = (
   return base;
 };
 
-// SAFETY: The StorageClusterKind test value defines the members exercised by this test.
+// SAFETY: Test fixture provides only metadata, spec.externalStorage, and status.phase
+// because ExternalSystemsCard reads no other StorageClusterKind fields.
 const externalCephCluster = (name: string, phase: string): StorageClusterKind =>
   ({
     metadata: { name, namespace: 'openshift-storage' },
@@ -173,8 +170,7 @@ const renderCard = () =>
 describe('ExternalSystemsCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useFlag as jest.Mock).mockReturnValue(true);
+    jest.mocked(useFlag).mockReturnValue(true);
     mockWatchClusters();
     mockFileSystems();
   });
@@ -193,8 +189,7 @@ describe('ExternalSystemsCard', () => {
       remoteClusters: { data: [], loaded: false, loadError: null },
       sanClusters: { data: [], loaded: false, loadError: null },
     });
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([[], false, undefined]);
+    jest.mocked(useK8sWatchResource).mockReturnValue([[], false, undefined]);
 
     renderCard();
     expect(
@@ -227,8 +222,9 @@ describe('ExternalSystemsCard', () => {
     const sanRow = screen
       .getByText('Storage Area Network LUN groups')
       .closest('dt');
-    // SAFETY: The HTMLElement test value defines the members exercised by this test.
-    const description = sanRow?.nextElementSibling as HTMLElement;
+    const description = sanRow?.nextElementSibling;
+    if (!(description instanceof HTMLElement))
+      throw new Error('expected HTMLElement sibling');
     expect(within(description).getAllByText('1')).toHaveLength(2);
   });
 

@@ -35,64 +35,48 @@ const remoteFileSystem = (name: string): FileSystemKind => ({
 
 describe('useIsSANSystemDeletable', () => {
   it('returns false while filesystems are loading', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([
-      undefined,
-      false,
-      null,
-    ]);
+    jest.mocked(useK8sWatchResource).mockReturnValue([undefined, false, null]);
 
     const { result } = renderHook(() => useIsSANSystemDeletable());
     expect(result.current).toBe(false);
   });
 
   it('returns false when the filesystem watch errors', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([
-      [],
-      true,
-      new Error('failed'),
-    ]);
+    jest
+      .mocked(useK8sWatchResource)
+      .mockReturnValue([[], true, new Error('failed')]);
 
     const { result } = renderHook(() => useIsSANSystemDeletable());
     expect(result.current).toBe(false);
   });
 
   it('returns false when SAN LUN groups exist', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([
-      [sanFileSystem('lun-group-1')],
-      true,
-      null,
-    ]);
+    jest
+      .mocked(useK8sWatchResource)
+      .mockReturnValue([[sanFileSystem('lun-group-1')], true, null]);
 
     const { result } = renderHook(() => useIsSANSystemDeletable());
     expect(result.current).toBe(false);
   });
 
   it('returns true when there are no SAN LUN groups', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([
-      [remoteFileSystem('remote-fs')],
-      true,
-      null,
-    ]);
+    jest
+      .mocked(useK8sWatchResource)
+      .mockReturnValue([[remoteFileSystem('remote-fs')], true, null]);
 
     const { result } = renderHook(() => useIsSANSystemDeletable());
     expect(result.current).toBe(true);
   });
 
   it('returns true when the filesystem list is empty', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([[], true, null]);
+    jest.mocked(useK8sWatchResource).mockReturnValue([[], true, null]);
 
     const { result } = renderHook(() => useIsSANSystemDeletable());
     expect(result.current).toBe(true);
   });
 
   it('does not throw when filesystems are undefined after load', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([undefined, true, null]);
+    jest.mocked(useK8sWatchResource).mockReturnValue([undefined, true, null]);
 
     const { result } = renderHook(() => useIsSANSystemDeletable());
     expect(result.current).toBe(true);

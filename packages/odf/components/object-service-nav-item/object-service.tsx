@@ -45,7 +45,7 @@ const ObjectServicePage: React.FC = () => {
   const title = t('Object Storage');
   const isAdmin = useFlag(ODF_ADMIN);
 
-  // SAFETY: isObjectServiceTab comes from the owner of the ExtensionTypeGuard<HorizontalNavTab> contract used at this boundary.
+  // SAFETY: The extension type guard is structurally compatible but uses a different generic signature.
   const [extensions, isLoaded, error] = useResolvedExtensions<HorizontalNavTab>(
     isObjectServiceTab as ExtensionTypeGuard<HorizontalNavTab>
   );
@@ -111,13 +111,13 @@ const ObjectServicePage: React.FC = () => {
       }
     };
 
-    // SAFETY: handleS3StorageEvent comes from the owner of the EventListener contract used at this boundary.
+    // SAFETY: addEventListener expects EventListener; this handler's signature matches but uses a narrower event type.
     window.addEventListener(
       ODF_S3_STORAGE_EVENT,
       handleS3StorageEvent as EventListener
     );
     return () => {
-      // SAFETY: handleS3StorageEvent comes from the owner of the EventListener contract used at this boundary.
+      // SAFETY: addEventListener expects EventListener; this handler's signature matches but uses a narrower event type.
       window.removeEventListener(
         ODF_S3_STORAGE_EVENT,
         handleS3StorageEvent as EventListener
@@ -179,7 +179,7 @@ const ObjectServicePage: React.FC = () => {
     location.pathname.includes(path)
   );
 
-  // SAFETY: convertObjectServiceTabToNav(filteredPages) contains only entries produced for the TabPage[] contract.
+  // SAFETY: Tab converter produces structurally compatible TabPage items; TS generic differs.
   return (
     <>
       {showNamespaceBar && <NamespaceBar />}

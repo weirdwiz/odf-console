@@ -16,14 +16,13 @@ export const useSafeFetch = () => {
     return () => ctrl.abort();
   }, []);
 
-  // SAFETY: controller.current.signal comes from the owner of the AbortSignal contract used at this boundary.
   return (props: SafeFetchProps) =>
     consoleFetchJSON(
       props.url,
       props.method || 'get',
       {
         ...(props.options || {}),
-        signal: controller.current.signal as AbortSignal,
+        signal: controller.current.signal,
       },
       props.timeout
     );

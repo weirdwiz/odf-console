@@ -84,7 +84,8 @@ export const getSwaggerPath = (
   followRef: boolean
 ): string[] => {
   const nextPath = [...currentPath, 'properties', name];
-  // SAFETY: _.get(allProperties, nextPath) comes from the owner of the SwaggerDefinition contract used at this boundary.
+  // SAFETY: _.get returns unknown for dynamic paths; swagger definitions
+  // nest SwaggerDefinition objects, so the cast is correct here.
   const definition = _.get(allProperties, nextPath) as SwaggerDefinition;
   if (!definition) {
     return null;
@@ -119,7 +120,8 @@ const findDefinition = (
     [rootPath]
   );
 
-  // SAFETY: _.get(swaggerDefinitions, path) comes from the owner of the SwaggerDefinition contract used at this boundary.
+  // SAFETY: _.get returns unknown for dynamic paths; swagger definitions
+  // values are always SwaggerDefinition objects.
   return path ? (_.get(swaggerDefinitions, path) as SwaggerDefinition) : null;
 };
 

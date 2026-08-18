@@ -206,7 +206,7 @@ const NonCurrentObjects: React.FC<StateAndDispatchProps> = ({
     let newRetention: number;
     switch (funcType) {
       case FuncType.ON_CHANGE: {
-        // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
+        // SAFETY: Event handler is attached to an <input> element; React types target as EventTarget.
         newRetention = Math.max(
           Math.min(
             Math.round(+(event?.target as HTMLInputElement)?.value) || 0,
@@ -426,7 +426,7 @@ const TransitionNonCurrentObjects: React.FC<StateAndDispatchProps> = ({
     let newRetention: number;
     switch (funcType) {
       case FuncType.ON_CHANGE: {
-        // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
+        // SAFETY: Event handler is attached to an <input> element; React types target as EventTarget.
         newRetention = Math.max(
           Math.min(
             Math.round(+(event?.target as HTMLInputElement)?.value) || 0,

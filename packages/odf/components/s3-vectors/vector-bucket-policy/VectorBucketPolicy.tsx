@@ -50,11 +50,11 @@ const VectorBucketPolicyContent: React.FC<VectorBucketPolicyContentProps> = ({
   const [edit, setEdit] = React.useState(false);
   const { s3VectorsClient } = React.useContext(S3VectorsContext);
   const { vectorBucketName } = useParams();
-  // SAFETY: s3VectorsClient.providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   const providerType = s3VectorsClient.providerType as S3ProviderType;
   const launcher = useModalWrapper();
 
-  // SAFETY: { triggerRefresh, title: t('Confirm delete vector bucket policy?'), de comes from the owner of the DeleteBucketPolicyModalProps contract used at this boundary.
+  // SAFETY: Object literal provides all DeleteBucketPolicyModalProps fields; TS cannot verify through the launcher API.
   const launchDeleteModal = () =>
     launcher(DeleteBucketPolicyModal, {
       extraProps: {
@@ -69,7 +69,7 @@ const VectorBucketPolicyContent: React.FC<VectorBucketPolicyContentProps> = ({
       isOpen: true,
     });
 
-  // SAFETY: { triggerRefresh, setSuccess, savePolicy: async () => { await s3Vector comes from the owner of the SaveBucketPolicyModalProps contract used at this boundary.
+  // SAFETY: Object literal provides all SaveBucketPolicyModalProps fields; TS cannot verify through the launcher API.
   const launchSaveModal = () =>
     launcher(SaveBucketPolicyModal, {
       extraProps: {

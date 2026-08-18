@@ -75,7 +75,7 @@ const RemoveRemoteClusterModal: React.FC<RemoveRemoteClusterModalProps> = ({
       }
 
       failureMessage = t('Failed to list remote clusters');
-      // SAFETY: (await k8sList({ model: RemoteClusterModel, queryParams: { ns: IBM_SCA contains only entries produced for the RemoteClusterKind[] contract.
+      // SAFETY: k8sList returns K8sResourceCommon[]; the model guarantees RemoteClusterKind shape.
       const remoteClusters = (await k8sList({
         model: RemoteClusterModel,
         queryParams: { ns: IBM_SCALE_NAMESPACE },
@@ -89,7 +89,7 @@ const RemoveRemoteClusterModal: React.FC<RemoveRemoteClusterModalProps> = ({
         let localCluster: ClusterKind | undefined;
 
         try {
-          // SAFETY: (await k8sGet({ model: ClusterModel, name: IBM_SCALE_LOCAL_CLUSTER_NAM comes from the owner of the ClusterKind contract used at this boundary.
+          // SAFETY: k8sGet returns K8sResourceCommon; the model guarantees ClusterKind shape.
           localCluster = (await k8sGet({
             model: ClusterModel,
             name: IBM_SCALE_LOCAL_CLUSTER_NAME,

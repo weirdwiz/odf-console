@@ -129,7 +129,7 @@ export const CorsFormContents: React.FC<
 
   const maxAge = state.maxAge;
 
-  // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
+  // SAFETY: Event handler is attached to an <input> element; React types target as EventTarget.
   return (
     <>
       <FormGroup

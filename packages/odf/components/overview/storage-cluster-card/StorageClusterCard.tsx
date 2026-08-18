@@ -35,6 +35,7 @@ import {
 import {
   HealthState,
   useK8sWatchResource,
+  PrometheusEndpoint,
 } from '@openshift-console/dynamic-plugin-sdk';
 import {
   ChartDonut,
@@ -97,19 +98,17 @@ export const StorageClusterCard: React.FC<CardProps> = ({ className }) => {
 
   const [totalCapacity, usedCapacity, capacityLoading, capacityLoadError] =
     useRawCapacity(clusterName);
-  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [cephResiliencyProgress, cephResiliencyProgressError] =
     useCustomPrometheusPoll({
       query: resiliencyProgressQuery(clusterName),
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 
-  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [objectResiliencyProgress, objectResiliencyProgressError] =
     useCustomPrometheusPoll({
       query: StatusCardQueries.MCG_REBUILD_PROGRESS_QUERY,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 

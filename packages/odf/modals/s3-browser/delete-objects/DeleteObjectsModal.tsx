@@ -54,7 +54,7 @@ type DeleteObjectsModalProps = {
   isVersioningEnabledOrSuspended: boolean;
 };
 
-// SAFETY: The receiving library accepts t; its published type does not expose this supported value.
+// SAFETY: react-i18next Trans component accepts TFunction but its prop type uses a narrower internal signature.
 const getTextInputLabel = (t: TFunction) => (
   <Trans t={t as any} values={{ delete: DELETE }}>
     <b>
@@ -145,10 +145,7 @@ type DeleteObjectsRowExtraProps = Pick<
 
 const DeleteObjectsTableRow: React.FC<
   RowComponentType<ObjectCrFormat, DeleteObjectsRowExtraProps>
-> = ({
-  row: object,
-  extraProps,
-}) => {
+> = ({ row: object, extraProps }) => {
   const { t } = useCustomTranslation();
 
   const { foldersPath, showVersioning } = extraProps;
@@ -258,7 +255,7 @@ const DeleteObjectsModal: React.FC<
         }
 
         deleteResponse.Deleted = successfullyDeletedObjectVersions;
-        // SAFETY: This empty DeleteObjectsCommandOutput accumulator receives only entries created by the reducer below.
+        // SAFETY: Empty fallback; the AWS SDK response may not include all DeleteObjectsCommandOutput optional fields.
         setDeleteResponse({
           selectedObjects: data,
           deleteResponse: deleteResponse || ({} as DeleteObjectsCommandOutput),
@@ -274,7 +271,7 @@ const DeleteObjectsModal: React.FC<
           Delete: { Objects: deleteObjectKeys },
         });
 
-        // SAFETY: This empty DeleteObjectsCommandOutput accumulator receives only entries created by the reducer below.
+        // SAFETY: Empty fallback; the AWS SDK response may not include all DeleteObjectsCommandOutput optional fields.
         setDeleteResponse({
           selectedObjects: data,
           deleteResponse: deleteResponse || ({} as DeleteObjectsCommandOutput),
@@ -292,7 +289,7 @@ const DeleteObjectsModal: React.FC<
     }
   };
 
-  // SAFETY: data contains only entries produced for the [] contract.
+  // SAFETY: The table component generic expects a narrower tuple; the source array is structurally compatible.
   return (
     <Modal
       title={getTitle(data, showVersioning, t)}

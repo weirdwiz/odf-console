@@ -24,28 +24,26 @@ jest
   .spyOn(TestDependency4, 'useCustomTranslation')
   .mockImplementation(() => ({ t: (key: string) => key }));
 
-// SAFETY: The NodeData test value defines the members exercised by this test.
 const makeNode = (
   name: string,
   labels: Record<string, string> = {
     'node-role.kubernetes.io/worker': '',
   }
-): NodeData =>
-  ({
-    apiVersion: 'v1',
-    kind: 'Node',
-    metadata: { name, uid: name, labels },
-    spec: {},
-    status: {
-      capacity: { cpu: '8', memory: '32Gi' },
-    },
-  }) as NodeData;
+): NodeData => ({
+  apiVersion: 'v1',
+  kind: 'Node',
+  metadata: { name, uid: name, labels },
+  spec: {},
+  status: {
+    capacity: { cpu: '8', memory: '32Gi' },
+  },
+  metrics: { memory: '' },
+});
 
 describe('AddLocalScaleNodesModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useKernelDevelEligibility as jest.Mock).mockReturnValue({
+    jest.mocked(useKernelDevelEligibility).mockReturnValue({
       areSelectedNodesEligible: false,
       isLoading: false,
       error: '',
@@ -70,8 +68,7 @@ describe('AddLocalScaleNodesModal', () => {
       { key: 'dedicated', value: 'other', effect: 'NoSchedule' },
     ];
 
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useNodesData as jest.Mock).mockReturnValue([
+    jest.mocked(useNodesData).mockReturnValue([
       [
         makeNode('worker-candidate'),
         cordonedWorker,
@@ -102,21 +99,17 @@ describe('AddLocalScaleNodesModal', () => {
   });
 
   it('assigns an eligible expansion candidate', async () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useNodesData as jest.Mock).mockReturnValue([
-      [makeNode('worker-candidate')],
-      true,
-      null,
-    ]);
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useKernelDevelEligibility as jest.Mock).mockImplementation(
-      (selectedNodes) => ({
+    jest
+      .mocked(useNodesData)
+      .mockReturnValue([[makeNode('worker-candidate')], true, null]);
+    jest
+      .mocked(useKernelDevelEligibility)
+      .mockImplementation((selectedNodes) => ({
         areSelectedNodesEligible: selectedNodes.length > 0,
         isLoading: false,
         error: '',
         nodesWithoutKernelDevel: [],
-      })
-    );
+      }));
     mockPatchNode.mockResolvedValue({});
     const closeModal = openModal();
 
@@ -143,21 +136,21 @@ describe('AddLocalScaleNodesModal', () => {
   });
 
   it('keeps the modal open and shows the patch error', async () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useNodesData as jest.Mock).mockReturnValue([
-      [makeNode('worker-one'), makeNode('worker-two')],
-      true,
-      null,
-    ]);
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useKernelDevelEligibility as jest.Mock).mockImplementation(
-      (selectedNodes) => ({
+    jest
+      .mocked(useNodesData)
+      .mockReturnValue([
+        [makeNode('worker-one'), makeNode('worker-two')],
+        true,
+        null,
+      ]);
+    jest
+      .mocked(useKernelDevelEligibility)
+      .mockImplementation((selectedNodes) => ({
         areSelectedNodesEligible: selectedNodes.length > 0,
         isLoading: false,
         error: '',
         nodesWithoutKernelDevel: [],
-      })
-    );
+      }));
     mockPatchNode.mockRejectedValue(new Error('patch failed'));
     const closeModal = openModal();
 

@@ -150,7 +150,7 @@ export const LocalVolumeSetBody: React.FC<LocalVolumeSetBodyProps> = ({
 
   const onRowSelected = React.useCallback(
     (selectedNodes: NodeData[]) => {
-      // SAFETY: selectedNodes as unknown contains only entries produced for the NodeKind[] contract.
+      // SAFETY: WizardNodeState[] shares NodeKind's K8sResourceCommon base; the structural overlap is sufficient.
       dispatch({
         type: 'setLvsSelectNodes',
         value: selectedNodes as NodeKind[],
@@ -161,7 +161,7 @@ export const LocalVolumeSetBody: React.FC<LocalVolumeSetBodyProps> = ({
 
   const diskTypeValidationError = getDiskTypeValidationError(state, t);
 
-  // SAFETY: state.lvsAllNodes as unknown contains only entries produced for the NodeData[] contract.
+  // SAFETY: WizardNodeState[] shares NodeData's K8sResourceCommon base; the structural overlap is sufficient.
   return (
     <>
       <FormGroup

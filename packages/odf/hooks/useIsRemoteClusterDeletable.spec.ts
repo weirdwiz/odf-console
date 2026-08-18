@@ -25,12 +25,7 @@ const remoteFileSystem = (
 
 describe('useIsRemoteClusterDeletable', () => {
   it('returns false while filesystems are loading', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([
-      undefined,
-      false,
-      null,
-    ]);
+    jest.mocked(useK8sWatchResource).mockReturnValue([undefined, false, null]);
 
     const { result } = renderHook(() =>
       useIsRemoteClusterDeletable('remote-cluster')
@@ -40,12 +35,9 @@ describe('useIsRemoteClusterDeletable', () => {
   });
 
   it('returns false when the filesystem watch errors', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([
-      [],
-      true,
-      new Error('failed'),
-    ]);
+    jest
+      .mocked(useK8sWatchResource)
+      .mockReturnValue([[], true, new Error('failed')]);
 
     const { result } = renderHook(() =>
       useIsRemoteClusterDeletable('remote-cluster')
@@ -55,8 +47,7 @@ describe('useIsRemoteClusterDeletable', () => {
   });
 
   it('returns false when the remote cluster name is unavailable', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([[], true, null]);
+    jest.mocked(useK8sWatchResource).mockReturnValue([[], true, null]);
 
     const { result } = renderHook(() => useIsRemoteClusterDeletable(''));
 
@@ -64,12 +55,13 @@ describe('useIsRemoteClusterDeletable', () => {
   });
 
   it('returns false when filesystems reference the remote cluster', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([
-      [remoteFileSystem('remote-fs', 'remote-cluster')],
-      true,
-      null,
-    ]);
+    jest
+      .mocked(useK8sWatchResource)
+      .mockReturnValue([
+        [remoteFileSystem('remote-fs', 'remote-cluster')],
+        true,
+        null,
+      ]);
 
     const { result } = renderHook(() =>
       useIsRemoteClusterDeletable('remote-cluster')
@@ -79,12 +71,13 @@ describe('useIsRemoteClusterDeletable', () => {
   });
 
   it('returns true when filesystems reference a different remote cluster', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([
-      [remoteFileSystem('remote-fs', 'other-cluster')],
-      true,
-      null,
-    ]);
+    jest
+      .mocked(useK8sWatchResource)
+      .mockReturnValue([
+        [remoteFileSystem('remote-fs', 'other-cluster')],
+        true,
+        null,
+      ]);
 
     const { result } = renderHook(() =>
       useIsRemoteClusterDeletable('remote-cluster')
@@ -94,8 +87,7 @@ describe('useIsRemoteClusterDeletable', () => {
   });
 
   it('returns true when the filesystem list is empty', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([[], true, null]);
+    jest.mocked(useK8sWatchResource).mockReturnValue([[], true, null]);
 
     const { result } = renderHook(() =>
       useIsRemoteClusterDeletable('remote-cluster')

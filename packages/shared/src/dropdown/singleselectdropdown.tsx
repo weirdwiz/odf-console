@@ -35,7 +35,8 @@ export const SingleSelectDropdown: React.FC<SingleSelectDropdownProps> = ({
 
   React.useEffect(() => {
     if (selectedKey) {
-      // SAFETY: React.Children.toArray(selectOptions).find( (opt: any) => opt.props?.v comes from the owner of the React.ReactElement | undefined contract used at this boundary.
+      // SAFETY: React.Children.toArray returns ReactNode[]; selectOptions
+      // are JSX elements, so the any cast lets us read .props.value.
       const matchedOption = React.Children.toArray(selectOptions).find(
         (opt: any) => opt.props?.value === selectedKey
       ) as React.ReactElement | undefined;
@@ -51,8 +52,9 @@ export const SingleSelectDropdown: React.FC<SingleSelectDropdownProps> = ({
   }, [selectedKey, selectOptions]);
 
   React.useEffect(() => {
-    let derivedValidated = validated === 'error' ? 'danger' : validated;
-    // SAFETY: derivedValidated comes from the owner of the MenuToggleStatus contract used at this boundary.
+    const derivedValidated = validated === 'error' ? 'danger' : validated;
+    // SAFETY: After mapping 'error' to 'danger' and excluding 'default',
+    // the remaining values ('danger'|'success'|'warning') match MenuToggleStatus.
     setStatus(
       derivedValidated && derivedValidated !== 'default'
         ? (derivedValidated as MenuToggleStatus)
@@ -143,7 +145,8 @@ export const SingleSelectDropdown: React.FC<SingleSelectDropdownProps> = ({
 
       const stringValue = String(value);
 
-      // SAFETY: React.Children.toArray(selectOptions).find( (opt: any) => opt.props?.v comes from the owner of the React.ReactElement | undefined contract used at this boundary.
+      // SAFETY: React.Children.toArray returns ReactNode[]; selectOptions
+      // are JSX elements, so the any cast lets us read .props.value.
       const matchedOption = React.Children.toArray(selectOptions).find(
         (opt: any) => opt.props?.value === stringValue
       ) as React.ReactElement | undefined;

@@ -19,6 +19,13 @@ const makeDevice = (
   ...overrides,
 });
 
+const makeLocalDisk = (name: string): LocalDiskKind => ({
+  apiVersion: 'scale.spectrum.ibm.com/v1beta1',
+  kind: 'LocalDisk',
+  metadata: { name },
+  spec: { device: '', node: '' },
+});
+
 describe('getDiscoveredDeviceKey', () => {
   it('prefers WWN when present', () => {
     expect(
@@ -138,12 +145,7 @@ describe('filterUsedDiscoveredDevices', () => {
   it('filters SAN devices already used as LocalDisks', () => {
     const wwn = '0x6001405c595842b2d484d0bb11e42179';
     const devices = [makeDevice({ WWN: wwn }), makeDevice({ WWN: '0xother' })];
-    // SAFETY: The LocalDiskKind test value defines the members exercised by this test.
-    const localDisks = [
-      {
-        metadata: { name: getLocalDiskNameFromDeviceKey(wwn) },
-      } as LocalDiskKind,
-    ];
+    const localDisks = [makeLocalDisk(getLocalDiskNameFromDeviceKey(wwn))];
 
     expect(filterUsedDiscoveredDevices(devices, localDisks)).toEqual([
       makeDevice({ WWN: '0xother' }),
@@ -164,12 +166,7 @@ describe('filterUsedDiscoveredDevices', () => {
         path: '/dev/dasdb',
       }),
     ];
-    // SAFETY: The LocalDiskKind test value defines the members exercised by this test.
-    const localDisks = [
-      {
-        metadata: { name: getLocalDiskNameFromDeviceKey(dasdUID) },
-      } as LocalDiskKind,
-    ];
+    const localDisks = [makeLocalDisk(getLocalDiskNameFromDeviceKey(dasdUID))];
 
     expect(filterUsedDiscoveredDevices(devices, localDisks)).toEqual([
       makeDevice({
@@ -186,12 +183,7 @@ describe('filterUsedDiscoveredDevices', () => {
       makeDevice({ WWN: '', deviceID: '', path }),
       makeDevice({ WWN: '', deviceID: '', path: '/dev/dasdb' }),
     ];
-    // SAFETY: The LocalDiskKind test value defines the members exercised by this test.
-    const localDisks = [
-      {
-        metadata: { name: getLocalDiskNameFromDeviceKey(path) },
-      } as LocalDiskKind,
-    ];
+    const localDisks = [makeLocalDisk(getLocalDiskNameFromDeviceKey(path))];
 
     expect(filterUsedDiscoveredDevices(devices, localDisks)).toEqual([
       makeDevice({ WWN: '', deviceID: '', path: '/dev/dasdb' }),
@@ -208,12 +200,7 @@ describe('filterUsedDiscoveredDevices', () => {
         path: '/dev/sdc',
       }),
     ];
-    // SAFETY: The LocalDiskKind test value defines the members exercised by this test.
-    const localDisks = [
-      {
-        metadata: { name: getLocalDiskNameFromDeviceKey(byId) },
-      } as LocalDiskKind,
-    ];
+    const localDisks = [makeLocalDisk(getLocalDiskNameFromDeviceKey(byId))];
 
     expect(filterUsedDiscoveredDevices(devices, localDisks)).toEqual([
       makeDevice({
@@ -231,13 +218,8 @@ describe('filterUsedDiscoveredDevices', () => {
       makeDevice({ WWN: '', deviceID: '', path: underscorePath }),
       makeDevice({ WWN: '', deviceID: '', path: hyphenPath }),
     ];
-    // SAFETY: The LocalDiskKind test value defines the members exercised by this test.
     const localDisks = [
-      {
-        metadata: {
-          name: getLocalDiskNameFromDeviceKey(underscorePath),
-        },
-      } as LocalDiskKind,
+      makeLocalDisk(getLocalDiskNameFromDeviceKey(underscorePath)),
     ];
 
     expect(filterUsedDiscoveredDevices(devices, localDisks)).toEqual([

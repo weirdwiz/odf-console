@@ -100,7 +100,6 @@ export const UtilizationItem: React.FC<UtilizationItemProps> = React.memo(
         />
       );
 
-    // SAFETY: humanizeValue comes from the owner of the Humanize contract used at this boundary.
     const chart = (
       <AreaChart
         ariaChartLinkLabel={t('View {{title}} metrics in query browser', {
@@ -110,7 +109,8 @@ export const UtilizationItem: React.FC<UtilizationItemProps> = React.memo(
         data={data}
         loading={!error && isLoading}
         query={!disableGraphLink && query}
-        // Todo(bipuladh): Make humanize type Humanize once unit.js is converted
+        // SAFETY: humanizeValue is typed as Function (legacy TODO in
+        // UtilizationItemProps); AreaChart expects Humanize.
         humanize={humanizeValue as Humanize}
         byteDataType={byteDataType}
         chartStyle={chartStyle}

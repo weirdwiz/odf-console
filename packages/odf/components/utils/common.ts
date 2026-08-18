@@ -353,7 +353,7 @@ export const checkError = (
 
   // Check IP Compatibility
   const endpoints = _.find(parsedData, { name: 'rook-ceph-mon-endpoints' });
-  // SAFETY: The receiving library accepts endpoints; its published type does not expose this supported value.
+  // SAFETY: The endpoint parameter is structurally compatible but the generic type differs.
   const ipAddr = (endpoints as any).data?.data
     ?.split('=')?.[1]
     ?.split(':')?.[0];
@@ -715,7 +715,7 @@ const getNetworkField = (
     ?.map((cidr) => cidr?.trim())
     ?.filter(Boolean);
   if (networkType === NetworkType.HOST || networkType === NetworkType.NIC) {
-    // SAFETY: { network: { connections: { encryption: { enabled: isTransitEncryption comes from the owner of the StorageClusterKind['spec']['network'] contract used at this boundary.
+    // SAFETY: Object literal matches StorageClusterKind spec.network shape; TS needs partial assertion for the deep structure.
     return {
       network: {
         connections: {

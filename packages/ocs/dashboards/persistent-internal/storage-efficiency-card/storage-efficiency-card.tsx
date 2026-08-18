@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useGetInternalClusterDetails } from '@odf/core/redux/utils';
-import { EfficiencyItemBody } from '@odf/shared/dashboards/storage-efficiency/storage-efficiency-card-item';
 import { PrometheusEndpoint } from '@odf/shared/constants';
+import { EfficiencyItemBody } from '@odf/shared/dashboards/storage-efficiency/storage-efficiency-card-item';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,

@@ -253,7 +253,7 @@ const useScaleSystemFormValidation = (
     },
   });
 
-  // SAFETY: Object.keys( scaleEncryptionDefaultValues ) contains only entries produced for the (keyof ScaleEncryptionFormData)[] contract.
+  // SAFETY: Object.keys returns string[]; the object keys match keyof ScaleEncryptionFormData.
   const encryptionFieldNames = Object.keys(
     scaleEncryptionDefaultValues
   ) as (keyof ScaleEncryptionFormData)[];

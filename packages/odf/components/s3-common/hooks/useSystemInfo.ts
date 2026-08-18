@@ -95,7 +95,7 @@ export const useSystemInfo = (): UseSystemInfoResult => {
   const swrConvertedData = React.useMemo(() => {
     if (isAdminOrClientCluster) return null;
 
-    // SAFETY: This empty SystemInfoData accumulator receives only entries created by the reducer below.
+    // SAFETY: Empty accumulator; the SWR callback populates all required SystemInfoData fields.
     return Object.entries(swrData?.clusterNamespaces || {}).reduce(
       (acc, [namespace, info]) => {
         acc[namespace] = {

@@ -34,7 +34,10 @@ import {
   resourcePathFromModel,
   getInfrastructurePlatform,
 } from '@odf/shared/utils';
-import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  useK8sWatchResource,
+  PrometheusEndpoint,
+} from '@openshift-console/dynamic-plugin-sdk';
 import {
   HealthItem,
   ResourceInventoryItem,
@@ -73,11 +76,10 @@ export const StorageClusterDetails: React.FC<StorageClusterDetailsProps> = ({
       ? getInfrastructurePlatform(infrastructure)
       : DASH;
 
-  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [resiliencyProgress, resiliencyProgressError] = useCustomPrometheusPoll(
     {
       query: resiliencyProgressQuery(ocsName),
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     }
   );
@@ -108,7 +110,7 @@ export const StorageClusterDetails: React.FC<StorageClusterDetailsProps> = ({
   const storageLabel = cephStorageLabel(odfNamespace);
   const ocsNodesHref = `/search?kind=${NodeModel.kind}&q=${storageLabel}`;
 
-  // SAFETY: The receiving library accepts NodeModel; its published type does not expose this supported value.
+  // SAFETY: The function expects K8sKind; NodeModel is a K8sModel constant with a compatible shape.
   return (
     <div className="odf-m-pane__body">
       <SectionHeading text={t('Cluster details')} />

@@ -88,7 +88,7 @@ const ObjectSizeFilter: React.FC<StateAndDispatchProps> = ({
     let newSize: number;
     switch (funcType) {
       case FuncType.ON_CHANGE: {
-        // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
+        // SAFETY: Event handler is attached to an <input> element; React types target as EventTarget.
         newSize = Math.max(+(event?.target as HTMLInputElement)?.value || 0, 0);
         break;
       }
@@ -459,7 +459,7 @@ export const GeneralConfigAndFilters: React.FC<
   const [invalidName, emptyName, alreadyUsedName, exceedingLengthName] =
     isInvalidName(state, existingRules, isEdit, editingRuleName);
 
-  // SAFETY: (event.target as HTMLInputElement).value comes from the owner of the RuleScope contract used at this boundary.
+  // SAFETY: Event handler is attached to an input with RuleScope values; React types target generically.
   return (
     <>
       <Content className="pf-v6-u-mb-lg">

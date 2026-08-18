@@ -9,21 +9,19 @@ jest
   .spyOn(TestDependency1, 'useK8sWatchResources')
   .mockImplementation(jest.fn());
 
-// SAFETY: The WizardNodeState test value defines the members exercised by this test.
-const makeNode = (name: string): WizardNodeState =>
-  ({
-    name,
-    hostName: name,
-    cpu: '4',
-    memory: '16Gi',
-    zone: 'us-east-1a',
-    rack: '',
-    uid: name,
-    roles: ['worker'],
-    labels: {},
-    taints: [],
-    architecture: 'amd64',
-  }) as WizardNodeState;
+const makeNode = (name: string): WizardNodeState => ({
+  name,
+  hostName: name,
+  cpu: '4',
+  memory: '16Gi',
+  zone: 'us-east-1a',
+  rack: '',
+  uid: name,
+  roles: ['worker'],
+  labels: {},
+  taints: [],
+  architecture: 'amd64',
+});
 
 type WatchResourceMock<T> = {
   data?: T[];
@@ -40,8 +38,7 @@ const mockWatchResources = ({
   machineConfigNodes = {},
   machineConfigs = {},
 }: WatchResourcesMock = {}) => {
-  // SAFETY: The jest.Mock test value defines the members exercised by this test.
-  (useK8sWatchResources as jest.Mock).mockReturnValue({
+  jest.mocked(useK8sWatchResources).mockReturnValue({
     machineConfigNodes: {
       data: machineConfigNodes.data || [],
       loaded: machineConfigNodes.loaded ?? true,

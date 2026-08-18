@@ -82,7 +82,8 @@ export const ChartLegendTooltipContent: React.FunctionComponent<
   // Returns x position of flyout
   const getX = () => {
     if (!(center || flyoutWidth || width)) {
-      // SAFETY: The receiving library accepts rest; its published type does not expose this supported value.
+      // SAFETY: PF ChartLegendTooltipContent passes x/y via rest props,
+      // but the public type does not declare them.
       const x = (rest as any).x;
       return x ? x : undefined;
     }
@@ -98,7 +99,8 @@ export const ChartLegendTooltipContent: React.FunctionComponent<
   // Returns y position
   const getY = () => {
     if (!(center || flyoutHeight || height)) {
-      // SAFETY: The receiving library accepts rest; its published type does not expose this supported value.
+      // SAFETY: PF ChartLegendTooltipContent passes x/y via rest props,
+      // but the public type does not declare them.
       const y = (rest as any).y;
       return y ? y : undefined;
     }
@@ -219,9 +221,12 @@ export const ChartLegendTooltipLabel: React.FunctionComponent<
       : applyDefaultStyle(styles);
   };
 
-  // SAFETY: The receiving library accepts index; its published type does not expose this supported value.
+  // SAFETY: PF renders ChartLegendTooltipLabel with a numeric index;
+  // the public type widens it to string | number.
   const label =
-    legendData && legendData.length ? legendData[index as any].name : undefined;
+    legendData && legendData.length
+      ? legendData[index as number].name
+      : undefined;
   return (
     <ChartLabel
       style={getStyle(style)}
@@ -280,7 +285,6 @@ export const ChartLegendTooltip: React.FunctionComponent<
   const pointerLength = theme?.tooltip
     ? Helpers.evaluateProp(theme.tooltip.pointerLength, props)
     : 10;
-  // SAFETY: getLegendTooltipVisibleText({ activePoints, legendData, text, }) contains only entries produced for the any[] contract.
   const legendTooltipProps = {
     legendData: getLegendTooltipVisibleData({
       activePoints,
@@ -291,6 +295,8 @@ export const ChartLegendTooltip: React.FunctionComponent<
     legendProps: getLegendTooltipDataProps(
       labelComponent.props.legendComponent
     ),
+    // SAFETY: getLegendTooltipVisibleText returns string[];
+    // getLegendTooltipSize expects any[], so the cast widens it.
     text: getLegendTooltipVisibleText({
       activePoints,
       legendData,

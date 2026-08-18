@@ -40,7 +40,8 @@ export const Timestamp = (props: TimestampProps) => {
     return <div className="co-timestamp">-</div>;
   }
 
-  // SAFETY: props.timestamp comes from the owner of the number contract used at this boundary.
+  // SAFETY: When isUnix is true, callers pass a numeric Unix epoch.
+  // TS cannot narrow timestamp via the separate isUnix boolean flag.
   const mdate = props.isUnix
     ? new Date((props.timestamp as number) * 1000)
     : new Date(props.timestamp);

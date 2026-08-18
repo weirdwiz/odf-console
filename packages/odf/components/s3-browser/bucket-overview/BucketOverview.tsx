@@ -73,7 +73,7 @@ const getBucketActionsItems = (
     React.SetStateAction<EmptyBucketResponse>
   >
 ): IAction[] => {
-  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   const providerType = s3Client.providerType as S3ProviderType;
   return [
     {
@@ -337,7 +337,7 @@ const BucketOverviewContent: React.FC<BucketOverviewContentProps> = ({
     [fresh, triggerRefresh, noobaaObjectBucket]
   );
 
-  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   const providerType = s3Client.providerType as S3ProviderType;
 
   return (

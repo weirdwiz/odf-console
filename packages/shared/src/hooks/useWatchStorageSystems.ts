@@ -89,7 +89,8 @@ export const useWatchStorageSystems = (
     daemons,
   } = useWatchStorageClusters();
 
-  // SAFETY: daemons?.data contains only entries produced for the DaemonKind[] contract.
+  // SAFETY: useK8sWatchResource returns K8sResourceCommon[]; the watch
+  // config targets the Daemon CRD, so data is DaemonKind[] at runtime.
   const sanClusterName = (daemons?.data as DaemonKind[])?.[0]?.status
     ?.clusterName;
 

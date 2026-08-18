@@ -12,7 +12,8 @@ export const resolveResourceUntilDeployment = (
     return null;
   }
   if (owner.kind === DeploymentModel.kind) {
-    // SAFETY: owner comes from the owner of the DeploymentKind contract used at this boundary.
+    // SAFETY: owner.kind === DeploymentModel.kind ('Deployment') confirms the
+    // resource is a Deployment; TS cannot narrow K8sResourceCommon via .kind.
     return owner as DeploymentKind;
   } else {
     return resolveResourceUntilDeployment(

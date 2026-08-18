@@ -95,11 +95,7 @@ const EmptyRowMessage: React.FC = () => {
 
 const VectorIndexTableRow: React.FC<
   RowComponentType<K8sResourceCommon, RowExtraPropsType>
-> = ({
-  row: indexRow,
-  rowIndex,
-  extraProps,
-}) => {
+> = ({ row: indexRow, rowIndex, extraProps }) => {
   const { t } = useCustomTranslation();
   const columnNames = getColumnNames(t);
   const {
@@ -165,10 +161,10 @@ export const VectorIndexesListTable: React.FC<VectorIndexesListTableProps> = ({
 }) => {
   const { t } = useCustomTranslation();
   const launcher = useModalWrapper();
-  // SAFETY: s3VectorsClient.providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   const providerType = s3VectorsClient.providerType as S3ProviderType;
 
-  // SAFETY: allVectorIndexes contains only entries produced for the [] contract.
+  // SAFETY: The table component generic expects a narrower tuple; the source array is structurally compatible.
   return (
     <ComposableTable
       rows={filteredVectorIndexes ?? []}

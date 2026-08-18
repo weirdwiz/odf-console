@@ -48,7 +48,7 @@ const getNextMarkers = (
       }
     : null;
 
-// SAFETY: response comes from the owner of the ListVectorBucketsCommandOutput contract used at this boundary.
+// SAFETY: The S3 vectors API returns ListVectorBucketsCommandOutput; SWR types the response generically.
 const getNextContinuationToken = (
   response: ListCommandOutput,
   containsNextContinuation = true,
@@ -75,7 +75,7 @@ const continuationTokensSetter = <T extends ListCommandOutput>(
   setContinuationTokens((oldTokens) => {
     const newTokens = _.cloneDeep(oldTokens);
     if (isNext) {
-      // SAFETY: The receiving library accepts newTokens.current; its published type does not expose this supported value.
+      // SAFETY: useRef current value matches the expected type; TS generic on useRef prevents inference.
       newTokens.previous.push(newTokens.current as any);
       newTokens.current = newTokens.next;
     } else {
@@ -138,7 +138,7 @@ export const continuationTokensRefresher = async <T extends ListCommandOutput>(
 ) => {
   try {
     const response: T = await trigger();
-    // SAFETY: { previous: [''], current: '', next: getNextContinuationToken( respons comes from the owner of the ContinuationTokens contract used at this boundary.
+    // SAFETY: Object literal provides all ContinuationTokens fields; TS cannot verify the shape from the spread.
     containsNextPageToken
       ? setContinuationTokens({
           previous: [''],

@@ -132,12 +132,12 @@ const createClientFromEndpointConfig = (params: CreateClientParams) => {
     };
     const client = S3_CLIENT_MAP[type](mapProps);
     if (!skipSignatureCalculation) {
-      // SAFETY: client.middlewareStack comes from the owner of the S3Commands['middlewareStack'] contract used at this boundary.
+      // SAFETY: S3Client.middlewareStack uses internal SDK type; public S3Commands subclass exposes a compatible shape.
       (client.middlewareStack as S3Commands['middlewareStack']).add(
         buildMiddleware,
         { step: 'build' }
       );
-      // SAFETY: client.middlewareStack comes from the owner of the S3Commands['middlewareStack'] contract used at this boundary.
+      // SAFETY: S3Client.middlewareStack uses internal SDK type; public S3Commands subclass exposes a compatible shape.
       (client.middlewareStack as S3Commands['middlewareStack']).add(
         finalizeMiddleware,
         { step: 'finalizeRequest' }

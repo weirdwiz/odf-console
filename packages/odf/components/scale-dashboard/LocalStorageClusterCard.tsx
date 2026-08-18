@@ -77,17 +77,17 @@ const LocalStorageClusterCard: React.FC = () => {
     encryptionConfig: EncryptionConfigKind;
   }>(watchResources);
 
-  // SAFETY: resources.cluster?.data comes from the owner of the ClusterKind contract used at this boundary.
+  // SAFETY: k8s watch returns K8sResourceCommon; the model guarantees ClusterKind shape.
   const cluster = resources.cluster?.data as ClusterKind;
   const clusterLoaded = resources.cluster?.loaded;
   const clusterLoadError = resources.cluster?.loadError;
 
-  // SAFETY: (resources.nodes?.data ?? []) contains only entries produced for the NodeKind[] contract.
+  // SAFETY: k8s watch returns K8sResourceCommon[]; the model guarantees NodeKind shape.
   const nodes = (resources.nodes?.data ?? []) as NodeKind[];
   const nodesLoaded = resources.nodes?.loaded;
   const nodesLoadError = resources.nodes?.loadError;
 
-  // SAFETY: resources.encryptionConfig ?.data comes from the owner of the EncryptionConfigKind contract used at this boundary.
+  // SAFETY: k8s watch returns K8sResourceCommon; the model guarantees EncryptionConfigKind shape.
   const encryptionConfig = resources.encryptionConfig
     ?.data as EncryptionConfigKind;
   const encryptionConfigLoaded = resources.encryptionConfig?.loaded;
@@ -108,7 +108,7 @@ const LocalStorageClusterCard: React.FC = () => {
   const openEncryptionConfig = () =>
     launchModal(EncryptionConfigModal, { isOpen: true });
 
-  // SAFETY: The receiving library accepts NodeModel; its published type does not expose this supported value.
+  // SAFETY: The function expects K8sKind; NodeModel is a K8sModel constant with a compatible shape.
   return (
     <Card>
       <CardHeader>

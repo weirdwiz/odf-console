@@ -4,7 +4,7 @@ import * as TestDependency2 from '@odf/shared/useCustomTranslationHook';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
-import type { Control, FieldValues } from 'react-hook-form';
+import type { FieldValues } from 'react-hook-form';
 import { ExternalRegistryFormSection } from './ExternalRegistryFormSection';
 
 jest
@@ -84,7 +84,7 @@ const fieldRequirements = {
 const FormWrapper: React.FC<{
   showImageRegistryFields: boolean;
 }> = ({ showImageRegistryFields }) => {
-  const methods = useForm({
+  const methods = useForm<FieldValues>({
     defaultValues: {
       imageRegistryUrl: '',
       imageRepositoryName: '',
@@ -93,11 +93,10 @@ const FormWrapper: React.FC<{
       privateKeySecret: '',
     },
   });
-  // SAFETY: The Control<FieldValues> test value defines the members exercised by this test.
   return (
     <FormProvider {...methods}>
       <ExternalRegistryFormSection
-        control={methods.control as Control<FieldValues>}
+        control={methods.control}
         fieldRequirements={fieldRequirements}
         showImageRegistryFields={showImageRegistryFields}
       />
@@ -182,9 +181,9 @@ describe('ExternalRegistryFormSection', () => {
 
     const FormWrapperWithPayloadTest: React.FC<{
       showImageRegistryFields: boolean;
-      defaultValues?: any;
+      defaultValues?: FieldValues;
     }> = ({ showImageRegistryFields, defaultValues }) => {
-      const methods = useForm({
+      const methods = useForm<FieldValues>({
         defaultValues: defaultValues || {
           imageRegistryUrl: '',
           imageRepositoryName: '',
@@ -199,11 +198,10 @@ describe('ExternalRegistryFormSection', () => {
         getValuesRef = methods.getValues;
       });
 
-      // SAFETY: The Control<FieldValues> test value defines the members exercised by this test.
       return (
         <FormProvider {...methods}>
           <ExternalRegistryFormSection
-            control={methods.control as Control<FieldValues>}
+            control={methods.control}
             fieldRequirements={fieldRequirements}
             showImageRegistryFields={showImageRegistryFields}
           />

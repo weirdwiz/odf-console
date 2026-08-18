@@ -37,7 +37,8 @@ export const Conditions: React.FC<ConditionsProps> = ({
     }
   };
 
-  // SAFETY: conditions contains only entries produced for the Array<K8sResourceCondition | ClusterServiceVersionCondition> contract.
+  // SAFETY: The prop type is a union of two condition arrays; the cast
+  // unifies them so both K8sResource and CSV fields are accessible in map.
   const rows = (
     conditions as Array<K8sResourceCondition | ClusterServiceVersionCondition>
   )?.map?.(

@@ -5,9 +5,11 @@ import i18n from 'i18next';
 import { isString } from 'lodash-es';
 import { initReactI18next } from 'react-i18next';
 
-// SAFETY: Node's TextEncoder implements the Web TextEncoder API used by the tests.
+// SAFETY: Node's util.TextEncoder is API-compatible with the web
+// TextEncoder, but its type signature differs slightly.
 global.TextEncoder = TextEncoder as typeof global.TextEncoder;
-// SAFETY: Node's TextDecoder implements the Web TextDecoder API used by the tests.
+// SAFETY: Node's util.TextDecoder is API-compatible with the web
+// TextDecoder, but its type signature differs slightly.
 global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 
 configure({ testIdAttribute: 'data-test-id' });

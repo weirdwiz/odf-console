@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { getRangeVectorStats } from '@odf/shared/charts';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   useCustomPrometheusPoll,
   usePrometheusBasePath,
@@ -23,19 +24,17 @@ export const PrometheusMultilineUtilizationItem: React.FC<
 
   const [queryA, queryB] = queries;
 
-  // SAFETY: The receiving library accepts 'api/v1/query_range'; its published type does not expose this supported value.
   const [firstMetric, firstMetricError, firstMetricLoading] =
     useCustomPrometheusPoll({
       query: queryA.query,
-      endpoint: 'api/v1/query_range' as any,
+      endpoint: PrometheusEndpoint.QUERY_RANGE,
       timespan: duration,
       basePath: usePrometheusBasePath(),
     });
-  // SAFETY: The receiving library accepts 'api/v1/query_range'; its published type does not expose this supported value.
   const [secondMetric, secondMetricError, secondMetricLoading] =
     useCustomPrometheusPoll({
       query: queryB?.query,
-      endpoint: 'api/v1/query_range' as any,
+      endpoint: PrometheusEndpoint.QUERY_RANGE,
       timespan: duration,
       basePath: usePrometheusBasePath(),
     });

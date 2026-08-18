@@ -130,7 +130,8 @@ export class S3Commands extends S3Client {
     command.middlewareStack.add(
       (next) => async (args) => {
         const result = await next(args);
-        // SAFETY: result?.response contains only entries produced for the { headers?: Record<string, string> } contract.
+        // SAFETY: AWS SDK middleware types result.response as unknown;
+        // the actual HTTP response always has a headers record.
         responseHeaders =
           (result?.response as { headers?: Record<string, string> })?.headers ||
           {};
@@ -246,7 +247,8 @@ export const dataPathSeparationProxy = (
     get(target, prop) {
       const value = target[prop];
       if (!isFunction(value)) return value;
-      // SAFETY: prop comes from the owner of the string contract used at this boundary.
+      // SAFETY: Proxy get handler receives prop as string | symbol;
+      // all S3Commands method names are strings, so the cast is safe.
       const isDataOp =
         !!dataOpsClient && DATA_OPERATION_COMMANDS.includes(prop as string);
       const client = isDataOp ? dataOpsClient : target;

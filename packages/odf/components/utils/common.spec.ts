@@ -11,26 +11,40 @@ import {
   isTNFRunnable,
 } from './common';
 
+const makeWizardNode = (
+  overrides: Partial<WizardNodeState> = {}
+): WizardNodeState => ({
+  name: '',
+  hostName: '',
+  cpu: '0',
+  memory: '0',
+  zone: '',
+  rack: '',
+  uid: '',
+  roles: [],
+  labels: {},
+  taints: [],
+  architecture: 'amd64',
+  ...overrides,
+});
+
 const tnfNodes = (
   cpuPerNode: number,
   memoryGiBPerNode: number
 ): WizardNodeState[] =>
-  Array.from({ length: 2 }, (_, index) => ({
-    name: `node-${index}`,
-    hostName: `host-${index}`,
-    cpu: String(cpuPerNode),
-    memory: `${memoryGiBPerNode}Gi`,
-    zone: '',
-    rack: '',
-    uid: `uid-${index}`,
-    roles: ['worker'],
-    labels: {},
-    taints: [],
-    architecture: 'amd64',
-  }));
+  Array.from({ length: 2 }, (_, index) =>
+    makeWizardNode({
+      name: `node-${index}`,
+      hostName: `host-${index}`,
+      cpu: String(cpuPerNode),
+      memory: `${memoryGiBPerNode}Gi`,
+      uid: `uid-${index}`,
+      roles: ['worker'],
+    })
+  );
 
 type ReplicasTest = {
-  wizardNodeStates: Partial<WizardNodeState>[];
+  wizardNodeStates: WizardNodeState[];
   expectedReplicas: number;
 };
 
@@ -39,89 +53,86 @@ describe('ODF common utilities', () => {
     const dataTest: ReplicasTest[] = [
       {
         // No zones, no racks.
-        wizardNodeStates: [{}, {}, {}, {}, {}, {}],
+        wizardNodeStates: Array.from({ length: 6 }, () => makeWizardNode()),
         expectedReplicas: OCS_DEVICE_SET_MINIMUM_REPLICAS,
       },
       {
         // 1 zone.
-        wizardNodeStates: [{ zone: '1' }, { zone: '1' }],
+        wizardNodeStates: [
+          makeWizardNode({ zone: '1' }),
+          makeWizardNode({ zone: '1' }),
+        ],
         expectedReplicas: OCS_DEVICE_SET_MINIMUM_REPLICAS,
       },
       {
         // 1 rack.
-        wizardNodeStates: [{ rack: '1' }, { rack: '1' }],
+        wizardNodeStates: [
+          makeWizardNode({ rack: '1' }),
+          makeWizardNode({ rack: '1' }),
+        ],
         expectedReplicas: OCS_DEVICE_SET_MINIMUM_REPLICAS,
       },
       {
         // 4 zones.
         wizardNodeStates: [
-          { zone: '1' },
-          { zone: '2' },
-          { zone: '3' },
-          { zone: '4' },
+          makeWizardNode({ zone: '1' }),
+          makeWizardNode({ zone: '2' }),
+          makeWizardNode({ zone: '3' }),
+          makeWizardNode({ zone: '4' }),
         ],
         expectedReplicas: 4,
       },
       {
         // 5 racks, no zones.
         wizardNodeStates: [
-          { rack: '1' },
-          { rack: '2' },
-          { rack: '3' },
-          { rack: '4' },
-          { rack: '5' },
+          makeWizardNode({ rack: '1' }),
+          makeWizardNode({ rack: '2' }),
+          makeWizardNode({ rack: '3' }),
+          makeWizardNode({ rack: '4' }),
+          makeWizardNode({ rack: '5' }),
         ],
         expectedReplicas: 5,
       },
       {
         // 1 zone, racks ignored (this shouldn't happen: we should receive either zones or racks).
         wizardNodeStates: [
-          { zone: 'zone1', rack: 'rack1' },
-          { zone: 'zone1', rack: 'rack2' },
-          { zone: 'zone1', rack: 'rack3' },
-          { zone: 'zone1', rack: 'rack4' },
+          makeWizardNode({ zone: 'zone1', rack: 'rack1' }),
+          makeWizardNode({ zone: 'zone1', rack: 'rack2' }),
+          makeWizardNode({ zone: 'zone1', rack: 'rack3' }),
+          makeWizardNode({ zone: 'zone1', rack: 'rack4' }),
         ],
         expectedReplicas: OCS_DEVICE_SET_MINIMUM_REPLICAS,
       },
     ];
     dataTest.forEach((test) => {
-      // SAFETY: The WizardNodeState[] test value defines the members exercised by this test.
-      expect(
-        getReplicasFromSelectedNodes(test.wizardNodeStates as WizardNodeState[])
-      ).toBe(test.expectedReplicas);
+      expect(getReplicasFromSelectedNodes(test.wizardNodeStates)).toBe(
+        test.expectedReplicas
+      );
     });
   });
 
   it('getDeviceSetReplica returns the correct amount of replicas', () => {
-    const wizardNodeStates: Partial<WizardNodeState>[] = [
-      { zone: '1' },
-      { zone: '2' },
-      { zone: '3' },
-      { zone: '4' },
+    const wizardNodeStates: WizardNodeState[] = [
+      makeWizardNode({ zone: '1' }),
+      makeWizardNode({ zone: '2' }),
+      makeWizardNode({ zone: '3' }),
+      makeWizardNode({ zone: '4' }),
     ];
     // Stretch cluster.
-    // SAFETY: The WizardNodeState[] test value defines the members exercised by this test.
-    expect(
-      getDeviceSetReplica(true, false, wizardNodeStates as WizardNodeState[])
-    ).toBe(5);
+    expect(getDeviceSetReplica(true, false, wizardNodeStates)).toBe(5);
 
     // Flexible scaling.
-    // SAFETY: The WizardNodeState[] test value defines the members exercised by this test.
-    expect(
-      getDeviceSetReplica(false, true, wizardNodeStates as WizardNodeState[])
-    ).toBe(OCS_DEVICE_SET_FLEXIBLE_REPLICA);
+    expect(getDeviceSetReplica(false, true, wizardNodeStates)).toBe(
+      OCS_DEVICE_SET_FLEXIBLE_REPLICA
+    );
 
     // Stretch cluster + Flexible scaling.
-    // SAFETY: The WizardNodeState[] test value defines the members exercised by this test.
-    expect(
-      getDeviceSetReplica(true, true, wizardNodeStates as WizardNodeState[])
-    ).toBe(OCS_DEVICE_SET_FLEXIBLE_REPLICA);
+    expect(getDeviceSetReplica(true, true, wizardNodeStates)).toBe(
+      OCS_DEVICE_SET_FLEXIBLE_REPLICA
+    );
 
     // No stretch cluster, no flexible scaling.
-    // SAFETY: The WizardNodeState[] test value defines the members exercised by this test.
-    expect(
-      getDeviceSetReplica(false, false, wizardNodeStates as WizardNodeState[])
-    ).toBe(4);
+    expect(getDeviceSetReplica(false, false, wizardNodeStates)).toBe(4);
   });
 
   describe('isTNFRunnable', () => {

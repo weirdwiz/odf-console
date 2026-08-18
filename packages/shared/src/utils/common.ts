@@ -108,20 +108,19 @@ export const isDefaultClass = (storageClass: K8sResourceKind) => {
 export const getLastLanguage = (): string =>
   localStorage.getItem(LAST_LANGUAGE_LOCAL_STORAGE_KEY);
 
-// SAFETY: k8sPatch({ model: kind, resource: { metadata: { name, namespace } }, d comes from the owner of the Promise<R> contract used at this boundary.
 export const k8sPatchByName = <R extends K8sResourceCommon>(
   kind: K8sKind,
   name: string,
   namespace: string,
   data: Patch[]
 ) =>
-  /* SAFETY: The value is supplied by the Promise<R> owner and follows that contract. */ k8sPatch(
-    {
-      model: kind,
-      resource: { metadata: { name, namespace } },
-      data: data,
-    }
-  ) as Promise<R>;
+  // SAFETY: k8sPatch returns Promise<K8sResourceCommon>; the generic R
+  // is a narrower subtype chosen by the caller, requiring the cast.
+  k8sPatch({
+    model: kind,
+    resource: { metadata: { name, namespace } },
+    data: data,
+  }) as Promise<R>;
 
 export const groupVersionFor = (apiVersion: string) => ({
   group: apiVersion.split('/').length === 2 ? apiVersion.split('/')[0] : 'core',
@@ -202,8 +201,7 @@ export const getOprMajorMinorVersion = (operator: K8sResourceKind): string =>
 export const numberInputOnChange =
   (min: number, max: number, onChange: (value: number) => void) =>
   (input: React.FormEvent<HTMLInputElement>): void => {
-    // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
-    const inputValue = +(input.target as HTMLInputElement)?.value;
+    const inputValue = +input.currentTarget?.value;
     if (!!min && inputValue < min) onChange(min);
     else if (!!max && inputValue > max) onChange(max);
     else onChange(inputValue);
@@ -214,16 +212,21 @@ export const fuzzyCaseInsensitive = (a: string, b: string): boolean =>
 
 export const deepSortObject = <T>(obj: T): T => {
   if (Array.isArray(obj)) {
-    // SAFETY: obj.map(deepSortObject) comes from the owner of the T contract used at this boundary.
+    // SAFETY: Array.map preserves the array shape, but TS cannot infer
+    // that map(deepSortObject) returns T when T is a generic array.
     return obj.map(deepSortObject) as T;
   } else if (_.isObjectLike(obj)) {
-    // SAFETY: This empty T accumulator receives only entries created by the reducer below.
     return Object.keys(obj)
       .sort()
-      .reduce((acc, key) => {
-        acc[key] = deepSortObject(obj[key]);
-        return acc;
-      }, {} as T);
+      .reduce(
+        (acc, key) => {
+          acc[key] = deepSortObject(obj[key]);
+          return acc;
+        },
+        // SAFETY: The empty object is populated with all keys of obj,
+        // rebuilding the T shape; TS cannot prove this via reduce.
+        {} as T
+      );
   }
   return obj;
 };

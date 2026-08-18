@@ -53,7 +53,8 @@ describe('tests for getNodeStatusGroups utility function', () => {
   ];
 
   test('correctly calls the groups resources by status for node status', () => {
-    // SAFETY: The any test value defines the members exercised by this test.
+    // SAFETY: Minimal test fixtures (id + status) are not full
+    // K8sResourceCommon objects; the cast satisfies the parameter type.
     const groups = getNodeStatusGroups(resources as any);
     expect(groups).toEqual({
       [InventoryStatusGroup.UNKNOWN]: { statusIDs: [], count: 1 },
@@ -80,7 +81,8 @@ describe('tests for getPVCStatusGroups utility function', () => {
   ];
 
   test('correctly calls the groups resources by status for pvc status', () => {
-    // SAFETY: The any test value defines the members exercised by this test.
+    // SAFETY: Minimal test fixtures (id + status.phase) are not full
+    // K8sResourceCommon objects; the cast satisfies the parameter type.
     const groups = getPVCStatusGroups(resources as any);
     expect(groups).toEqual({
       [InventoryStatusGroup.UNKNOWN]: { statusIDs: [], count: 0 },
@@ -112,7 +114,8 @@ describe('tests for getPVStatusGroups utility function', () => {
   ];
 
   test('correctly calls the groups resources by status for pv status', () => {
-    // SAFETY: The any test value defines the members exercised by this test.
+    // SAFETY: Minimal test fixtures (id + status.phase) are not full
+    // K8sResourceCommon objects; the cast satisfies the parameter type.
     const groups = getPVStatusGroups(resources as any);
     expect(groups).toEqual({
       [InventoryStatusGroup.UNKNOWN]: { statusIDs: [], count: 0 },

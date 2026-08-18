@@ -9,16 +9,16 @@ import { ODFStorageSystem } from '@odf/shared/models';
 import { useCustomTranslation } from '@odf/shared/useCustomTranslationHook';
 import { humanizeBinaryBytes } from '@odf/shared/utils/humanize';
 import { parseMetricData } from '@odf/shared/utils/metrics';
+import { PrometheusEndpoint } from '@openshift-console/dynamic-plugin-sdk';
 import { Card, CardBody, CardHeader, CardTitle } from '@patternfly/react-core';
 import { externalStorageCapacityUsed } from '../../../constants';
 import { StorageDashboard, CAPACITY_QUERIES } from '../queries';
 
 const ObjectCapacityCard: React.FC = () => {
   const { t } = useCustomTranslation();
-  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [data, error, loading] = useCustomPrometheusPoll({
     query: CAPACITY_QUERIES[StorageDashboard.USED_CAPACITY_OBJECT],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 

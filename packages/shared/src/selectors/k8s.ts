@@ -22,23 +22,13 @@ export const getLabel = <A extends K8sResourceCommon = K8sResourceCommon>(
 ) =>
   _.has(value, 'metadata.labels') ? value.metadata.labels[label] : defaultValue;
 
-// SAFETY: _.get(value, 'metadata.labels') comes from the owner of the K8sResourceCommon['metadata']['labels'] contract used at this boundary.
 export const getLabels = <A extends K8sResourceCommon = K8sResourceCommon>(
   value: A
-) =>
-  /* SAFETY: The value is supplied by the K8sResourceCommon['metadata']['labels'] owner and follows that contract. */ _.get(
-    value,
-    'metadata.labels'
-  ) as K8sResourceCommon['metadata']['labels'];
+) => value?.metadata?.labels;
 
-// SAFETY: _.get( value, 'metadata.namespace' ) comes from the owner of the K8sResourceCommon['metadata']['namespace'] contract used at this boundary.
 export const getNamespace = <A extends K8sResourceCommon = K8sResourceCommon>(
   value: A
-) =>
-  /* SAFETY: The value is supplied by the K8sResourceCommon['metadata']['namespace'] owner and follows that contract. */ _.get(
-    value,
-    'metadata.namespace'
-  ) as K8sResourceCommon['metadata']['namespace'];
+) => value?.metadata?.namespace;
 
 export const getAnnotations = <A extends K8sResourceCommon = K8sResourceCommon>(
   value: A,
@@ -48,25 +38,15 @@ export const getAnnotations = <A extends K8sResourceCommon = K8sResourceCommon>(
     ? value.metadata.annotations
     : defaultValue;
 
-// SAFETY: _.get(value, 'apiVersion') comes from the owner of the K8sResourceCommon['apiVersion'] contract used at this boundary.
 export const getAPIVersion = <A extends K8sResourceCommon = K8sResourceCommon>(
   value: A
-) =>
-  /* SAFETY: The value is supplied by the K8sResourceCommon['apiVersion'] owner and follows that contract. */ _.get(
-    value,
-    'apiVersion'
-  ) as K8sResourceCommon['apiVersion'];
+) => value?.apiVersion;
 
-// SAFETY: _.get( value, 'metadata.ownerReferences' ) comes from the owner of the K8sResourceCommon['metadata']['ownerReferences'] contract used at this boundary.
 export const getOwnerReferences = <
   A extends K8sResourceCommon = K8sResourceCommon,
 >(
   value: A
-) =>
-  /* SAFETY: The value is supplied by the K8sResourceCommon['metadata']['ownerReferences'] owner and follows that contract. */ _.get(
-    value,
-    'metadata.ownerReferences'
-  ) as K8sResourceCommon['metadata']['ownerReferences'];
+) => value?.metadata?.ownerReferences;
 
 export const findCondition = (
   conditions: K8sResourceCondition[] | undefined,

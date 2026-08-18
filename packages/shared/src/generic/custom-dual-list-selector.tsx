@@ -93,11 +93,10 @@ export const CustomDualListSelector = ({
     // From: (value: string, event: React.FormEvent<HTMLInputElement>) => void
     // To: (_event: React.FormEvent<HTMLInputElement>, value: string) => void
     // both cases need to be handled for backwards compatibility
-    const onChange = (input: any) => {
-      // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
-      const value = isString(input)
-        ? input
-        : (input.target as HTMLInputElement).value;
+    const onChange = (input: string | React.FormEvent<HTMLInputElement>) => {
+      // PF SearchInput onChange may provide a string or a synthetic event;
+      // when an event, currentTarget is the typed HTMLInputElement.
+      const value = isString(input) ? input : input.currentTarget.value;
       isAvailable ? setAvailableFilter(value) : setChosenFilter(value);
       const toFilter = isAvailable ? [...availableOptions] : [...chosenOptions];
       toFilter.forEach((option) => {

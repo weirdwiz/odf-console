@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { getMax } from '@odf/shared/charts';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import {
   CustomUtilizationSummaryProps,
   UtilizationItem,
@@ -45,10 +46,9 @@ export const PrometheusUtilizationItem: React.FC<
   const { duration } = useUtilizationDuration();
   const defaultBasePath = usePrometheusBasePath();
 
-  // SAFETY: The receiving library accepts 'api/v1/query_range'; its published type does not expose this supported value.
   const [utilization, error, loading] = useCustomPrometheusPoll({
     query: utilizationQuery,
-    endpoint: 'api/v1/query_range' as any,
+    endpoint: PrometheusEndpoint.QUERY_RANGE,
     timespan: timespan || duration,
     basePath: basePath || defaultBasePath,
   });
@@ -105,10 +105,9 @@ type TotalUtilizationItemProps = UtilizationItemProps & {
 };
 
 const TotalUtilizationItem: React.FC<TotalUtilizationItemProps> = (props) => {
-  // SAFETY: The receiving library accepts 'api/v1/query_range'; its published type does not expose this supported value.
   const [total, totalError, totalLoading] = useCustomPrometheusPoll({
     query: props.totalQuery,
-    endpoint: 'api/v1/query_range' as any,
+    endpoint: PrometheusEndpoint.QUERY_RANGE,
     timespan: props.duration,
     basePath: props.basePath || props.defaultBasePath,
   });

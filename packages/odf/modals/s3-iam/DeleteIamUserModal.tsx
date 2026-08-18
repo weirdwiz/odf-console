@@ -40,7 +40,7 @@ type DeleteIamUserModalProps = {
   refreshTokens: () => void;
 };
 
-// SAFETY: The receiving library accepts t; its published type does not expose this supported value.
+// SAFETY: react-i18next Trans component accepts TFunction but its prop type uses a narrower internal signature.
 const getTextInputLabel = (t: TFunction) => (
   <Trans t={t as any} values={{ delete: 'delete' }}>
     <b>
@@ -129,8 +129,7 @@ export const DeleteIamUserModal: React.FC<
       refreshTokens();
       navigate(IAM_BASE_ROUTE);
     } catch (err) {
-      // SAFETY: err comes from the owner of the Error contract used at this boundary.
-      setError(err as Error);
+      setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       setInProgress(false);
     }
@@ -172,8 +171,7 @@ export const DeleteIamUserModal: React.FC<
 
       setDeleteSuccess(true);
     } catch (err) {
-      // SAFETY: err comes from the owner of the Error contract used at this boundary.
-      setError(err as Error);
+      setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       setInProgress(false);
     }

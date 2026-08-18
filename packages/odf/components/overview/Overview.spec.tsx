@@ -2,9 +2,7 @@ import * as React from 'react';
 import * as TestDependency1 from '@odf/core/redux/selectors';
 import * as TestDependency4 from '@odf/shared/hooks/custom-prometheus-poll';
 import {
-  PrometheusData,
   PrometheusResponse,
-  PrometheusResult,
   useFlag,
 } from '@openshift-console/dynamic-plugin-sdk';
 import * as TestDependency3 from '@openshift-console/dynamic-plugin-sdk';
@@ -58,7 +56,6 @@ jest
   .spyOn(TestDependency3, 'useActivePerspective')
   .mockImplementation(jest.fn(() => ''));
 
-// SAFETY: The PrometheusData test value defines the members exercised by this test.
 const promResponse: PrometheusResponse = {
   status: 'success',
   data: {
@@ -66,10 +63,10 @@ const promResponse: PrometheusResponse = {
       {
         metric: {},
         value: [1712304917.483, '0'],
-      } as PrometheusResult,
+      },
     ],
     resultType: 'vector',
-  } as PrometheusData,
+  },
 };
 jest
   .spyOn(TestDependency4, 'useCustomPrometheusPoll')
@@ -84,8 +81,7 @@ jest.spyOn(TestDependency6, 'useFlag').mockImplementation(jest.fn());
 
 describe('General Overview', () => {
   it('only renders common cards', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useFlag as jest.Mock).mockReturnValue(false);
+    jest.mocked(useFlag).mockReturnValue(false);
     render(
       <BrowserRouter>
         <Overview />
@@ -98,8 +94,7 @@ describe('General Overview', () => {
   });
 
   it('also renders External Systems card', () => {
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useFlag as jest.Mock).mockReturnValue(true);
+    jest.mocked(useFlag).mockReturnValue(true);
     render(
       <BrowserRouter>
         <Overview />

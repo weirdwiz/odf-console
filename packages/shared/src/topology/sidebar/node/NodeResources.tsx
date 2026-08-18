@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { PrometheusEndpoint } from '@odf/shared/constants';
 import { DataUnavailableError } from '@odf/shared/generic/Error';
 import {
   useCustomPrometheusPoll,
@@ -56,16 +57,14 @@ export const NodeResources: React.FC<NodeResourcesProps> = ({
       : [];
 
   const basePath = usePrometheusBasePath();
-  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [usedCpu, errorUsedCpu, loadingUsedCpu] = useCustomPrometheusPoll({
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     query: POD_QUERIES(odfNamespace)[PodMetrics.CPU],
     basePath: basePath,
   });
-  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [usedMemory, errorUsedMemory, loadingUsedMemory] =
     useCustomPrometheusPoll({
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       query: POD_QUERIES(odfNamespace)[PodMetrics.MEMORY],
       basePath: basePath,
     });

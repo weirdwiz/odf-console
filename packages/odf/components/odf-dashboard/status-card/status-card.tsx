@@ -26,6 +26,7 @@ import {
   HealthState,
   useFlag,
   useK8sWatchResource,
+  PrometheusEndpoint,
 } from '@openshift-console/dynamic-plugin-sdk';
 import { useNavigate } from 'react-router';
 import {
@@ -55,10 +56,9 @@ export const StatusCard: React.FC = () => {
   const [csvData, csvLoaded, csvLoadError] =
     useSafeK8sWatchResource<ClusterServiceVersionKind[]>(operatorResource);
   const [systems, systemsLoaded, systemsLoadError] = useWatchStorageSystems();
-  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [healthData, healthError, healthLoading] = useCustomPrometheusPoll({
     query: STATUS_QUERIES[StorageDashboard.HEALTH],
-    endpoint: 'api/v1/query' as any,
+    endpoint: PrometheusEndpoint.QUERY,
     basePath: usePrometheusBasePath(),
   });
 

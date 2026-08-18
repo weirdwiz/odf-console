@@ -136,7 +136,7 @@ export const FlashSystemConnectionDetails: React.FC = () => {
       namespace: odfNamespace,
       storageClassName: FLASH_STORAGE_CLASS,
     });
-    // SAFETY: p.model comes from the owner of the K8sModel contract used at this boundary.
+    // SAFETY: WizardPayload.model is typed as K8sModel; k8sCreate expects the compatible K8sKind.
     const promises = payload.map(
       (p) => () => k8sCreate({ model: p.model as K8sModel, data: p.payload })
     );
@@ -146,7 +146,7 @@ export const FlashSystemConnectionDetails: React.FC = () => {
       // Then create the FlashSystem
       await promises[1]();
       if (!storageClusterExists) {
-        // SAFETY: The receiving library accepts {}; its published type does not expose this supported value.
+        // SAFETY: Empty object satisfies the component props when all props are optional.
         launchModal(DeployDataFoundationModal, {} as any);
       } else {
         isFDF

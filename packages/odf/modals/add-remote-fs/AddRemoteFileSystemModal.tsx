@@ -92,7 +92,7 @@ const AddRemoteFileSystemModal: React.FC<
     };
   }, [t, existingFileSystemNames]);
 
-  // SAFETY: The receiving library accepts useYupValidationResolver(formSchema); its published type does not expose this supported value.
+  // SAFETY: Yup resolver returns a compatible Resolver shape; TS generic parameters differ.
   const resolver = useYupValidationResolver(formSchema) as any;
 
   const { control, watch, handleSubmit } = useForm({
@@ -120,7 +120,7 @@ const AddRemoteFileSystemModal: React.FC<
       setInProgress(false);
     }
   });
-  // SAFETY: control comes from the owner of the Control<FieldValues> contract used at this boundary.
+  // SAFETY: useForm returns a narrower Control type; the component prop expects Control<FieldValues>.
   return (
     <Modal
       title={t('Add Remote FileSystem')}

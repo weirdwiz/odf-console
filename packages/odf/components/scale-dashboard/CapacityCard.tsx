@@ -23,7 +23,10 @@ import {
   humanizeBinaryBytes,
   sortInstantVectorStats,
 } from '@odf/shared/utils';
-import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  useK8sWatchResource,
+  PrometheusEndpoint,
+} from '@openshift-console/dynamic-plugin-sdk';
 import {
   MenuToggle,
   MenuToggleElement,
@@ -43,18 +46,16 @@ export const CapacityCard: React.FC<{}> = () => {
     [ScaleDashboardQuery.BY_USED]: queryByUsed,
     [ScaleDashboardQuery.TOTAL_USED]: queryTotalUsed,
   } = getBreakdownByStorageClass(storageClassName);
-  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [modelByUsed, modelUsedError, modelUsedLoading] =
     useCustomPrometheusPoll({
       query: queryByUsed,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
-  // SAFETY: The receiving library accepts 'api/v1/query'; its published type does not expose this supported value.
   const [modelTotalUsed, modelTotalError, modalTotalLoading] =
     useCustomPrometheusPoll({
       query: queryTotalUsed,
-      endpoint: 'api/v1/query' as any,
+      endpoint: PrometheusEndpoint.QUERY,
       basePath: usePrometheusBasePath(),
     });
 
@@ -93,7 +94,7 @@ export const CapacityCard: React.FC<{}> = () => {
     _e,
     storageClassNameSelection
   ) => {
-    // SAFETY: The receiving library accepts storageClassNameSelection; its published type does not expose this supported value.
+    // SAFETY: The component prop uses a generic type; the storageClassName value is structurally compatible.
     setStorageClassName(storageClassNameSelection as any);
     setBreakdownSelect(!isOpenBreakdownSelect);
   };

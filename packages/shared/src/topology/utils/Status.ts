@@ -9,7 +9,7 @@ import { NodeStatus } from '@patternfly/react-topology';
 import { DeploymentModel, NodeModel } from '../../models';
 import { getNodeStatusWithDescriptors } from '../../Nodes';
 import { getName } from '../../selectors';
-import { DeploymentKind } from '../../types';
+import { DeploymentKind, NodeKind } from '../../types';
 import { NodeDeploymentMap } from '../Context';
 import { filterRelevantAlerts, getFilteredAlerts } from './AlertFilters';
 import { isCriticalAlert, isWarningAlert } from './Monitoring';
@@ -24,10 +24,7 @@ const getStorageClusterStatus = (
   t: TFunction
 ) => {
   const anyUnavailableDeployment = deployments.some((resource) => {
-    // SAFETY: resource comes from the owner of the DeploymentKind contract used at this boundary.
-    const availabilityStatus = (
-      resource as DeploymentKind
-    )?.status?.conditions?.find(
+    const availabilityStatus = resource?.status?.conditions?.find(
       (condition) => condition?.type === 'Available'
     )?.status;
     return availabilityStatus !== 'True';
@@ -70,15 +67,17 @@ export const getStatusWithDescriptors = (
     };
   }
   if (_.isEqual(resourceModel, NodeModel)) {
-    // SAFETY: The receiving library accepts resource; its published type does not expose this supported value.
+    // SAFETY: resourceModel === NodeModel guarantees resource is a NodeKind;
+    // TS cannot narrow K8sResourceCommon via the separate model argument.
     return getNodeStatusWithDescriptors(
-      resource as any,
+      resource as NodeKind,
       nodeDeploymentMap[getName(resource)],
       t
     );
   }
   if (_.isEqual(resourceModel, DeploymentModel)) {
-    // SAFETY: resource comes from the owner of the DeploymentKind contract used at this boundary.
+    // SAFETY: resourceModel === DeploymentModel guarantees resource is a
+    // DeploymentKind; TS cannot narrow via the separate model argument.
     const availabilityStatus = (
       resource as DeploymentKind
     )?.status?.conditions?.find(
@@ -94,7 +93,10 @@ export const getStatusWithDescriptors = (
   );
 };
 
-// SAFETY: _.identity comes from the owner of the TFunction contract used at this boundary.
+// SAFETY: Identity function cast to TFunction; TFunction has overloads that
+// a plain (key: string) => string does not satisfy, requiring the cast.
+const noopTranslate: TFunction = ((key: string) => key) as TFunction;
+
 export const getStatus = (
   resourceModel: K8sModel,
   nodeDeploymentMap: NodeDeploymentMap,
@@ -106,5 +108,5 @@ export const getStatus = (
     nodeDeploymentMap,
     resource,
     alerts,
-    /* SAFETY: The value is supplied by the TFunction owner and follows that contract. */ _.identity as TFunction
+    noopTranslate
   ).status;

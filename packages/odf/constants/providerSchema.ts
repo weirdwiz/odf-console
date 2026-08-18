@@ -2,14 +2,13 @@ import { PersistentVolumeClaimKind } from '@odf/shared/types';
 import * as Yup from 'yup';
 import { StoreProviders } from './mcg';
 
-// SAFETY: value comes from the owner of the StoreProviders contract used at this boundary.
 export const providerSchema = (shouldValidateSecret: boolean) =>
   Yup.object({
     'provider-name': Yup.string().required(),
     endpoint: Yup.string().when('provider-name', {
       is: (value: string) =>
         [StoreProviders.S3, StoreProviders.IBM].includes(
-          /* SAFETY: The value is supplied by the StoreProviders owner and follows that contract. */ value as StoreProviders
+          /* SAFETY: Yup .when() 'is' callback types value as string; the actual values match StoreProviders enum. */ value as StoreProviders
         ),
       then: (schema: Yup.StringSchema) => schema.required(),
     }),
@@ -25,7 +24,7 @@ export const providerSchema = (shouldValidateSecret: boolean) =>
           StoreProviders.AZURE,
           StoreProviders.IBM,
         ].includes(
-          /* SAFETY: The value is supplied by the StoreProviders owner and follows that contract. */ value as StoreProviders
+          /* SAFETY: Yup .when() 'is' callback types value as string; the actual values match StoreProviders enum. */ value as StoreProviders
         ),
       then: (schema: Yup.StringSchema) =>
         shouldValidateSecret ? schema.required() : schema.notRequired(),
@@ -43,7 +42,7 @@ export const providerSchema = (shouldValidateSecret: boolean) =>
           StoreProviders.IBM,
           StoreProviders.GCP,
         ].includes(
-          /* SAFETY: The value is supplied by the StoreProviders owner and follows that contract. */ value as StoreProviders
+          /* SAFETY: Yup .when() 'is' callback types value as string; the actual values match StoreProviders enum. */ value as StoreProviders
         ),
       then: (schema: Yup.StringSchema) => schema.required(),
     }),

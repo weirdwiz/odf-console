@@ -21,7 +21,8 @@ export const useK8sGet = <R extends K8sResourceCommon = K8sResourceCommon>(
         setLoadError(null);
         setLoaded(false);
         setData(null);
-        // SAFETY: (await k8sGet({ model: kind, name: name, ns: namespace, })) comes from the owner of the R contract used at this boundary.
+        // SAFETY: k8sGet returns K8sResourceCommon; R is a narrower
+        // subtype specified by the caller, so the cast narrows it.
         const resource = (await k8sGet({
           model: kind,
           name: name,

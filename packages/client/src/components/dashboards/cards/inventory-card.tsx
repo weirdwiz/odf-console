@@ -42,20 +42,22 @@ export const InventoryCard: React.FC = () => {
 
   const pvcsLoaded = resources?.pvcs?.loaded;
   const pvcsLoadError = resources?.pvcs?.loadError;
-  // SAFETY: (resources?.pvcs?.data ?? []) contains only entries produced for the PersistentVolumeClaimKind[] contract.
+  // SAFETY: useK8sWatchResources returns K8sResourceCommon[]; the watch
+  // config uses PersistentVolumeClaimModel, so data is PersistentVolumeClaimKind[].
   const pvcsData = (resources?.pvcs?.data ?? []) as PersistentVolumeClaimKind[];
 
   const pvsLoaded = resources?.pvs?.loaded;
   const pvsLoadError = resources?.pvs?.loadError;
-  // SAFETY: (resources?.pvs?.data ?? []) contains only entries produced for the K8sResourceKind[] contract.
+  // SAFETY: useK8sWatchResources returns K8sResourceCommon[]; the watch
+  // config uses PersistentVolumeModel, so data is K8sResourceKind[].
   const pvsData = (resources?.pvs?.data ?? []) as K8sResourceKind[];
 
-  // SAFETY: (resources?.sc?.data ?? []) contains only entries produced for the StorageClassResourceKind[] contract.
+  // SAFETY: useK8sWatchResources returns K8sResourceCommon[]; the watch
+  // config uses StorageClassModel, so data is StorageClassResourceKind[].
   const scData = (resources?.sc?.data ?? []) as StorageClassResourceKind[];
   const filteredCephSC = getCephSC(scData);
   const filteredSCNames = filteredCephSC.map(getName);
 
-  // SAFETY: The receiving library accepts PersistentVolumeClaimModel; its published type does not expose this supported value.
   return (
     <Card>
       <CardHeader>
@@ -66,6 +68,8 @@ export const InventoryCard: React.FC = () => {
           dataTest="inventory-pvc"
           isLoading={!pvcsLoaded}
           error={!!pvcsLoadError}
+          // SAFETY: ResourceInventoryItem.kind expects K8sKind from
+          // sdk-internal; our model uses K8sKind from a sibling path.
           kind={PersistentVolumeClaimModel as any}
           resources={getCephPVCs(filteredSCNames, pvcsData, pvsData)}
           mapper={getPVCStatusGroups}
@@ -75,6 +79,7 @@ export const InventoryCard: React.FC = () => {
           dataTest="inventory-pv"
           isLoading={!pvsLoaded}
           error={!!pvsLoadError}
+          // SAFETY: Same K8sKind import-path mismatch as above.
           kind={PersistentVolumeModel as any}
           resources={getCephPVs(pvsData)}
           mapper={getPVStatusGroups}

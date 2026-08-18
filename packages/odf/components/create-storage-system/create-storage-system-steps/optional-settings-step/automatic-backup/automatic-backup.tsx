@@ -35,7 +35,7 @@ const getCronTimeFromSchedule = (schedule: string): CronTime => {
   const entry = Object.entries(CRON_MAP).find(
     ([, value]) => value === schedule
   );
-  // SAFETY: entry[0] comes from the owner of the CronTime contract used at this boundary.
+  // SAFETY: Object.entries returns string keys; the object keys are CronTime enum values.
   return entry ? (entry[0] as CronTime) : CronTime.DAILY;
 };
 
@@ -107,7 +107,7 @@ export const AutomaticBackup: React.FC<AutomaticBackupProps> = ({
     let newValue: number;
     switch (funcType) {
       case 'onChange': {
-        // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
+        // SAFETY: Event handler is attached to an <input> element; React types target as EventTarget.
         const value = (event.target as HTMLInputElement).value;
         const numValue = parseInt(value, 10);
         newValue = isNaN(numValue)

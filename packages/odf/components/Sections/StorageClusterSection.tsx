@@ -116,7 +116,7 @@ const useInternalStorageCluster = () => {
   });
 
   const internalClusterDetails = useGetInternalClusterDetails();
-  // SAFETY: getResourceInNs( storageClusters, internalClusterDetails.clusterNamesp comes from the owner of the StorageClusterKind contract used at this boundary.
+  // SAFETY: getResourceInNs filters StorageClusterKind items; the return is typed as the generic base.
   const currentStorageCluster = getResourceInNs(
     storageClusters,
     internalClusterDetails.clusterNamespace

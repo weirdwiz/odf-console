@@ -36,7 +36,7 @@ const convertCorsRuleToRuleState = (rule: CORSRule): RuleState => {
   }
   ruleState.allowedOrigins = rule.AllowedOrigins;
 
-  // SAFETY: rule.AllowedMethods contains only entries produced for the AllowedMethods[] contract.
+  // SAFETY: CORSRule.AllowedMethods is typed as string[]; AllowedMethods is a more specific string enum.
   ruleState.allowedMethods = rule.AllowedMethods as AllowedMethods[];
 
   if (!!rule.AllowedHeaders) {
@@ -63,7 +63,7 @@ const setEditRuleState = (
   existingRules: GetBucketCorsCommandOutput,
   dispatch: React.Dispatch<RuleAction>
 ) => {
-  // SAFETY: This empty CORSRule accumulator receives only entries created by the reducer below.
+  // SAFETY: Empty CORSRule object; the producer populates all required fields before use.
   let corsRule = {} as CORSRule;
   if (!!ruleName) {
     corsRule = existingRules?.CORSRules?.find((rule) => rule.ID === ruleName);

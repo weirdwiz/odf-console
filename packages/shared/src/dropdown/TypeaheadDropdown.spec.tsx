@@ -4,9 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { SelectOptionProps } from '@patternfly/react-core';
 import { TypeaheadDropdown } from './TypeaheadDropdown';
 
-// SAFETY: The string test value defines the members exercised by this test.
 const getOption = (rtlScreen: Screen, name: ReactNode) =>
   rtlScreen.queryByRole('option', {
+    // SAFETY: Test items use string children; RegExp requires a string argument.
     name: new RegExp(name as string, 'i'),
   });
 const getTypeaheadDropdown = (rtlScreen: Screen) =>
@@ -78,8 +78,8 @@ describe('TypeaheadDropdown', () => {
 
     const typeaheadDropdown = getTypeaheadDropdown(screen);
     await user.click(typeaheadDropdown);
-    // SAFETY: The Element test value defines the members exercised by this test.
-    await user.click(getOption(screen, items[3].children) as Element);
+    // queryByRole returns HTMLElement | null; the option must exist here.
+    await user.click(getOption(screen, items[3].children)!);
 
     expect(typeaheadDropdown).toHaveValue(items[3].children);
     expect(onSelect).toHaveBeenCalledTimes(1);

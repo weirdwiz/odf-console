@@ -11,10 +11,10 @@ export const ONGOING_FILESYSTEM_REASONS = [
   'LocalDiskWrongType',
 ] as const;
 
-// SAFETY: reason comes from the owner of the (typeof ONGOING_FILESYSTEM_REASONS)[number] contract used at this boundary.
+// SAFETY: Array.find callback types reason as the array element; TS cannot narrow the const array literal type.
 export const isOngoingFilesystemReason = (reason?: string): boolean =>
   ONGOING_FILESYSTEM_REASONS.includes(
-    /* SAFETY: The value is supplied by the (typeof ONGOING_FILESYSTEM_REASONS)[number] owner and follows that contract. */ reason as (typeof ONGOING_FILESYSTEM_REASONS)[number]
+    /* SAFETY: Array.find narrows to element type; TS const array literal prevents inference. */ reason as (typeof ONGOING_FILESYSTEM_REASONS)[number]
   );
 
 export const isTemporaryNSDError = (fileSystem: FileSystemKind): boolean => {

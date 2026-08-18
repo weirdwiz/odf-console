@@ -80,7 +80,7 @@ const ObjectSizeFilter: React.FC<StateAndDispatchProps> = ({
     let newSize: number;
     switch (funcType) {
       case FuncType.ON_CHANGE: {
-        // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
+        // SAFETY: Event handler is attached to an <input> element; React types target as EventTarget.
         newSize = Math.max(+(event?.target as HTMLInputElement)?.value || 0, 0);
         break;
       }

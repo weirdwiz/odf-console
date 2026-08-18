@@ -718,7 +718,7 @@ export const StorageSystemListPage: React.FC = () => {
     }, {});
   }, [isFDF, filesystems, filesystemsLoaded]);
 
-  // SAFETY: data contains only entries produced for the StorageSystemKind[] contract.
+  // SAFETY: k8s watch returns K8sResourceCommon[]; the model guarantees StorageSystemKind shape.
   const normalizedMetrics = React.useMemo(
     () => ({
       normalizedMetrics: normalizeMetrics(
@@ -765,7 +765,7 @@ export const StorageSystemListPage: React.FC = () => {
   const isLSOInstalled =
     lsoCSVLoaded && !lsoCSVLoadError && isCSVSucceeded(lsoCSV);
 
-  // SAFETY: filteredData contains only entries produced for the StorageSystemKind[] contract.
+  // SAFETY: Filter preserves StorageSystemKind items; TS loses the type through Array.filter.
   return (
     <>
       <ListPageHeader title={t('External systems')}>

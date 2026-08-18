@@ -49,14 +49,12 @@ jest
   .spyOn(TestDependency4, 'useModalWrapper')
   .mockImplementation(() => launchModal);
 
-// SAFETY: The NodeKind test value defines the members exercised by this test.
-const makeNode = (name: string, labels: Record<string, string>): NodeKind =>
-  ({
-    apiVersion: 'v1',
-    kind: 'Node',
-    metadata: { name, labels, uid: name },
-    spec: {},
-  }) as NodeKind;
+const makeNode = (name: string, labels: Record<string, string>): NodeKind => ({
+  apiVersion: 'v1',
+  kind: 'Node',
+  metadata: { name, labels, uid: name },
+  spec: {},
+});
 
 const scaleNode = (name: string) =>
   makeNode(name, { [SCALE_DAEMON_NODE_LABEL]: '' });
@@ -112,8 +110,7 @@ const setupMocks = ({
   encryptionConfigLoaded = true,
   encryptionConfigLoadError,
 }: SetupMocksOptions = {}) => {
-  // SAFETY: The jest.Mock test value defines the members exercised by this test.
-  (useK8sWatchResources as jest.Mock).mockReturnValue({
+  jest.mocked(useK8sWatchResources).mockReturnValue({
     cluster: {
       data: cluster,
       loaded: clusterLoaded,
@@ -262,9 +259,8 @@ describe('LocalStorageClusterCard', () => {
       });
       renderCard();
       expect(screen.getByText('3 Nodes')).toBeInTheDocument();
-      // SAFETY: The jest.Mock test value defines the members exercised by this test.
       expect(
-        (useK8sWatchResources as jest.Mock).mock.calls[0][0]
+        jest.mocked(useK8sWatchResources).mock.calls[0][0]
       ).not.toHaveProperty('corePods');
     });
 

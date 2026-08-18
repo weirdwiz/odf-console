@@ -76,11 +76,12 @@ export const useAccessReview = (
   const [isAllowed, setAllowed] = React.useState(false);
   // Destructure the attributes to pass them as dependencies to `useEffect`,
   // which doesn't do deep comparison of object dependencies.
-  // SAFETY: '' comes from the owner of the K8sVerb contract used at this boundary.
   const {
     group = '',
     resource = '',
     subresource = '',
+    // SAFETY: '' is not a K8sVerb member, but the hook uses it only as a
+    // dependency-array placeholder when no verb is provided.
     verb = '' as K8sVerb,
     name = '',
     namespace = '',

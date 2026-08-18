@@ -52,7 +52,7 @@ const getSharedDiscoveredDevicesRepresentatives = (
     }
   }
 
-  // SAFETY: Object.entries(grouped).filter(([, dds]) => { if (!Array.isArray(dds)  contains only entries produced for the [string, DiscoveredDevice[]][] contract.
+  // SAFETY: Object.entries types values as unknown; the grouped object values are DiscoveredDevice arrays.
   const sharedGroups = Object.entries(grouped).filter(([, dds]) => {
     if (!Array.isArray(dds) || dds.length === 0) {
       return false;
@@ -112,8 +112,9 @@ export const useDeviceFinder = (selectedNodes?: WizardNodeState[]) => {
           },
           body: JSON.stringify(payload),
         }).catch((error) => {
-          // SAFETY: error comes from the owner of the Error contract used at this boundary.
-          setDeviceFinderError(error as Error);
+          setDeviceFinderError(
+            error instanceof Error ? error : new Error(String(error))
+          );
         });
       }
     }
@@ -134,8 +135,9 @@ export const useDeviceFinder = (selectedNodes?: WizardNodeState[]) => {
         await initiateDeviceFinder();
       } catch (error) {
         if (isMounted) {
-          // SAFETY: error comes from the owner of the Error contract used at this boundary.
-          setDeviceFinderError(error as Error);
+          setDeviceFinderError(
+            error instanceof Error ? error : new Error(String(error))
+          );
           setDeviceFinderLoading(false);
         }
         return;
@@ -156,8 +158,9 @@ export const useDeviceFinder = (selectedNodes?: WizardNodeState[]) => {
           }
         } catch (error) {
           if (isMounted) {
-            // SAFETY: error comes from the owner of the Error contract used at this boundary.
-            setDeviceFinderError(error as Error);
+            setDeviceFinderError(
+              error instanceof Error ? error : new Error(String(error))
+            );
           }
         } finally {
           if (isMounted) {

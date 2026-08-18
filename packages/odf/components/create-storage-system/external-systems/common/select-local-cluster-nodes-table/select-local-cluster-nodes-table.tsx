@@ -92,7 +92,7 @@ const LocalClusterRoleDropdown: React.FC<{
   onRoleChange: (role: NodeType) => void;
 }> = ({ role, onRoleChange }) => {
   const { t } = useCustomTranslation();
-  // SAFETY: value comes from the owner of the NodeType contract used at this boundary.
+  // SAFETY: PatternFly Select onSelect types value as string; the options use NodeType enum values.
   return (
     <SingleSelectDropdown
       className="dropdown--full-width"
@@ -196,7 +196,7 @@ const InternalNodeTable: React.FC<NodeTableProps> = ({
   );
 
   const getColumns = React.useMemo((): TableColumnProps[] => {
-    // SAFETY: nameSort comes from the owner of the <T>(a: T, b: T, c: SortByDirection) => number contract used at this boundary.
+    // SAFETY: The generic sort comparator is compatible but TS cannot narrow the generic type parameter.
     return [
       {
         columnName: t('Name'),

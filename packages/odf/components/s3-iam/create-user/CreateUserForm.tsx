@@ -115,12 +115,12 @@ export const CreateUserFormContent = () => {
   );
 
   const { userFormSchema, fieldRequirements } = useIamUserFormValidation();
-  // SAFETY: useYupValidationResolver( userFormSchema ) as unknown comes from the owner of the Resolver<FormData> contract used at this boundary.
+  // SAFETY: Yup resolver returns a compatible Resolver shape but generic types differ.
   const resolver = useYupValidationResolver(
     userFormSchema
   ) as Resolver<FormData>;
 
-  // SAFETY: The receiving library accepts formSettings; its published type does not expose this supported value.
+  // SAFETY: useForm returns a narrower type; the component prop expects the wider FieldValues generic.
   const {
     control,
     handleSubmit,
@@ -205,7 +205,7 @@ export const CreateUserFormContent = () => {
       });
 
       if (result?.accessKeyResponse) {
-        // SAFETY: { isOpen: true, extraProps: { AccessKeyId: result.accessKeyResponse.Ac comes from the owner of the CommonModalProps<AccessKeySecretKeyDisplayModalProps> contract used at this boundary.
+        // SAFETY: Object literal provides all required CommonModalProps fields; the generic parameter prevents inference.
         launchModal(AccessKeySecretKeyDisplayModal, {
           isOpen: true,
           extraProps: {
@@ -222,7 +222,7 @@ export const CreateUserFormContent = () => {
     }
   };
 
-  // SAFETY: The receiving library accepts control; its published type does not expose this supported value.
+  // SAFETY: useForm returns a narrower Control type; the component prop expects Control<FieldValues>.
   return (
     <div>
       <div className="pf-v6-u-p-lg pf-v6-u-pb-sm">

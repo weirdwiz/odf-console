@@ -118,7 +118,7 @@ const getRowActions = (
   const searchParam = !!ruleName
     ? `${RULE_NAME}=${encodeURIComponent(ruleName)}`
     : `${RULE_HASH}=${ruleHash}`;
-  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   const providerType = s3Client.providerType as S3ProviderType;
   const editRuleLink = `${getBucketOverviewBaseRoute(bucketName, providerType)}/management/lifecycle/edit?${searchParam}`;
   return [
@@ -373,7 +373,7 @@ const LifecycleRulesListContent: React.FC = () => {
   // in case of "noRuleExistsError" error, cache could still have older "data", hence clearing that.
   const rules: LifecycleRule[] = noRuleExistsError ? [] : data?.Rules || [];
   const loaded = !isLoading;
-  // SAFETY: s3Client.providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   const providerType = s3Client.providerType as S3ProviderType;
   const createRuleLink = `${getBucketOverviewBaseRoute(bucketName, providerType)}/management/lifecycle/create/~new`;
 

@@ -26,7 +26,7 @@ import './advanced-kms-modal.scss';
 const AdvancedVaultModal: ModalComponent<AdvancedKMSModalProps> = (props) => {
   const { closeModal, state, dispatch, isWizardFlow, systemNamespace } = props;
 
-  // SAFETY: state.kms.providerState comes from the owner of the VaultConfig contract used at this boundary.
+  // SAFETY: KMS wizard state stores KMSConfiguration union; the component narrows by current provider.
   const kms = state.kms.providerState as VaultConfig;
 
   const { t } = useCustomTranslation();

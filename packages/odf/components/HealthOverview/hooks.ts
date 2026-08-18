@@ -199,7 +199,7 @@ const processAlertTimeSeries = (
   }
 
   const alerts: AlertRowData[] = [];
-  // SAFETY: response.data.result contains only entries produced for the PrometheusAlertResult[] contract.
+  // SAFETY: Prometheus API returns PrometheusResult[]; the alert variant is structurally narrower.
   const results = response.data.result as PrometheusAlertResult[];
 
   results.forEach((result) => {
@@ -328,7 +328,7 @@ export const useHealthAlerts = (): [AlertRowData[], boolean, any] => {
     if (!allowedAlertNames.size) {
       return [];
     }
-    // SAFETY: The receiving library accepts alert; its published type does not expose this supported value.
+    // SAFETY: The component prop expects a broader Alert type; the alert object is structurally compatible.
     const filteredActiveAlerts = (activeAlerts || []).filter(
       (alert) =>
         alert.state === 'firing' &&
@@ -356,7 +356,7 @@ export const useHealthAlerts = (): [AlertRowData[], boolean, any] => {
       const labels = alert.labels || {};
       const alertKey = getNormalizedAlertKey(alertname, labels);
       const startTime = alert.activeAt ? new Date(alert.activeAt) : new Date();
-      // SAFETY: alert.annotations comes from the owner of the AlertAnnotations contract used at this boundary.
+      // SAFETY: Alert.annotations is typed as an index signature; the component expects AlertAnnotations.
       const message = resolveAlertMessage(
         alertname,
         labels,
@@ -461,7 +461,7 @@ const mapSilencesToRows = (
         : new Date();
       const endsOn = silence.endsAt ? new Date(silence.endsAt) : undefined;
 
-      // SAFETY: { silenceId: silence.id, alertname, silencedOn, endsOn, severity, deta comes from the owner of the SilencedAlertRowData contract used at this boundary.
+      // SAFETY: Object literal provides all SilencedAlertRowData fields; TS loses type through the builder pattern.
       return {
         silenceId: silence.id,
         alertname,

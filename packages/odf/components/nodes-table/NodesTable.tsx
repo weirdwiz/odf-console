@@ -94,7 +94,7 @@ export const NodesTable: React.FC<NodesTableProps> = ({
   nameColumnTitle,
 }) => {
   const { t } = useCustomTranslation();
-  // SAFETY: nameSort comes from the owner of the <T>( a: T, b: T, direction: SortByDirection ) => number contract used at this boundary.
+  // SAFETY: The generic sort comparator is compatible but TS cannot narrow the generic type parameter.
   const columns = React.useMemo<TableColumnProps[]>(
     () => [
       {
@@ -126,7 +126,7 @@ export const NodesTable: React.FC<NodesTableProps> = ({
     [nameColumnTitle, t]
   );
 
-  // SAFETY: isRowSelectable comes from the owner of the (row: any) => boolean contract used at this boundary.
+  // SAFETY: PatternFly table isRowSelectable types the row as any; the callback uses the concrete row type.
   return (
     <div className="ceph-odf-install__select-nodes-table">
       <SelectableTable<NodeData>

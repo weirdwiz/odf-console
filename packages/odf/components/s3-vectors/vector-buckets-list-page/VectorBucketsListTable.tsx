@@ -105,22 +105,13 @@ const EmptyRowMessage: React.FC = () => {
 
 const VectorBucketsTableRow: React.FC<
   RowComponentType<K8sResourceCommon, RowExtraPropsType>
-> = ({
-  row: vectorBucket,
-  rowIndex,
-  extraProps,
-}) => {
+> = ({ row: vectorBucket, rowIndex, extraProps }) => {
   const { t } = useCustomTranslation();
   const columnNames = getColumnNames(t);
   const {
     metadata: { name, creationTimestamp },
   } = vectorBucket;
-  const {
-    favorites,
-    setFavorites,
-    triggerRefresh,
-    launcher,
-  } = extraProps;
+  const { favorites, setFavorites, triggerRefresh, launcher } = extraProps;
 
   const { s3VectorsClient } = React.useContext(S3VectorsContext);
 
@@ -130,7 +121,7 @@ const VectorBucketsTableRow: React.FC<
       ...(active ? [key] : []),
     ]);
   };
-  // SAFETY: s3VectorsClient.providerType comes from the owner of the S3ProviderType contract used at this boundary.
+  // SAFETY: S3Commands.providerType is typed as string; useProviderType() validated it as S3ProviderType before construction.
   const providerType = s3VectorsClient.providerType as S3ProviderType;
 
   return (
@@ -181,7 +172,7 @@ export const VectorBucketsListTable: React.FC<VectorBucketsListTableProps> = ({
     []
   );
   const launcher = useModalWrapper();
-  // SAFETY: allVectorBuckets contains only entries produced for the [] contract.
+  // SAFETY: The table component generic expects a narrower tuple; the source array is structurally compatible.
   return (
     <ComposableTable
       rows={filteredVectorBuckets}

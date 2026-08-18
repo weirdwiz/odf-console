@@ -49,15 +49,11 @@ const getUtilizationMetrics = (
 describe('useNodesData', () => {
   it('contains node memory from metrics', () => {
     const nodes = createFakeNodes(1, cpu, memory);
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([nodes, true, null]);
+    jest.mocked(useK8sWatchResource).mockReturnValue([nodes, true, null]);
     const promResponse = getUtilizationMetrics('node-name-0', metricMemory);
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
-      promResponse,
-      null,
-      false,
-    ]);
+    jest
+      .mocked(useCustomPrometheusPoll)
+      .mockReturnValue([promResponse, null, false]);
 
     const { result } = renderHook(() => useNodesData());
     const [nodesData] = result.current;
@@ -66,15 +62,11 @@ describe('useNodesData', () => {
 
   it('does not contain node memory from metrics (missing node metric)', () => {
     const nodes = createFakeNodes(1, cpu, memory);
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([nodes, true, null]);
+    jest.mocked(useK8sWatchResource).mockReturnValue([nodes, true, null]);
     const promResponse = getUtilizationMetrics('nonexistent', metricMemory);
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
-      promResponse,
-      null,
-      false,
-    ]);
+    jest
+      .mocked(useCustomPrometheusPoll)
+      .mockReturnValue([promResponse, null, false]);
 
     const { result } = renderHook(() => useNodesData());
     const [nodesData] = result.current;
@@ -83,10 +75,8 @@ describe('useNodesData', () => {
 
   it('does not return nodes when prom response is not available yet', () => {
     const nodes = createFakeNodes(1, cpu, memory);
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([nodes, true, null]);
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useCustomPrometheusPoll as jest.Mock).mockReturnValue([null, null, true]);
+    jest.mocked(useK8sWatchResource).mockReturnValue([nodes, true, null]);
+    jest.mocked(useCustomPrometheusPoll).mockReturnValue([null, null, true]);
 
     const { result } = renderHook(() => useNodesData());
     const [nodesData] = result.current;
@@ -95,14 +85,10 @@ describe('useNodesData', () => {
 
   it('returns nodes when prom response errors out', () => {
     const nodes = createFakeNodes(1, cpu, memory);
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useK8sWatchResource as jest.Mock).mockReturnValue([nodes, true, null]);
-    // SAFETY: The jest.Mock test value defines the members exercised by this test.
-    (useCustomPrometheusPoll as jest.Mock).mockReturnValue([
-      null,
-      new Error('Bad Gateway'),
-      false,
-    ]);
+    jest.mocked(useK8sWatchResource).mockReturnValue([nodes, true, null]);
+    jest
+      .mocked(useCustomPrometheusPoll)
+      .mockReturnValue([null, new Error('Bad Gateway'), false]);
 
     const { result } = renderHook(() => useNodesData());
     const [nodesData, loaded] = result.current;

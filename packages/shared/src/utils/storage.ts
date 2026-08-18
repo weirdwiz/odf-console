@@ -74,18 +74,18 @@ export const getStorageSizeInTiBWithoutUnit = (
 export const getStorageAutoScalerName = (storageCluster: StorageClusterKind) =>
   `${getName(storageCluster)}-${DEFAULT_DEVICECLASS}`;
 
-// SAFETY: { kind: StorageClusterModel.kind, apiVersion: StorageClusterModel.apiV comes from the owner of the Model contract used at this boundary.
 export const isOCSStorageSystem = (
   resource: K8sResourceKind
 ): resource is StorageSystemKind =>
   resource?.spec?.kind ===
-  getGVKLabel(
-    /* SAFETY: The value is supplied by the Model owner and follows that contract. */ {
-      kind: StorageClusterModel.kind,
-      apiVersion: StorageClusterModel.apiVersion,
-      apiGroup: StorageClusterModel.apiGroup,
-    } as Model
-  );
+  // SAFETY: getGVKLabel only reads { kind, apiGroup, apiVersion }, but its
+  // Model parameter requires all K8sModel fields. The cast satisfies the
+  // type with only the three fields actually used.
+  getGVKLabel({
+    kind: StorageClusterModel.kind,
+    apiVersion: StorageClusterModel.apiVersion,
+    apiGroup: StorageClusterModel.apiGroup,
+  } as Model);
 
 export const getOCSStorageSystem = (ssList: StorageSystemKind[] = []) =>
   ssList.find((ss) => isOCSStorageSystem(ss));

@@ -32,14 +32,13 @@ export const ListFilter: React.FC<ListFilterProps> = ({
     return (data ?? []).filter(resourceFilter);
   }, [input, data, dataFilter]);
 
-  // SAFETY: React invokes this handler from the rendered HTMLInputElement control.
+  // PF SearchInput onChange may provide a string or a FormEvent;
+  // when a FormEvent, currentTarget is the typed HTMLInputElement.
   const onChange = (
     inputValue: string | React.FormEvent<HTMLInputElement>
   ): void =>
     setInput(
-      _.isString(inputValue)
-        ? inputValue
-        : (inputValue.target as HTMLInputElement)?.value
+      _.isString(inputValue) ? inputValue : inputValue.currentTarget?.value
     );
 
   return (

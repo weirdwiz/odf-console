@@ -35,7 +35,7 @@ const useIamUserFormValidation = (): IamUserFormValidation => {
         .transform((value: string) => (!!value ? value.trim() : '')),
     });
 
-    // SAFETY: userFormSchema as unknown comes from the owner of the IamUserFormSchema contract used at this boundary.
+    // SAFETY: Yup schema is structurally compatible but generic types differ; double assertion needed.
     return {
       userFormSchema: userFormSchema as IamUserFormSchema,
       fieldRequirements,
